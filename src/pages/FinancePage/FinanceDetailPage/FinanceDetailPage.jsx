@@ -697,18 +697,15 @@ const FinanceDetailPage = () => {
                                                             />
                                                         </div>
                                                         <div className="flex-1 bg-white rounded-lg p-2 shadow-sm border border-gray-100">
-                                                            <div className="flex-col sm:flex-row mb-1">
+                                                            <div className="flex flex-wrap items-center gap-2 mb-2">
                                                                 <span className="font-medium text-gray-900 text-xs">
                                                                     {formatName(
                                                                         reply.user?.user_name || ROLES.DEFAULT
                                                                     )}
                                                                 </span>
-                                                                {reply.user?._id ===
-                                                                    displayData.user?._id && (
-                                                                        <span className="text-xs ml-2 text-blue-600 bg-blue-100 px-1 py-0.5 rounded-full">
-                                                                            {LABELS.CLAIMER}
-                                                                        </span>
-                                                                    )}
+                                                                <span className="text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full">
+                                                                    {reply.user.role}
+                                                                </span>
                                                                 <span className="text-xs text-gray-400 mt-1 sm:mt-0 sm:ml-2">
                                                                     {formatTimeAgo(reply.createdAt)}
                                                                 </span>
