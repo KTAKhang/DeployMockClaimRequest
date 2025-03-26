@@ -3,6 +3,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 
+import { API_URL } from "./const";
+import { MESSAGES } from "./string";
+import { validateVerificationCode, validatePassword } from "./utils";
+
 function VerifyCodePage() {
   const [password, setPassword] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
@@ -29,18 +33,12 @@ function VerifyCodePage() {
     e.preventDefault();
 
     let formErrors = {};
-    const otpRegex = /^[0-9]{6}$/;
-    if (!otpRegex.test(verificationCode)) {
-      formErrors.verificationCode = "Invalid OTP. Please enter a 6-digit OTP.";
-    }
 
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
-    if (!passwordRegex.test(password)) {
-      formErrors.password =
-        "Password must contain at least 8 characters, including uppercase and a number.";
-    }
+    // Xác thực mã OTP và mật khẩu
+    formErrors.verificationCode = validateVerificationCode(verificationCode);
+    formErrors.password = validatePassword(password);
 
-    if (Object.keys(formErrors).length > 0) {
+    if (formErrors.verificationCode || formErrors.password) {
       setErrors(formErrors);
       return;
     }
@@ -49,14 +47,15 @@ function VerifyCodePage() {
       setIsLoading(true); // Đặt trạng thái loading là true khi bắt đầu gửi
 
       try {
-        const result = await axios.post(
-          "https://ojtbe-production.up.railway.app/api/auth/reset-password",
-          { email, otp: verificationCode, newPassword: password }
-        );
+        const result = await axios.post(API_URL, {
+          email,
+          otp: verificationCode,
+          newPassword: password,
+        });
 
         if (result.data) {
           setIsCodeVerified(true);
-          toast.success("Password has been successfully reset!", {
+          toast.success(MESSAGES.PASSWORD_RESET_SUCCESS, {
             autoClose: 8000,
           });
           setTimeout(() => {
@@ -65,14 +64,14 @@ function VerifyCodePage() {
         } else {
           setErrors({
             ...formErrors,
-            verificationCode: "Invalid verification code. Please try again.",
+            verificationCode: MESSAGES.INVALID_VERIFICATION_CODE,
           });
         }
       } catch (error) {
-        console.error("Error during password reset:", error);
+        console.error("Lỗi trong quá trình đặt lại mật khẩu:", error);
         setErrors({
           ...formErrors,
-          verificationCode: "You entered the wrong OTP code. Please try again.",
+          verificationCode: MESSAGES.WRONG_OTP,
         });
       } finally {
         setIsLoading(false); // Đặt trạng thái loading là false khi hoàn thành
@@ -90,7 +89,7 @@ function VerifyCodePage() {
       <div className="absolute inset-0 bg-black opacity-50"></div>
       <div className="relative bg-white p-12 rounded-lg shadow-xl w-[550px] max-w-[90%]">
         <h2 className="text-2xl font-bold text-center mb-6">
-          {isCodeVerified ? "Enter New Password" : "Enter Verification Code"}
+          {isCodeVerified ? "Nhập Mật Khẩu Mới" : "Nhập Mã Xác Minh"}
         </h2>
 
         <form onSubmit={handleVerificationSubmit} className="space-y-4">
@@ -107,7 +106,7 @@ function VerifyCodePage() {
               htmlFor="verificationCode"
               className="block text-lg font-semibold"
             >
-              Enter Verification Code
+              Nhập Mã Xác Minh
             </label>
             <input
               id="verificationCode"
@@ -115,7 +114,7 @@ function VerifyCodePage() {
               value={verificationCode}
               onChange={(e) => setVerificationCode(e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-md"
-              placeholder="Enter your verification code"
+              placeholder="Nhập mã xác minh của bạn"
             />
             {errors.verificationCode && (
               <p className="text-red-500 text-sm">{errors.verificationCode}</p>
@@ -124,7 +123,7 @@ function VerifyCodePage() {
 
           <div className="mb-4">
             <label htmlFor="password" className="block text-lg font-semibold">
-              New Password
+              Mật Khẩu Mới
             </label>
             <input
               id="password"
@@ -132,7 +131,7 @@ function VerifyCodePage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-md"
-              placeholder="Enter new password"
+              placeholder="Nhập mật khẩu mới"
             />
             {errors.password && (
               <p className="text-red-500 text-sm">{errors.password}</p>
@@ -149,7 +148,9 @@ function VerifyCodePage() {
               }`}
               disabled={!verificationCode || !password || isLoading}
             >
-              {isLoading ? "Please wait..." : "Submit"}
+              {isLoading
+                ? MESSAGES.PLEASE_WAIT_TEXT
+                : MESSAGES.SUBMIT_BUTTON_TEXT}
             </button>
           </div>
         </form>

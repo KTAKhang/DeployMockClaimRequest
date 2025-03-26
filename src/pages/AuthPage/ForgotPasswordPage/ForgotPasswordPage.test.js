@@ -4,6 +4,7 @@ import { MemoryRouter } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import ForgotPasswordPage from "./ForgotPasswordPage";
+import { MESSAGES } from "./string";
 
 // Mock các dependencies
 jest.mock("axios");
@@ -50,28 +51,65 @@ describe("ForgotPasswordPage", () => {
   });
 
   // Test case 2: Hiển thị lỗi khi email không hợp lệ
-  test("shows error message for invalid email", async () => {
+  // test("shows error message for invalid email", async () => {
+  //   render(
+  //     <MemoryRouter>
+  //       <ForgotPasswordPage />
+  //     </MemoryRouter>
+  //   );
+
+  //   // Nhập email không hợp lệ
+  //   fireEvent.change(screen.getByLabelText("Enter your email"), {
+  //     target: { value: "invalid-email" },
+  //   });
+
+  //   // Click button Send Code
+  //   fireEvent.click(screen.getByRole("button", { name: "Send Code" }));
+
+  //   // Kiểm tra hiển thị thông báo lỗi
+  //   // expect(
+  //   //   screen.getByText(MESSAGES.PLEASE_ENTER_VALID_EMAIL)
+  //   // ).toBeInTheDocument();
+
+  //   // Kiểm tra hiển thị thông báo lỗi bằng cách dùng findByText
+  //     await waitFor(() => {
+  //     const errorMessage = screen.getByText(MESSAGES.PLEASE_ENTER_VALID_EMAIL);
+  //     expect(errorMessage).toBeInTheDocument();
+  //   });
+
+  //   // Kiểm tra không có call API
+  //   expect(axios.post).not.toHaveBeenCalled();
+  // });
+
+  test("disables send code button for invalid email input", () => {
     render(
       <MemoryRouter>
         <ForgotPasswordPage />
       </MemoryRouter>
     );
 
+    // Lấy input email và nút Send Code
+    const emailInput = screen.getByLabelText("Enter your email");
+    const sendCodeButton = screen.getByRole("button", { name: "Send Code" });
+
+    // Kiểm tra trạng thái ban đầu của nút
+    expect(sendCodeButton).toBeDisabled();
+
     // Nhập email không hợp lệ
-    fireEvent.change(screen.getByLabelText("Enter your email"), {
+    fireEvent.change(emailInput, {
       target: { value: "invalid-email" },
     });
 
-    // Click button Send Code
-    fireEvent.click(screen.getByRole("button", { name: "Send Code" }));
+    // Kiểm tra nút vẫn bị disabled
+    expect(sendCodeButton).toBeDisabled();
 
-    // Kiểm tra hiển thị thông báo lỗi
-    expect(
-      screen.getByText("Please enter a valid email address.")
-    ).toBeInTheDocument();
+    // Nhập email hợp lệ
+    fireEvent.change(emailInput, {
+      target: { value: "valid.email@example.com" },
+    });
 
-    // Kiểm tra không có call API
-    expect(axios.post).not.toHaveBeenCalled();
+    // Kiểm tra nút được enable
+    expect(sendCodeButton).not.toBeDisabled();
   });
 
   // Test case 3: Xử lý thành công khi gửi email

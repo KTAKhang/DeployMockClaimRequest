@@ -307,7 +307,6 @@ const FinanceDetailPage = () => {
             }
             dispatch(createCommentRequest({ content: commentData, claim_id: id }));
         }
-
         // Reset input
         setCommentData("");
         setReplyTo("");

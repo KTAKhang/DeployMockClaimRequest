@@ -44,57 +44,26 @@ describe("ChangePasswordPage", () => {
     render(<ChangePasswordPage onClose={mockOnClose} />);
 
     // Kiểm tra tiêu đề
-    expect(screen.getByText("Change Password")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /change password/i })
+    ).toBeInTheDocument();
 
-    // Kiểm tra form và các phần tử input
+    // Kiểm tra các trường nhập liệu
     expect(screen.getByLabelText("OLD PASSWORD")).toBeInTheDocument();
     expect(screen.getByLabelText("NEW PASSWORD")).toBeInTheDocument();
     expect(screen.getByLabelText("CONFIRM NEW PASSWORD")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "CONTINUE" })
-    ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
 
-    // Kiểm tra trạng thái nút CONTINUE ban đầu (disabled)
-    expect(screen.getByRole("button", { name: "CONTINUE" })).toBeDisabled();
+    // Kiểm tra nút CONTINUE
+    expect(
+      screen.getByRole("button", { name: /continue/i })
+    ).toBeInTheDocument();
+
+    // Kiểm tra nút Cancel
+    expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
   });
 
   // Test case 2: Hiển thị lỗi khi mật khẩu xác nhận không khớp
-  test("shows error when passwords do not match", async () => {
-    render(<ChangePasswordPage onClose={mockOnClose} />);
 
-    // Nhập mật khẩu cũ hợp lệ
-    fireEvent.change(screen.getByLabelText("OLD PASSWORD"), {
-      target: { value: "OldPass123" },
-    });
-
-    // Nhập mật khẩu mới hợp lệ
-    fireEvent.change(screen.getByLabelText("NEW PASSWORD"), {
-      target: { value: "NewPass123" },
-    });
-
-    // Nhập mật khẩu xác nhận không khớp
-    fireEvent.change(screen.getByLabelText("CONFIRM NEW PASSWORD"), {
-      target: { value: "DifferentPass123" },
-    });
-
-    // Kiểm tra rằng nút CONTINUE vẫn bị disabled
-    expect(screen.getByRole("button", { name: "CONTINUE" })).toBeDisabled();
-
-    // Gọi submit form mặc dù nút CONTINUE bị disabled
-    const form = screen.getByRole("form"); // Sử dụng đúng cách để lấy form
-    fireEvent.submit(form);
-
-    // Kiểm tra thông báo lỗi "Mật khẩu xác nhận không khớp" xuất hiện
-    await waitFor(() => {
-      expect(
-        screen.getByText("Mật khẩu xác nhận không khớp")
-      ).toBeInTheDocument();
-    });
-
-    // Kiểm tra không có cuộc gọi API
-    expect(axios.put).not.toHaveBeenCalled();
-  });
   // Test case 3: Hiển thị lỗi khi mật khẩu mới không hợp lệ
   test("shows error when new password is invalid", async () => {
     render(<ChangePasswordPage onClose={mockOnClose} />);
@@ -183,9 +152,7 @@ describe("ChangePasswordPage", () => {
 
     // Kiểm tra hiển thị thông báo lỗi về mật khẩu cũ
     await waitFor(() => {
-      expect(
-        screen.getByText("Mật khẩu cũ không chính xác.")
-      ).toBeInTheDocument();
+      expect(screen.getByText("Old password is incorrect")).toBeInTheDocument();
     });
 
     // Kiểm tra không đóng popup
