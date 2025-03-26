@@ -147,8 +147,8 @@ export default function StaffManagement() {
             {STRINGS.STAFF_MANAGEMENT_TITLE}
           </h3>
 
-          {/* Search and Filters Section */}
-          <div className="w-full lg:flex-1 lg:max-w-md mb-3 lg:mb-0 flex justify-center lg:justify-start">
+          {/* Search and Filters Section - Centered */}
+          <div className="w-full lg:flex-1 text-xs sm:text-sm lg:max-w-md mb-3 lg:mb-0 flex justify-center lg:justify-start">
             <EnhancedSearch
               onSearch={handleSearch}
               activeFilters={searchFilters}
@@ -232,9 +232,9 @@ export default function StaffManagement() {
         {/* Table Container */}
         <div
           className="w-full overflow-x-auto overflow-hidden"
-          style={{ minHeight: paginatedStaff.length > 0 ? "600px" : "auto" }}
+          style={{ minHeight: paginatedStaff.length > 0 ? "500px" : "auto" }}
         >
-          <div className="h-[600px] overflow-y-auto">
+          <div className="h-[500px] overflow-y-auto">
             <table className="w-full border-collapse text-gray-700 text-[10px] xs:text-xs sm:text-sm min-w-[700px]">
               <thead className="bg-gray-200 text-gray-600 sticky top-0 z-20">
                 <tr className="border-b">
@@ -333,7 +333,7 @@ export default function StaffManagement() {
                         </td>
                       ))}
                       <td className="px-1 sm:px-2 md:px-4 py-2 sm:py-3 md:py-4 flex items-center justify-center">
-                        <button className="flex justify-center items-center">
+                        <div className="inline-flex items-center justify-center w-full h-full">
                           <FaEye
                             className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500 cursor-pointer hover:text-blue-600 transition"
                             onClick={() =>
@@ -342,7 +342,7 @@ export default function StaffManagement() {
                               })
                             }
                           />
-                        </button>
+                        </div>
                       </td>
                     </tr>
                   ))

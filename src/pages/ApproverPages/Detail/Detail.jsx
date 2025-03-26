@@ -751,7 +751,7 @@ export default function Detail() {
           {/* Comment input - GitHub style fixed at bottom */}
           <div className="border-t border-gray-200 p-4 bg-white">
             {claim.status?.name === "Paid" ? (
-              <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg border h-40 border-gray-200">
                 <FaLock className="text-gray-400 mr-2" />
                 <span className="text-gray-500 text-sm">
                   {COMMENTS.COMMENTS_LOCKED}
