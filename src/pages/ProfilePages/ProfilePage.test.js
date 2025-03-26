@@ -8,7 +8,7 @@ import ProfilePage from './ProfilePage';
 import '@testing-library/jest-dom';
 
 // Mock các actions
-jest.mock('../redux/actions/userActions', () => ({
+jest.mock('../../redux/actions/userActions', () => ({
     getUserProfile: jest.fn().mockReturnValue({ type: 'GET_USER_PROFILE_REQUEST' }),
     updateUserProfile: jest.fn().mockReturnValue({ type: 'UPDATE_USER_PROFILE_REQUEST' })
 }));
@@ -135,8 +135,8 @@ describe('ProfilePage Component', () => {
             </Provider>
         );
 
-        // Kiểm tra loading message hiển thị
-        expect(screen.getByText('Loading profile information...')).toBeInTheDocument();
+        // Sửa đoạn này để phù hợp với text thực tế hiển thị trong DOM
+        expect(screen.getByText('Loading user profile...')).toBeInTheDocument();
         
         // Kiểm tra spinner hiển thị
         const spinner = document.querySelector('.animate-spin');

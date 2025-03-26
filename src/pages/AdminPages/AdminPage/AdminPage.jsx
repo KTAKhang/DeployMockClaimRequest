@@ -7,12 +7,17 @@ import {
   FaUsers,
   FaProjectDiagram,
 } from "react-icons/fa";
+import Chart from "react-apexcharts";
+
 import { getStaffAll } from "../../../redux/actions/staffActions";
 import { getProjectsAll } from "../../../redux/actions/projectActions";
-import Chart from "react-apexcharts";
 import Loading from "../../../components/Loading/Loading";
 
-export default function AdminHome() {
+import * as CONSTANTS from "./constants";
+import * as STRINGS from "./strings";
+import * as UTILS from "./utils";
+
+export default function AdminPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -28,20 +33,16 @@ export default function AdminHome() {
   const [staffPage, setStaffPage] = useState(1);
   const [projectPage, setProjectPage] = useState(1);
   const [chartWidth, setChartWidth] = useState(300);
-  const itemsPerPage = 4;
+  const itemsPerPage = CONSTANTS.PAGINATION.ITEMS_PER_PAGE;
 
   // Responsive chart size
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
-      if (width < 640) {
-        setChartWidth(240);
-      } else {
-        setChartWidth(300);
-      }
+      setChartWidth(width < 640 ? 240 : 300);
     };
 
-    handleResize(); // Set initial size
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -65,26 +66,27 @@ export default function AdminHome() {
   ).length;
   const totalProject = projectList.length;
 
-  const completedProjects = projectList.filter((p) => p.status === true).length;
-  const inProgressProjects = projectList.filter(
-    (p) => p.status === false
-  ).length;
+  const { completedProjects, inProgressProjects } =
+    UTILS.filterProjectsByStatus(projectList);
 
   const chartOptions = {
-    labels: ["Completed", "In Progress"],
-    colors: ["#22c55e", "#facc15"],
+    labels: CONSTANTS.CHART_OPTIONS.LABELS,
+    colors: [
+      CONSTANTS.COLORS.PROJECT_STATUS.COMPLETED,
+      CONSTANTS.COLORS.PROJECT_STATUS.IN_PROGRESS,
+    ],
     legend: {
-      position: "bottom",
-      horizontalAlign: "center",
-      fontSize: "14px",
-      offsetY: 5,
+      position: CONSTANTS.CHART_OPTIONS.LEGEND.POSITION,
+      horizontalAlign: CONSTANTS.CHART_OPTIONS.LEGEND.HORIZONTAL_ALIGN,
+      fontSize: CONSTANTS.CHART_OPTIONS.LEGEND.FONT_SIZE,
+      offsetY: CONSTANTS.CHART_OPTIONS.LEGEND.OFFSET_Y,
     },
     responsive: [
       {
         breakpoint: 480,
         options: {
           legend: {
-            fontSize: "12px",
+            fontSize: CONSTANTS.CHART_OPTIONS.LEGEND.MOBILE_FONT_SIZE,
           },
         },
       },
@@ -94,40 +96,40 @@ export default function AdminHome() {
   const chartSeries = [completedProjects, inProgressProjects];
 
   // Pagination for projects
-  const totalProjectPages = Math.ceil(totalProject / itemsPerPage) || 1;
-  let paginatedProjects = projectList.slice(
-    (projectPage - 1) * itemsPerPage,
-    projectPage * itemsPerPage
+  const paginatedProjects = UTILS.paginateItems(
+    projectList,
+    projectPage,
+    itemsPerPage
   );
-  while (paginatedProjects.length < itemsPerPage) paginatedProjects.push(null);
 
   // Pagination for staff
-  const totalStaffPages = Math.ceil(employeeList.length / itemsPerPage) || 1;
-  let paginatedEmployees = employeeList.slice(
-    (staffPage - 1) * itemsPerPage,
-    staffPage * itemsPerPage
+  const paginatedEmployees = UTILS.paginateItems(
+    employeeList,
+    staffPage,
+    itemsPerPage
   );
-  while (paginatedEmployees.length < itemsPerPage)
-    paginatedEmployees.push(null);
+
+  const totalProjectPages = Math.ceil(totalProject / itemsPerPage) || 1;
+  const totalStaffPages = Math.ceil(employeeList.length / itemsPerPage) || 1;
 
   return (
     <div className="flex justify-center items-center min-h-screen p-2 sm:p-4">
       <div className="w-full max-w-6xl bg-white shadow-lg rounded-xl border overflow-hidden">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center p-4 sm:p-6 border-b">
-          Welcome Admin
+          {STRINGS.LABELS.ADMIN_WELCOME}
         </h1>
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 sm:p-6">
           <button
             className="bg-gradient-to-r from-blue-50 to-blue-100 text-base sm:text-lg font-bold p-4 sm:p-6 rounded-xl shadow-md w-full hover:shadow-lg transition duration-300 flex items-center"
-            onClick={() => navigate("/admin/project")}
+            onClick={() => navigate(CONSTANTS.ROUTES.ADMIN_PROJECT)}
           >
             <div className="bg-blue-500 text-white p-3 rounded-lg mr-4">
               <FaProjectDiagram size={20} />
             </div>
             <div className="text-left">
-              <p className="text-gray-600">Total Projects</p>
+              <p className="text-gray-600">{STRINGS.LABELS.TOTAL_PROJECTS}</p>
               <p className="text-xl sm:text-2xl text-gray-800">
                 {totalProject}
               </p>
@@ -135,13 +137,13 @@ export default function AdminHome() {
           </button>
           <button
             className="bg-gradient-to-r from-green-50 to-green-100 text-base sm:text-lg font-bold p-4 sm:p-6 rounded-xl shadow-md w-full hover:shadow-lg transition duration-300 flex items-center"
-            onClick={() => navigate("/admin/staff")}
+            onClick={() => navigate(CONSTANTS.ROUTES.ADMIN_STAFF)}
           >
             <div className="bg-green-500 text-white p-3 rounded-lg mr-4">
               <FaUsers size={20} />
             </div>
             <div className="text-left">
-              <p className="text-gray-600">Active Staff</p>
+              <p className="text-gray-600">{STRINGS.LABELS.ACTIVE_STAFF}</p>
               <p className="text-xl sm:text-2xl text-gray-800">
                 {totalActiveEmployees}
               </p>
@@ -154,11 +156,11 @@ export default function AdminHome() {
           {/* Chart */}
           <div className="bg-gray-50 shadow-md p-4 rounded-xl flex flex-col items-center">
             <h2 className="text-lg sm:text-xl font-bold text-gray-700 mb-2 sm:mb-4 w-full text-center">
-              Project Status Overview
+              {STRINGS.LABELS.PROJECT_STATUS_OVERVIEW}
             </h2>
             {projectLoading ? (
               <div className="mt-20">
-              <Loading message="Loading chart..." />
+                <Loading message={STRINGS.LABELS.LOADING.CHART} />
               </div>
             ) : (
               <div className="flex justify-center w-full">
@@ -175,18 +177,20 @@ export default function AdminHome() {
           {/* Project Table */}
           <div className="bg-gray-50 shadow-md p-4 rounded-xl">
             <h2 className="text-lg sm:text-xl font-bold text-gray-700 mb-2 sm:mb-4">
-              Project Management
+              {STRINGS.LABELS.PROJECT_MANAGEMENT}
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-gray-700 text-xs sm:text-sm">
                 <thead className="bg-gray-200 text-gray-600">
                   <tr className="border-b">
-                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left">ID</th>
                     <th className="px-2 sm:px-4 py-2 sm:py-3 text-left">
-                      Project Name
+                      {STRINGS.LABELS.PROJECT_TABLE_HEADERS.ID}
                     </th>
                     <th className="px-2 sm:px-4 py-2 sm:py-3 text-left">
-                      Status
+                      {STRINGS.LABELS.PROJECT_TABLE_HEADERS.PROJECT_NAME}
+                    </th>
+                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left">
+                      {STRINGS.LABELS.PROJECT_TABLE_HEADERS.STATUS}
                     </th>
                   </tr>
                 </thead>
@@ -205,11 +209,13 @@ export default function AdminHome() {
                             <span
                               className={
                                 project.status
-                                  ? "bg-green-200 text-green-700 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-medium"
-                                  : "bg-yellow-200 text-yellow-700 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-medium"
+                                  ? `${CONSTANTS.COLORS.EMPLOYEE_STATUS.ACTIVE.BACKGROUND} ${CONSTANTS.COLORS.EMPLOYEE_STATUS.ACTIVE.TEXT} px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-medium`
+                                  : `bg-yellow-200 text-yellow-700 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-medium`
                               }
                             >
-                              {project.status ? "Completed" : "In Progress"}
+                              {project.status
+                                ? STRINGS.LABELS.PROJECT_STATUS.COMPLETED
+                                : STRINGS.LABELS.PROJECT_STATUS.IN_PROGRESS}
                             </span>
                           </td>
                         </>
@@ -248,16 +254,24 @@ export default function AdminHome() {
         {/* Staff Table */}
         <div className="bg-gray-50 shadow-md p-4 m-4 sm:m-6 rounded-xl">
           <h2 className="text-lg sm:text-xl font-bold text-gray-700 mb-2 sm:mb-4">
-            Staff Management
+            {STRINGS.LABELS.STAFF_MANAGEMENT}
           </h2>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-xs sm:text-sm">
               <thead className="bg-gray-200">
                 <tr>
-                  <th className="p-2 sm:p-3 text-left">ID</th>
-                  <th className="p-2 sm:p-3 text-left">Name</th>
-                  <th className="p-2 sm:p-3 text-left">Role</th>
-                  <th className="p-2 sm:p-3 text-left">Status</th>
+                  <th className="p-2 sm:p-3 text-left">
+                    {STRINGS.LABELS.STAFF_TABLE_HEADERS.ID}
+                  </th>
+                  <th className="p-2 sm:p-3 text-left">
+                    {STRINGS.LABELS.STAFF_TABLE_HEADERS.NAME}
+                  </th>
+                  <th className="p-2 sm:p-3 text-left">
+                    {STRINGS.LABELS.STAFF_TABLE_HEADERS.ROLE}
+                  </th>
+                  <th className="p-2 sm:p-3 text-left">
+                    {STRINGS.LABELS.STAFF_TABLE_HEADERS.STATUS}
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -279,11 +293,13 @@ export default function AdminHome() {
                             className={`px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-medium 
                             ${
                               employee.status
-                                ? "bg-green-200 text-green-700"
-                                : "bg-red-200 text-red-700"
+                                ? `${CONSTANTS.COLORS.EMPLOYEE_STATUS.ACTIVE.BACKGROUND} ${CONSTANTS.COLORS.EMPLOYEE_STATUS.ACTIVE.TEXT}`
+                                : `${CONSTANTS.COLORS.EMPLOYEE_STATUS.INACTIVE.BACKGROUND} ${CONSTANTS.COLORS.EMPLOYEE_STATUS.INACTIVE.TEXT}`
                             }`}
                           >
-                            {employee.status ? "Active" : "Inactive"}
+                            {employee.status
+                              ? STRINGS.LABELS.EMPLOYEE_STATUS.ACTIVE
+                              : STRINGS.LABELS.EMPLOYEE_STATUS.INACTIVE}
                           </span>
                         </td>
                       </>

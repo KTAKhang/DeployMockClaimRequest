@@ -7,8 +7,8 @@ import createSagaMiddleware from 'redux-saga';
 import CreateClaim from './CreateClaim';
 import '@testing-library/jest-dom';
 
-// Mock các actions
-jest.mock('../../redux/actions/claimerActions', () => ({
+// Sử dụng đường dẫn tuyệt đối thay vì tương đối
+jest.mock('../../../redux/actions/claimerActions', () => ({
     fetchProjectsRequest: jest.fn().mockReturnValue({ type: 'FETCH_PROJECTS_REQUEST' }),
     createClaimRequest: jest.fn().mockReturnValue({ type: 'CREATE_CLAIM_REQUEST' })
 }));
@@ -27,8 +27,8 @@ jest.mock('react-toastify', () => ({
     }
 }));
 
-// Mock ClaimModal component
-jest.mock('./ClaimModal', () => {
+// Kiểm tra đường dẫn đến ClaimModal, có thể cần điều chỉnh
+jest.mock('../ClaimModal/ClaimModal', () => {
     return jest.fn(({ isOpen, onClose, onConfirm, actionType }) => (
         isOpen ? (
             <div role="dialog">
@@ -180,7 +180,7 @@ describe('CreateClaim Component', () => {
 
     // Test case 5: Kiểm tra xử lý submit đơn giản
     it('dispatches createClaimRequest action when submitting form', async () => {
-        // Mock actions
+        // Sửa lại đường dẫn require
         const { createClaimRequest } = require('../../../redux/actions/claimerActions');
         createClaimRequest.mockClear();
 

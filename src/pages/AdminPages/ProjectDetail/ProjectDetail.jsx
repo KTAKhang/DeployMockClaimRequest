@@ -6,7 +6,7 @@ import {
   updateProject,
   toggleProjectStatus,
 } from "../../../redux/actions/projectActions";
-import PopupProjectInfo from "../../../components/Popup/PopupProjectInfor";
+import PopupProjectInfo from "../../../components/Popup/Project/PopupProjectInfor";
 import StatusChart from "../../../components/Charts/StatusChart";
 import Modal from "../../../components/Modal/Modal";
 import { toast } from "react-toastify";

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addStaff } from "../../redux/actions/staffActions";
+import { addStaff } from "../../../redux/actions/staffActions";
 import { toast } from "react-toastify";
 
 export default function PopupStaffInfor({ onClose }) {

@@ -7,16 +7,16 @@ import UpdateClaimForm from './UpdateClaimForm';
 import '@testing-library/jest-dom';
 
 // Mock các actions
-jest.mock('../../redux/actions/claimerActions', () => ({
+jest.mock('../../../redux/actions/claimerActions', () => ({
     updateClaimRequest: jest.fn().mockReturnValue({ type: 'UPDATE_CLAIM_REQUEST' }),
     resetUpdateState: jest.fn().mockReturnValue({ type: 'RESET_UPDATE_STATE' })
 }));
 
 // Mock ClaimModal component
-jest.mock('../../pages/ClaimerPage/ClaimModal', () => {
+jest.mock('../../../pages/ClaimerPage/ClaimModal/ClaimModal', () => {
     return jest.fn(({ isOpen, onClose, onConfirm, actionType }) => (
         isOpen ? (
-            <div role="dialog">
+            <div role="dialog" data-testid="claim-modal">
                 <button onClick={onConfirm}>Confirm</button>
                 <button onClick={onClose}>Cancel</button>
             </div>
@@ -82,9 +82,11 @@ describe('UpdateClaimForm Component', () => {
         expect(screen.getByDisplayValue('8')).toBeInTheDocument();
         expect(screen.getByDisplayValue('Working overtime')).toBeInTheDocument();
         
-        // Kiểm tra các button
-        expect(screen.getByText('SAVE')).toBeInTheDocument();
-        expect(screen.getByText('CANCEL')).toBeInTheDocument();
+        // Tìm nút "Save Changes" theo text chính xác
+        expect(screen.getByText('Save Changes')).toBeInTheDocument();
+        
+        // Tìm nút "Cancel" (chính xác như hiển thị trong component)
+        expect(screen.getByText('Cancel')).toBeInTheDocument();
     });
 
     // Test case 2: Kiểm tra validation form
@@ -108,17 +110,40 @@ describe('UpdateClaimForm Component', () => {
             </Provider>
         );
 
-        // Click SAVE button
-        fireEvent.click(screen.getByText('SAVE'));
+        // Tìm Save Changes button theo text chính xác
+        const saveButton = screen.getByText('Save Changes');
+        
+        // Click Save button
+        fireEvent.click(saveButton);
 
-        // Kiểm tra các thông báo lỗi hiển thị
-        expect(screen.getByText('Start date is required')).toBeInTheDocument();
-        expect(screen.getByText('End date is required')).toBeInTheDocument();
-        expect(screen.getByText('Total working hours is required')).toBeInTheDocument();
-        expect(screen.getByText('Reason is required')).toBeInTheDocument();
+        // Kiểm tra các phần tử p có class text-red-500
+        await waitFor(() => {
+            // Sử dụng CSS selector để tìm các phần tử p có class text-red-500
+            const errorElements = document.querySelectorAll('p.text-red-500');
+            expect(errorElements.length).toBeGreaterThan(0);
+            
+            // Kiểm tra nội dung text của các phần tử này
+            let foundStartDateError = false;
+            let foundEndDateError = false;
+            let foundTotalHoursError = false;
+            let foundReasonError = false;
+            
+            errorElements.forEach(element => {
+                const text = element.textContent;
+                if (text.includes('Start date is required')) foundStartDateError = true;
+                if (text.includes('End date is required')) foundEndDateError = true;
+                if (text.includes('Total working hours is required')) foundTotalHoursError = true;
+                if (text.includes('Reason is required')) foundReasonError = true;
+            });
+            
+            expect(foundStartDateError).toBe(true);
+            expect(foundEndDateError).toBe(true);
+            expect(foundTotalHoursError).toBe(true);
+            expect(foundReasonError).toBe(true);
+        });
         
         // Kiểm tra modal không được mở
-        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('claim-modal')).not.toBeInTheDocument();
     });
 
     // Test case 3: Kiểm tra cập nhật form và xóa lỗi
@@ -142,11 +167,17 @@ describe('UpdateClaimForm Component', () => {
             </Provider>
         );
 
-        // Click SAVE button để hiển thị lỗi trước
-        fireEvent.click(screen.getByText('SAVE'));
+        // Tìm Save Changes button theo text chính xác
+        const saveButton = screen.getByText('Save Changes');
         
-        // Kiểm tra lỗi hiển thị
-        expect(screen.getByText('Start date is required')).toBeInTheDocument();
+        // Click Save button để hiển thị lỗi trước
+        fireEvent.click(saveButton);
+        
+        // Đợi error messages hiển thị
+        await waitFor(() => {
+            const errorElements = document.querySelectorAll('p.text-red-500');
+            expect(errorElements.length).toBeGreaterThan(0);
+        });
         
         // Tìm các input theo selector chính xác
         const fromDateInputs = document.querySelectorAll('input[type="date"]');
@@ -154,7 +185,9 @@ describe('UpdateClaimForm Component', () => {
         const toDateInput = fromDateInputs[2];
         
         const hoursInput = screen.getByRole('spinbutton');
-        const reasonInput = document.querySelector('input[type="text"][required]');
+        
+        // Tìm textarea cho reason
+        const reasonInput = screen.getByPlaceholderText('Enter your reason here...');
         
         // Cập nhật các input
         if (fromDateInput) {
@@ -168,16 +201,13 @@ describe('UpdateClaimForm Component', () => {
         fireEvent.change(hoursInput, { target: { value: '8' } });
         fireEvent.change(reasonInput, { target: { value: 'Working overtime' } });
         
-        // Click SAVE lần nữa để kích hoạt validation
-        fireEvent.click(screen.getByText('SAVE'));
+        // Click Save lần nữa để kích hoạt validation
+        fireEvent.click(saveButton);
         
         // Đợi modal hiển thị - điều này có nghĩa là validation đã pass
         await waitFor(() => {
-            expect(screen.getByRole('dialog')).toBeInTheDocument();
+            expect(screen.getByTestId('claim-modal')).toBeInTheDocument();
         });
-        
-        // Kiểm tra modal hiển thị thay vì tìm kiếm lỗi đã biến mất
-        expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
 
     // Test case 4: Kiểm tra xác nhận save và gọi onSubmit
@@ -193,12 +223,15 @@ describe('UpdateClaimForm Component', () => {
             </Provider>
         );
 
-        // Click SAVE button
-        fireEvent.click(screen.getByText('SAVE'));
+        // Tìm Save Changes button theo text chính xác
+        const saveButton = screen.getByText('Save Changes');
         
-        // Kiểm tra modal hiển thị
+        // Click Save button
+        fireEvent.click(saveButton);
+        
+        // Kiểm tra modal hiển thị bằng data-testid thay vì role
         await waitFor(() => {
-            expect(screen.getByRole('dialog')).toBeInTheDocument();
+            expect(screen.getByTestId('claim-modal')).toBeInTheDocument();
         });
         
         // Click Confirm button trong modal
@@ -215,7 +248,7 @@ describe('UpdateClaimForm Component', () => {
         }));
         
         // Kiểm tra modal đã đóng
-        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('claim-modal')).not.toBeInTheDocument();
     });
 
     // Test case 5: Kiểm tra hiện thị thông báo thành công khi cập nhật

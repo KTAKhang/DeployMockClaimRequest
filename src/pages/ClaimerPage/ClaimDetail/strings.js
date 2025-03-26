@@ -22,7 +22,7 @@ export const SECTION_HEADERS = {
     COMMENTS_HISTORY: "Comments History",
     DECISION_REASON: "Decision & Reason",
     CLAIMER_REASON: "Claimer's Reason",
-    DECISION_REASON_TITLE: "Your Decision Reason",
+    DECISION_REASON_TITLE: "Approver's Decision Reason",
 };
 
 // Comment related strings

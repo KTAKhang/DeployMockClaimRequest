@@ -7,11 +7,11 @@ import {
   FaClock,
   FaExclamationCircle,
 } from "react-icons/fa";
-import ClaimModal from "../../pages/ClaimerPage/ClaimModal/ClaimModal";
+import ClaimModal from "../../../pages/ClaimerPage/ClaimModal/ClaimModal";
 import {
   updateClaimRequest,
   resetUpdateState,
-} from "../../redux/actions/claimerActions";
+} from "../../../redux/actions/claimerActions";
 
 const UpdateClaimForm = ({ initialData, onClose, onSubmit, claimId }) => {
   const dispatch = useDispatch();

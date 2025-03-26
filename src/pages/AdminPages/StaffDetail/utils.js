@@ -8,7 +8,7 @@ import profileImage from "../../../assets/img/profile.png";
  */
 export const formatCurrency = (value) => {
   if (!value && value !== 0) return "N/A";
-  
+
   return `${Number(value).toLocaleString()} VND`;
 };
 
@@ -63,7 +63,7 @@ export const getStaffAvatar = (avatarUrl) => {
  * @returns {string} Truncated ID
  */
 export const truncateId = (id, length = 10) => {
-  if (!id) return '';
+  if (!id) return "";
   return id.substring(0, length);
 };
 
@@ -86,6 +86,6 @@ export const isObjectChanged = (obj1, obj2) => {
 export const mergeStaffData = (original, updates) => {
   return {
     ...original,
-    ...updates
+    ...updates,
   };
 };

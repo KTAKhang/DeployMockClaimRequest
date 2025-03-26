@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getStaffAll } from "../../redux/actions/staffActions";
-import { createProject } from "../../redux/actions/projectActions";
+import { getStaffAll } from "../../../redux/actions/staffActions";
+import { createProject } from "../../../redux/actions/projectActions";
 import { toast } from 'react-toastify';
 
 export default function PopupProjectInfo({

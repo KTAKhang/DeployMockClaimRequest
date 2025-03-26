@@ -16,28 +16,23 @@ import {
   FaCheck,
 } from "react-icons/fa";
 import profileImage from "../../../assets/img/profile.png";
-import PopupUpdateStaff from "../../../components/Popup/PopupUpdateStaff";
+import PopupUpdateStaff from "../../../components/Popup/Staff/PopupUpdateStaff";
 import Loading from "../../../components/Loading/Loading";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 // Import từ các file đã tách
-import { 
-  ROUTES, 
-  UI_CONSTANTS,
-  TOAST_CONFIG,
-  FIELD_TYPES
-} from "./constants";
-import { 
-  PAGE_STRINGS, 
-  SECTION_HEADERS, 
+import { ROUTES, UI_CONSTANTS, TOAST_CONFIG, FIELD_TYPES } from "./constants";
+import {
+  PAGE_STRINGS,
+  SECTION_HEADERS,
   FIELD_LABELS,
   QUICK_STATS_LABELS,
   BUTTON_STRINGS,
   PLACEHOLDER_STRINGS,
   DEFAULT_VALUES,
   TOAST_MESSAGES,
-  LOADING_STRINGS
+  LOADING_STRINGS,
 } from "./strings";
 import {
   formatCurrency,
@@ -47,7 +42,7 @@ import {
   getStaffAvatar,
   truncateId,
   isObjectChanged,
-  mergeStaffData
+  mergeStaffData,
 } from "./utils";
 
 const StaffDetail = () => {
@@ -143,7 +138,8 @@ const StaffDetail = () => {
               onClick={() => navigate(-1)}
               className="text-gray-500 hover:text-blue-600 transition-colors inline-flex items-center"
             >
-              <FaArrowLeft className="mr-1 sm:mr-2" /> {PAGE_STRINGS.BREADCRUMB_BACK}
+              <FaArrowLeft className="mr-1 sm:mr-2" />{" "}
+              {PAGE_STRINGS.BREADCRUMB_BACK}
             </button>
           </li>
           <li>
@@ -227,7 +223,9 @@ const StaffDetail = () => {
                 title={BUTTON_STRINGS.COPY}
               >
                 <span className="mr-2">ID:</span>
-                <span className="font-mono mr-2">{truncateId(id, UI_CONSTANTS.ID_SUBSTRING_LENGTH)}...</span>
+                <span className="font-mono mr-2">
+                  {truncateId(id, UI_CONSTANTS.ID_SUBSTRING_LENGTH)}...
+                </span>
                 {isCopied ? (
                   <FaCheck className="text-green-400 group-hover:text-green-300 transition-colors" />
                 ) : (
@@ -282,7 +280,9 @@ const StaffDetail = () => {
                   <div className="flex items-center justify-center mb-1 text-purple-600">
                     <FaChartLine />
                   </div>
-                  <p className="text-xs text-gray-500 text-center">{QUICK_STATS_LABELS.RANK}</p>
+                  <p className="text-xs text-gray-500 text-center">
+                    {QUICK_STATS_LABELS.RANK}
+                  </p>
                   <p className="font-medium text-center text-sm truncate">
                     {staffDetail.job_rank || DEFAULT_VALUES.JOB_RANK}
                   </p>
@@ -296,7 +296,8 @@ const StaffDetail = () => {
                     {QUICK_STATS_LABELS.SALARY}
                   </p>
                   <p className="font-medium text-center text-sm">
-                    {staffDetail.salary?.toLocaleString() || DEFAULT_VALUES.SALARY}
+                    {staffDetail.salary?.toLocaleString() ||
+                      DEFAULT_VALUES.SALARY}
                   </p>
                 </div>
               </div>
@@ -306,7 +307,8 @@ const StaffDetail = () => {
             <div className="md:w-2/3">
               <div className="bg-gray-50 p-4 sm:p-6 rounded-xl border border-gray-100">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                  <FaFileAlt className="mr-2 text-blue-600" /> {SECTION_HEADERS.DETAILED_INFORMATION}
+                  <FaFileAlt className="mr-2 text-blue-600" />{" "}
+                  {SECTION_HEADERS.DETAILED_INFORMATION}
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
@@ -315,38 +317,38 @@ const StaffDetail = () => {
                       icon: <FaUser className="text-blue-600 mr-2" />,
                       label: FIELD_LABELS.FULL_NAME,
                       value: staffDetail.user_name,
-                      type: FIELD_TYPES.NORMAL
+                      type: FIELD_TYPES.NORMAL,
                     },
                     {
                       icon: <FaBriefcase className="text-blue-600 mr-2" />,
                       label: FIELD_LABELS.ROLE,
                       value: staffDetail.role_name,
-                      type: FIELD_TYPES.NORMAL
+                      type: FIELD_TYPES.NORMAL,
                     },
                     {
                       icon: <FaBuilding className="text-blue-600 mr-2" />,
                       label: FIELD_LABELS.DEPARTMENT,
                       value: staffDetail.department,
-                      type: FIELD_TYPES.NORMAL
+                      type: FIELD_TYPES.NORMAL,
                     },
                     {
                       icon: <FaChartLine className="text-blue-600 mr-2" />,
                       label: FIELD_LABELS.JOB_RANK,
                       value: staffDetail.job_rank,
-                      type: FIELD_TYPES.NORMAL
+                      type: FIELD_TYPES.NORMAL,
                     },
                     {
                       icon: <FaDollarSign className="text-blue-600 mr-2" />,
                       label: FIELD_LABELS.SALARY,
                       value: formatCurrency(staffDetail.salary),
-                      type: FIELD_TYPES.NORMAL
+                      type: FIELD_TYPES.NORMAL,
                     },
                     {
                       icon: <FaFileAlt className="text-blue-600 mr-2" />,
                       label: FIELD_LABELS.STATUS,
                       value: formatStatusText(staffDetail.status),
                       type: FIELD_TYPES.BADGE,
-                      badgeColor: getStatusBadgeColor(staffDetail.status)
+                      badgeColor: getStatusBadgeColor(staffDetail.status),
                     },
                   ].map((field, index) => (
                     <div key={index} className="mb-2">
@@ -356,7 +358,9 @@ const StaffDetail = () => {
                       <div className="font-medium text-gray-900 pl-6">
                         {field.type === FIELD_TYPES.BADGE ? (
                           <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getBadgeColorClass(field.badgeColor)}`}
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getBadgeColorClass(
+                              field.badgeColor
+                            )}`}
                           >
                             {field.value}
                           </span>

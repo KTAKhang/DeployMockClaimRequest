@@ -28,7 +28,7 @@ import {
     FaEdit,
     FaCheck,
 } from "react-icons/fa";
-import UpdateClaimForm from "../../../components/Popup/UpdateClaimForm";
+import UpdateClaimForm from "../../../components/Popup/Claim/UpdateClaimForm";
 import ClaimModal from "../ClaimModal/ClaimModal";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -54,6 +54,7 @@ import {
     createInitialFormData,
     getImageSrc,
 } from "./utils";
+import { formatDate } from "../../ApproverPages/Detail/utils";
 
 const ClaimDetail = () => {
     const { id } = useParams();
@@ -615,14 +616,10 @@ const ClaimDetail = () => {
                                     {SECTION_HEADERS.DECISION_REASON_TITLE}
                                 </h4>
 
-                                <textarea
-                                    className="w-full border border-gray-200 p-2 sm:p-4 rounded-lg bg-white shadow-sm resize-none cursor-default"
-                                    style={{ minHeight: "100px" }}
-                                    placeholder="Enter your decision reason here..."
-                                    value={displayData.reason_approver || REASON_STRINGS.NO_DECISION_REASON}
-                                    readOnly
-                                    disabled
-                                />
+                                <p className="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                                    {displayData.reason_approver || REASON_STRINGS.NO_DECISION_REASON}
+                                </p>
+
                             </div>
                         )}
                     </div>
@@ -739,7 +736,8 @@ const ClaimDetail = () => {
                                                                     {comment.user_id.role_id.name}
                                                                 </span>
                                                                 <span className="text-xs text-gray-400">
-                                                                    {formatTimeAgo(comment.createdAt)}
+                                                                    {formatTimeAgo(comment.createdAt)} •{" "}
+                                                                    {formatDate(comment.createdAt)}
 
                                                                 </span>
                                                             </div>
@@ -801,9 +799,8 @@ const ClaimDetail = () => {
                                                                                     {reply.user.role}
                                                                                 </span>
                                                                                 <span className="text-xs text-gray-400">
-                                                                                    {formatTimeAgo(
-                                                                                        reply.createdAt
-                                                                                    )}
+                                                                                    {formatTimeAgo(reply.createdAt)} •{" "}
+                                                                                    {formatDate(reply.createdAt)}
 
                                                                                 </span>
                                                                             </div>

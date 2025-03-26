@@ -176,7 +176,7 @@ describe('PopupProjectInfo Component', () => {
 
     // Test case 3: Kiểm tra cập nhật form và xác nhận update
     it('allows editing form values and updates project', async () => {
-        const { createProject } = require('../../redux/actions/projectActions');
+        const { createProject } = require('../../../redux/actions/projectActions');
         
         render(
             <Provider store={store}>
