@@ -44,7 +44,10 @@ const ClaimLayout = () => {
         isMobileView={isMobileView}
       />
       <div className="flex">
-        <div className={`${isMobileView ? "w-0" : isOpen ? "w-[290px]" : "w-16"}`}>
+        <div
+          className={`transition-all duration-300 ease-in-out ${isMobileView ? "w-0" : isOpen ? "w-[290px]" : "w-16"
+            }`}
+        >
           <Sidebar
             isClaimer={true}
             isOpen={isOpen}
@@ -54,7 +57,7 @@ const ClaimLayout = () => {
           />
         </div>
 
-        <div className="flex-1 p-4">
+        <div className="flex-1 p-4 transition-all duration-300 ease-in-out">
           <Outlet />
         </div>
       </div>

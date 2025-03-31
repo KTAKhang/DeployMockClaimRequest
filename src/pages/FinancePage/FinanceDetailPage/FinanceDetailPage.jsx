@@ -505,12 +505,12 @@ const FinanceDetailPage = () => {
                             <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">
                                 {displayData.user?.user_name || ROLES.DEFAULT}
                             </h2>
-                            <div className="flex flex-wrap justify-center sm:justify-start gap-3 sm:gap-10">
-                                <div className="flex flex-col sm:flex-row items-center sm:items-start">
+                            <div className="flex flex-col sm:flex-row justify-center sm:justify-start gap-3 sm:gap-10 flex-wrap">
+                                <div className="flex flex-col sm:flex-row items-center sm:items-start w-full sm:w-auto">
                                     <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
                                         <FaClipboard className="text-blue-600" />
                                     </div>
-                                    <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0">
+                                    <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0 w-full sm:w-auto">
                                         <p className="text-xs text-gray-500">{LABELS.PROJECT}</p>
                                         <p className="font-medium text-gray-800 text-sm">
                                             {detailFields[1].value}
@@ -518,11 +518,11 @@ const FinanceDetailPage = () => {
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col sm:flex-row items-center sm:items-start">
+                                <div className="flex flex-col sm:flex-row items-center sm:items-start w-full sm:w-auto">
                                     <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
                                         <FaClock className="text-green-600" />
                                     </div>
-                                    <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0">
+                                    <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0 w-full sm:w-auto">
                                         <p className="text-xs text-gray-500">{LABELS.WORKING_HOURS}</p>
                                         <p className="font-medium text-gray-800 text-sm">
                                             {detailFields[3].value}
@@ -530,11 +530,11 @@ const FinanceDetailPage = () => {
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col sm:flex-row items-center sm:items-start">
+                                <div className="flex flex-col sm:flex-row items-center sm:items-start w-full sm:w-auto">
                                     <div className="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-full">
                                         <FaCalendarAlt className="text-purple-600" />
                                     </div>
-                                    <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0">
+                                    <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0 w-full sm:w-auto">
                                         <p className="text-xs text-gray-500">{LABELS.DURATION}</p>
                                         <p className="font-medium text-gray-800 text-sm">
                                             {detailFields[2].value}
@@ -542,7 +542,7 @@ const FinanceDetailPage = () => {
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col sm:flex-row items-center sm:items-start">
+                                <div className="flex flex-col sm:flex-row items-center sm:items-start w-full sm:w-auto">
                                     <div
                                         className={`flex items-center justify-center w-8 h-8 bg-${getStatusBgColor(
                                             currentStatus
@@ -550,7 +550,7 @@ const FinanceDetailPage = () => {
                                     >
                                         <FaClipboard className={getStatusColor(currentStatus)} />
                                     </div>
-                                    <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0">
+                                    <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0 w-full sm:w-auto">
                                         <p className="text-xs text-gray-500">{DATA.STATUS}</p>
                                         <p
                                             className={`font-semibold text-sm ${getStatusColor(

@@ -536,12 +536,12 @@ const ClaimDetail = () => {
               <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">
                 {displayData.staff || "N/A"}
               </h2>
-              <div className="flex flex-wrap justify-center sm:justify-start gap-3 sm:gap-10">
-                <div className="flex flex-col sm:flex-row items-center sm:items-start">
+              <div className="flex flex-col sm:flex-row justify-center sm:justify-start gap-3 sm:gap-10 flex-wrap">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start w-full sm:w-auto">
                   <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
                     <FaProjectDiagram className="text-blue-600" />
                   </div>
-                  <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0">
+                  <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0 w-full sm:w-auto">
                     <p className="text-xs text-gray-500">Project</p>
                     <p className="font-medium text-gray-800 text-sm">
                       {displayData.project || "N/A"}
@@ -549,11 +549,11 @@ const ClaimDetail = () => {
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center sm:items-start">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start w-full sm:w-auto">
                   <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
                     <FaClock className="text-green-600" />
                   </div>
-                  <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0">
+                  <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0 w-full sm:w-auto">
                     <p className="text-xs text-gray-500">Working Hours</p>
                     <p className="font-medium text-gray-800 text-sm">
                       {displayData.hours ? `${displayData.hours} hrs` : "N/A"}
@@ -561,18 +561,19 @@ const ClaimDetail = () => {
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center sm:items-start">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start w-full sm:w-auto">
                   <div className="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-full">
                     <FaCalendarAlt className="text-purple-600" />
                   </div>
-                  <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0">
+                  <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0 w-full sm:w-auto">
                     <p className="text-xs text-gray-500">Duration</p>
                     <p className="font-medium text-gray-800 text-sm">
                       {displayData.duration || "N/A"}
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-col sm:flex-row items-center sm:items-start">
+
+                <div className="flex flex-col sm:flex-row items-center sm:items-start w-full sm:w-auto">
                   <div
                     className={`flex items-center justify-center w-8 h-8 ${
                       currentStatus === STATUS.CANCELLED
@@ -596,7 +597,7 @@ const ClaimDetail = () => {
                       }
                     />
                   </div>
-                  <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0">
+                  <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0 w-full sm:w-auto">
                     <p className="text-xs text-gray-500">Status</p>
                     <p
                       className={`font-semibold text-sm ${statusTextColor} whitespace-nowrap`}
@@ -676,7 +677,7 @@ const ClaimDetail = () => {
       </div>
 
       {/* Content Section - Modified for GitHub-like design */}
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1">
         {isDraft ? (
           /* Draft Specific Content - Left empty as requested */
           <div className="flex flex-col h-full">
@@ -697,7 +698,9 @@ const ClaimDetail = () => {
             <div className="flex flex-col">
               {/* Comment input */}
               <div className="p-4 bg-gray-50 border-b border-gray-200">
-                {claim.status?.name === LOCKED_COMMENT_STATUSES ? (
+                {LOCKED_COMMENT_STATUSES.includes(
+                  claim.status?.toLowerCase()
+                ) ? (
                   <div className="flex items-center justify-center p-3 border bg-white rounded-lg">
                     <FaLock className="text-gray-400 mr-2" />
                     <span className="text-gray-500 text-sm">

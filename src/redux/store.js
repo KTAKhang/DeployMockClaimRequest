@@ -11,6 +11,10 @@ import claimerReducer from "./reducers/claimerReducer";
 import commentReducer from "./reducers/commentReducer";
 import notificationReducer from "./reducers/notificationReducer";
 import chatReducer from "./reducers/chatReducer";
+
+// Define the navigation action type
+export const NAVIGATE_TO_CLAIM = "NAVIGATE_TO_CLAIM";
+
 const rootReducer = combineReducers({
   auth: authReducer,
   claims: claimReducer,
@@ -24,9 +28,24 @@ const rootReducer = combineReducers({
   chat: chatReducer,
 });
 
+// Navigation middleware
+const navigateMiddleware = (store) => (next) => (action) => {
+  if (action.type === NAVIGATE_TO_CLAIM) {
+    // Use your router's navigate function
+    // For React Router v6, you might use a custom hook approach instead
+    window.location.href = action.payload; // Simple but causes full page refresh
+    // Or better: history.push(action.payload); if you're using history
+  }
+  return next(action);
+};
+
 const sagaMiddleware = createSagaMiddleware();
 
-const store = createStore(rootReducer, applyMiddleware(sagaMiddleware));
+// Apply both middlewares
+const store = createStore(
+  rootReducer,
+  applyMiddleware(sagaMiddleware, navigateMiddleware)
+);
 
 sagaMiddleware.run(rootSaga);
 

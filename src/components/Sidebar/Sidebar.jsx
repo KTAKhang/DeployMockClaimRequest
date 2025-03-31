@@ -185,7 +185,7 @@ const Sidebar = ({
       {/* Desktop sidebar - only visible when NOT in mobile view */}
       {!isMobileView && (
         <div
-          className={`h-fit min-h-[100vh] fixed left-0 bg-white shadow-lg transition-all duration-300 overflow-hidden ${effectiveIsOpen ? "w-64" : "w-16"
+          className={`h-fit min-h-[100vh] fixed left-0 bg-white shadow-lg transition-all duration-300 ease-in-out overflow-hidden ${effectiveIsOpen ? "w-64" : "w-16"
             } flex flex-col justify-between`}
           style={{ flexShrink: 0 }}
         >

@@ -13,6 +13,7 @@ import { logout } from "../../redux/actions/authActions";
 import {
   getNotificationsRequest,
   updateCommentStatusRequest,
+  FETCH_CLAIM_STATUS_REQUEST, // Import the action type directly
 } from "../../redux/actions/notificationActions";
 import { toast } from "react-toastify";
 
@@ -117,17 +118,6 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, isMobileView }) => {
     markNotificationAsSeen,
     clearSeenNotifications,
   } = useNotificationManager();
-
-  // New method for updating comment status
-  const handleUpdateCommentStatus = (commentId, status) => {
-    try {
-      dispatch(updateCommentStatusRequest(commentId, status));
-      toast.success("Notification status updated");
-    } catch (error) {
-      console.error("Error updating comment status:", error);
-      toast.error("Failed to update notification status");
-    }
-  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -238,27 +228,14 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, isMobileView }) => {
     markNotificationAsSeen(notification._id);
 
     if (notification.claim_id) {
-      const userRole = user?.role_name;
-      const claimStatus = claim?.status;
-
-      const navigationMap = {
-        Approver: {
-          pending: `/approver/history/${notification.claim_id}`,
-          default: `/approver/vetting/${notification.claim_id}`,
+      // Dispatch with simpler payload
+      dispatch({
+        type: FETCH_CLAIM_STATUS_REQUEST,
+        payload: {
+          claimId: notification.claim_id,
+          userRole: user?.role_name,
         },
-        Claimer: {
-          pending: `/claimer/pending/${notification.claim_id}`,
-          default: `/claimer/approved/${notification.claim_id}`,
-        },
-        Finance: `/finance/approved/${notification.claim_id}`,
-      };
-
-      const navigatePath =
-        navigationMap[userRole]?.[claimStatus] ||
-        navigationMap[userRole]?.["default"] ||
-        navigationMap["Finance"];
-
-      navigate(navigatePath);
+      });
     }
 
     setIsNotificationOpen(false);
@@ -301,21 +278,6 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, isMobileView }) => {
               </div>
             </div>
           </div>
-
-          {/* Status update buttons */}
-          {!isSeen && (
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden group-hover:flex space-x-2 z-10">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleUpdateCommentStatus(notification._id, "read");
-                }}
-                className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded"
-              >
-                Mark Read
-              </button>
-            </div>
-          )}
         </div>
       );
     });
