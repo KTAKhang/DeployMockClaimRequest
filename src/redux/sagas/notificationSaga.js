@@ -1,50 +1,77 @@
 import { all, call, put, takeLatest } from "redux-saga/effects";
-import { toast } from "react-toastify";
 
 import {
   GET_NOTIFICATIONS_REQUEST,
   GET_NOTIFICATIONS_SUCCESS,
   GET_NOTIFICATIONS_FAILURE,
+  UPDATE_COMMENT_STATUS_REQUEST,
+  UPDATE_COMMENT_STATUS_SUCCESS,
+  UPDATE_COMMENT_STATUS_FAILURE,
 } from "../actions/notificationActions";
 
 import api from "../api/apiUtils";
 
-const transformClaimComments = (comments, currentUserId, currentUserRole) => {
+const transformClaimComments = (comments, currentUserId, roleName) => {
   const transformedNotifications = [];
 
   comments.forEach((comment) => {
-    // Claimer specific: track new comments on their claims
-    if (currentUserRole === "Claimer") {
-      // Check if the comment is not made by the current user
-      if (comment.user_id !== currentUserId) {
+    // Approver and Finance should only receive replies
+    if (roleName === "Approver" || roleName === "Finance") {
+      if (comment.type === "replies" && comment.user._id !== currentUserId) {
         transformedNotifications.push({
           _id: comment._id,
-          type: "new_comment",
+          type: "replies",
           claim_id: comment.claim_id,
-          content: `New comment: ${comment.content}`,
-          user_id: comment.user_id,
+          original_comment_id: comment.original_comment_id,
+          content: comment.content,
+          user_id: comment.user._id,
+          user_name: comment.user.user_name,
           createdAt: comment.createdAt,
+          status: comment.status,
         });
       }
-    }
+    } else {
+      // Other users receive all relevant notifications
 
-    // For Approver and Finance: track comment replies
-    if (["Approver", "Finance"].includes(currentUserRole)) {
-      if (comment.replies && comment.replies.length > 0) {
-        comment.replies.forEach((reply) => {
-          // Only add notification if reply is not by current user
-          if (reply.user._id !== currentUserId) {
-            transformedNotifications.push({
-              _id: reply._id,
-              type: "comment_reply",
-              claim_id: comment.claim_id,
-              original_comment_id: comment._id,
-              content: `Replied to your comment: ${reply.content}`,
-              user_id: reply.user._id,
-              user_name: reply.user.user_name,
-              createdAt: reply.createdAt,
-            });
-          }
+      // Handle "comments" type (user's own comments)
+      if (comment.type === "comments" && comment.user._id === currentUserId) {
+        transformedNotifications.push({
+          _id: comment._id,
+          type: "comments",
+          claim_id: comment.claim_id,
+          content: comment.content,
+          user_id: comment.user._id,
+          createdAt: comment.createdAt,
+          status: comment.status,
+        });
+      }
+
+      // Handle "replies" type (replies to the user's comments)
+      if (comment.type === "replies" && comment.user._id !== currentUserId) {
+        transformedNotifications.push({
+          _id: comment._id,
+          type: "replies",
+          claim_id: comment.claim_id,
+          original_comment_id: comment.original_comment_id,
+          content: comment.content,
+          user_id: comment.user._id,
+          user_name: comment.user.user_name,
+          createdAt: comment.createdAt,
+          status: comment.status,
+        });
+      }
+
+      // Handle "claims" type (when someone comments on the user's claim)
+      if (comment.type === "claims" && comment.user._id !== currentUserId) {
+        transformedNotifications.push({
+          _id: comment._id,
+          type: "claims",
+          claim_id: comment.claim_id,
+          content: comment.content,
+          user_id: comment.user._id,
+          user_name: comment.user.user_name,
+          createdAt: comment.createdAt,
+          status: comment.status,
         });
       }
     }
@@ -56,69 +83,66 @@ const transformClaimComments = (comments, currentUserId, currentUserRole) => {
   );
 };
 
-function* handleGetNotifications() {
+function* handleUpdateCommentStatus(action) {
   try {
-    console.group("📡 Notification Fetch Process");
+    const { commentId, status } = action.payload;
+    const commentIds = Array.isArray(commentId) ? commentId : [commentId];
+    const booleanStatus = status === "read" || status === true;
 
-    // Get current user from localStorage
-    const userString = localStorage.getItem("user");
-    const user = userString ? JSON.parse(userString) : null;
+    const response = yield call(api.put, `comment/update`, {
+      comment_ids: commentIds,
+      status: booleanStatus,
+    });
 
-    if (!user || !user._id) {
-      console.warn("No valid user found. Skipping notification fetch.");
-      console.groupEnd();
+    const responseData = response?.data || response; // Handle Axios wrapping
+
+    // ✅ Check if response is an array and contains updated comments
+    if (Array.isArray(responseData) && responseData.length > 0) {
       yield put({
-        type: GET_NOTIFICATIONS_SUCCESS,
-        payload: [],
+        type: UPDATE_COMMENT_STATUS_SUCCESS,
+        payload: responseData,
       });
       return;
     }
 
-    // Fetch user's claims for Claimers
-    let claimComments = [];
-    if (user.role_name === "Claimer") {
-      try {
-        // Fetch all claims for the current user
-        const userClaimsResponse = yield call(api.get, "/claim");
+    console.error("Unexpected Response Format:", responseData);
+    throw new Error("Failed to update comment status");
+  } catch (error) {
+    console.error("Detailed Error updating comment status:", error);
+    yield put({
+      type: UPDATE_COMMENT_STATUS_FAILURE,
+      payload: error.message,
+    });
+  }
+}
 
-        // Ensure userClaims is an array and filter for Pending and Approved claims
-        const userClaims = (
-          Array.isArray(userClaimsResponse)
-            ? userClaimsResponse
-            : userClaimsResponse.data || userClaimsResponse.claims || []
-        ).filter(
-          (claim) => claim.status === "Pending" || claim.status === "Approved"
-        );
+function* handleGetNotifications() {
+  try {
+    const userString = localStorage.getItem("user");
+    const user = userString ? JSON.parse(userString) : null;
 
-        // Fetch comments for each claim
-        const claimCommentsPromises = userClaims.map((claim) =>
-          call(api.get, `comment/${claim._id || claim.id}`)
-        );
-
-        // Resolve all claim comments
-        const claimCommentsResults = yield all(claimCommentsPromises);
-
-        // Flatten the comments from all claims
-        claimComments = claimCommentsResults
-          .flat()
-          .filter((comment) => comment);
-      } catch (error) {
-        console.error("Error fetching claim comments:", error);
-        claimComments = [];
-      }
-    } else {
-      // For other roles, fetch general comments
-      claimComments = yield call(api.get, "comment");
+    if (!user || !user._id) {
+      yield put({ type: GET_NOTIFICATIONS_SUCCESS, payload: [] });
+      return;
     }
+
+    if (user.role_name === "Administrator") {
+      yield put({ type: GET_NOTIFICATIONS_SUCCESS, payload: [] });
+      return;
+    }
+
+    let notifications = [];
+
+    // Fetch notifications from API
+    const response = yield call(api.get, "comment");
+    notifications = response.data || response;
 
     // Transform notifications based on user role
     const transformedNotifications = transformClaimComments(
-      claimComments,
+      notifications,
       user._id,
       user.role_name
     );
-
-    console.groupEnd();
 
     yield put({
       type: GET_NOTIFICATIONS_SUCCESS,
@@ -126,17 +150,18 @@ function* handleGetNotifications() {
     });
   } catch (error) {
     console.error("❌ Notification Fetch Saga Error:", error);
-
     yield put({
       type: GET_NOTIFICATIONS_FAILURE,
       payload: error.message,
     });
-    toast.error("Failed to fetch notifications");
   }
 }
 
 export function* notificationSaga() {
-  yield all([takeLatest(GET_NOTIFICATIONS_REQUEST, handleGetNotifications)]);
+  yield all([
+    takeLatest(GET_NOTIFICATIONS_REQUEST, handleGetNotifications),
+    takeLatest(UPDATE_COMMENT_STATUS_REQUEST, handleUpdateCommentStatus),
+  ]);
 }
 
 export default notificationSaga;

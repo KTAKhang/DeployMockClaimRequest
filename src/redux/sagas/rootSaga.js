@@ -9,6 +9,7 @@ import userSaga from "./userSaga";
 import { claimerSaga } from "./claimerSaga";
 import { commentSaga } from "./commentSaga";
 import { notificationSaga } from "./notificationSaga";
+import chatSaga from "./chatSaga";
 export default function* rootSaga() {
   yield all([
     authSaga(),
@@ -20,5 +21,6 @@ export default function* rootSaga() {
     staffSaga(),
     commentSaga(),
     notificationSaga(),
+    chatSaga(),
   ]);
 }

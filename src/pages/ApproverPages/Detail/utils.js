@@ -65,7 +65,10 @@ export const formatName = (fullName) => {
 
 // Format a date string into a standard format
 export const formatDate = (dateString) => {
-  if (!dateString) return "N/A";
+  if (!dateString) {
+    // If no date is provided, return current date in YYYY-MM-DD format
+    return new Date().toISOString().split("T")[0];
+  }
   return new Date(dateString.split("T")[0]).toISOString().split("T")[0];
 };
 

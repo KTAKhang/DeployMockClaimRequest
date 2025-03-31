@@ -94,6 +94,11 @@ export default function AdminClaimDetail() {
   // Thêm state để theo dõi trạng thái copy
   const [isCopied, setIsCopied] = useState(false);
 
+  // Thêm sau phần khai báo state hiện tại
+  const [currentPage, setCurrentPage] = useState(1);
+  const [commentsPerPage] = useState(10);
+  const currentUser = useSelector((state) => state.auth?.user);
+
   // Các useEffect giữ nguyên như file Detail.jsx
   useEffect(() => {
     if (Array.isArray(comments)) {
@@ -314,63 +319,73 @@ export default function AdminClaimDetail() {
     navigator.clipboard.writeText(id)
       .then(() => {
         setIsCopied(true);
+        toast.success(TOAST_STRINGS.COPY_SUCCESS);
         setTimeout(() => {
           setIsCopied(false);
-        }, 2000);
+        }, NOTIFICATION_DURATION.SHORT);
       })
-      .catch( () => {
-        console.error(TOAST_STRINGS.COPY_FAIL);
+      .catch(() => {
+        toast.error(TOAST_STRINGS.COPY_FAIL);
       });
+  };
+
+  // Pagination logic
+  const reversedComments = Array.isArray(comments) ? [...comments].reverse() : [];
+  const currentComments = reversedComments.slice(
+    (currentPage - 1) * commentsPerPage,
+    currentPage * commentsPerPage
+  );
+
+  const totalPages = Array.isArray(comments) && comments.length > 0
+    ? Math.ceil(comments.length / commentsPerPage)
+    : 0;
+
+  // Pagination handler functions
+  const handleNextPage = () => {
+    setCurrentPage((prevPage) =>
+      prevPage < totalPages ? prevPage + 1 : prevPage
+    );
+  };
+
+  const handlePrevPage = () => {
+    setCurrentPage((prevPage) => (prevPage > 1 ? prevPage - 1 : prevPage));
+  };
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
   return (
     <div className="px-2 sm:px-4 py-4 sm:py-6 min-h-screen max-w-full overflow-x-hidden">
-      {/* Breadcrumb Navigation với Back button nằm cùng hàng */}
-      <nav className="flex mb-4 sm:mb-6 text-xs sm:text-sm">
-        <ol className="inline-flex items-center space-x-1 md:space-x-3 flex-wrap overflow-x-auto whitespace-nowrap">
-          <li className="inline-flex items-center">
-            <button 
-              onClick={() => navigate(-1)}
-              className="text-gray-500 hover:text-blue-600 transition-colors inline-flex items-center"
-            >
-              <FaArrowLeft className="mr-1 sm:mr-2" /> Back
-            </button>
-          </li>
-          <li>
-            <div className="flex items-center">
-              <span className="mx-1 sm:mx-2">|</span>
-            </div>
-          </li>
-          <li className="inline-flex items-center">
-            <button 
-              onClick={() => navigate("/admin")}
-              className="text-gray-500 hover:text-blue-600 transition-colors inline-flex items-center"
-            >
-              <svg className="w-3 h-3 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
-              </svg>
-              Dashboard
-            </button>
-          </li>
-          <li>
-            <div className="flex items-center">
-              <span className="mx-1 sm:mx-2">&gt;</span>
-              <button 
-                className="text-gray-500 hover:text-blue-600 transition-colors"
-                onClick={() => navigate("/admin/claim-management")}
-              >
-                Claim Management
-              </button>
-            </div>
-          </li>
-          <li>
-            <div className="flex items-center">
-              <span className="mx-1 sm:mx-2">&gt;</span>
-              <span className="text-blue-600 font-semibold">Claim Details</span>
-            </div>
-          </li>
-        </ol>
-      </nav>
+      {/* Breadcrumb Navigation */}
+      <div className="flex items-center text-gray-500 text-xs sm:text-sm mb-4 sm:mb-6 overflow-x-auto whitespace-nowrap">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center hover:text-blue-600 transition-colors mr-2"
+        >
+          <FaArrowLeft className="mr-1 sm:mr-2" /> {BUTTON_STRINGS.BACK}
+        </button>
+        <span className="mx-1 sm:mx-2">|</span>
+        <span>Pages</span>
+        <span className="mx-1 sm:mx-2">&gt;</span>
+        <button
+          className="hover:text-blue-600 transition-colors"
+          onClick={() => navigate("/admin")}
+        >
+          Dashboard
+        </button>
+        <span className="mx-1 sm:mx-2">&gt;</span>
+        <button
+          className="hover:text-blue-600 transition-colors"
+          onClick={() => navigate("/admin/claim-management")}
+        >
+          Claim Management
+        </button>
+        <span className="mx-1 sm:mx-2">&gt;</span>
+        <span className="text-blue-600 font-semibold">
+          Claim Details
+        </span>
+      </div>
 
       {/* Claim Details Card - Giữ nguyên */}
       <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6">
@@ -381,29 +396,25 @@ export default function AdminClaimDetail() {
               {PAGE_STRINGS.TITLE}
             </h1>
             <div className="flex items-center">
+              <span className="text-xs sm:text-sm opacity-80 mr-1 sm:mr-2">
+                ID:
+              </span>
               <div 
-                className="px-3 py-1.5 bg-white bg-opacity-20 rounded-full text-sm backdrop-blur-sm flex items-center group cursor-pointer hover:bg-opacity-30 transition-all relative"
+                className="bg-white bg-opacity-20 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm flex items-center group cursor-pointer hover:bg-opacity-30 transition-all"
                 onClick={handleCopyId}
-                title="Click to copy ID"
               >
-                <span className="mr-2">ID:</span>
-                <span className="font-mono mr-2">{claim._id.substring(0, 10)}...</span>
+                <span className="font-mono mr-2">{claim._id}</span>
                 {isCopied ? (
                   <FaCheck className="text-green-400 group-hover:text-green-300 transition-colors" />
                 ) : (
                   <FaCopy className="text-white opacity-70 group-hover:opacity-100 transition-opacity" />
                 )}
-                
-                {/* Tooltip khi hover */}
-                <span className="absolute right-0 top-full mt-1 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-                  {isCopied ? "Copied!" : BUTTON_STRINGS.COPY}
-                </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* User Profile Section - Giữ nguyên */}
+        {/* User Profile Section */}
         <div className="p-3 sm:p-6 border-b border-gray-200">
           <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
             <div className="relative">
@@ -425,12 +436,12 @@ export default function AdminClaimDetail() {
               <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">
                 {claim.user?.user_name || "N/A"}
               </h2>
-              <div className="flex flex-wrap justify-center sm:justify-start gap-3 sm:gap-10">
-                <div className="flex flex-col sm:flex-row items-center sm:items-start">
+              <div className="flex flex-col sm:flex-row justify-center sm:justify-start gap-3 sm:gap-10 flex-wrap">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start w-full sm:w-auto">
                   <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
                     <FaProjectDiagram className="text-blue-600" />
                   </div>
-                  <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0">
+                  <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0 w-full sm:w-auto">
                     <p className="text-xs text-gray-500">{FIELD_LABELS.PROJECT}</p>
                     <p className="font-medium text-gray-800 text-sm">
                       {claim.project?.project_name || "N/A"}
@@ -438,12 +449,12 @@ export default function AdminClaimDetail() {
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center sm:items-start">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start w-full sm:w-auto">
                   <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
                     <FaClock className="text-green-600" />
                   </div>
-                  <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0">
-                    <p className="text-xs text-gray-500">Working Hours</p>
+                  <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0 w-full sm:w-auto">
+                    <p className="text-xs text-gray-500">{FIELD_LABELS.WORKING_HOURS}</p>
                     <p className="font-medium text-gray-800 text-sm">
                       {claim.total_no_of_hours
                         ? `${claim.total_no_of_hours} hrs`
@@ -452,39 +463,33 @@ export default function AdminClaimDetail() {
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center sm:items-start">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start w-full sm:w-auto">
                   <div className="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-full">
                     <FaCalendarAlt className="text-purple-600" />
                   </div>
-                  <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0">
-                    <p className="text-xs text-gray-500">Duration</p>
+                  <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0 w-full sm:w-auto">
+                    <p className="text-xs text-gray-500">{FIELD_LABELS.DURATION}</p>
                     <p className="font-medium text-gray-800 text-sm">
-                      {claim.project?.duration?.from &&
-                      claim.project?.duration?.to
-                        ? `${formatDate(
-                            claim.project.duration.from
-                          )} - ${formatDate(claim.project.duration.to)}`
+                      {claim.from && claim.to
+                        ? `From ${formatDate(claim.from)} To ${formatDate(claim.to)}`
                         : "N/A"}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center sm:items-start">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start w-full sm:w-auto">
                   <div
                     className={`flex items-center justify-center w-8 h-8 ${getStatusColor(
                       claim.status?.name
-                    )
-                      .replace("bg-", "bg-")
-                      .replace("500", "100")} rounded-full`}
+                    ).replace("bg-", "bg-").replace("500", "100")} rounded-full`}
                   >
                     <FaClipboard
                       className={getStatusColor(claim.status?.name)
-                        .replace("bg-", "text-")
-                        .replace("500", "600")}
+                        .replace("bg-", "text-").replace("500", "600")}
                     />
                   </div>
-                  <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0">
-                    <p className="text-xs text-gray-500">Status</p>
+                  <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0 w-full sm:w-auto">
+                    <p className="text-xs text-gray-500">{FIELD_LABELS.STATUS}</p>
                     <p
                       className={`font-semibold text-sm ${getStatusTextColor(
                         claim.status?.name
@@ -503,7 +508,7 @@ export default function AdminClaimDetail() {
         <div className="p-3 sm:p-6">
           <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center">
             <FaClipboard className="mr-2 text-blue-600" />
-            {SECTION_HEADERS.CLAIM_INFORMATION}
+            {SECTION_HEADERS.DECISION_REASON}
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
@@ -513,16 +518,19 @@ export default function AdminClaimDetail() {
                 <FaComment className="mr-2 text-gray-500" />
                 {SECTION_HEADERS.CLAIMER_REASON}
               </h4>
-              <div className="text-sm text-gray-700" style={{ minHeight: "100px" }}>
+              <div
+                className="text-sm text-gray-700"
+                style={{ minHeight: "100px" }}
+              >
                 {claim?.reason_claimer || REASON_STRINGS.NO_CLAIMER_REASON}
               </div>
             </div>
 
-            {/* Approver's Decision Section */}
+            {/* Approver's Reason Section */}
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm">
               <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center">
                 <FaComment className="mr-2 text-gray-500" />
-                Approver's Decision
+                {SECTION_HEADERS.DECISION_REASON_TITLE}
               </h4>
               <div className="flex items-center mb-2">
                 <div className={`w-3 h-3 rounded-full ${getStatusColor(claim.status?.name)} mr-2`}></div>
@@ -530,67 +538,17 @@ export default function AdminClaimDetail() {
                   {claim.status?.name || "Pending"}
                 </span>
               </div>
-              <div className="text-sm text-gray-600 whitespace-pre-line">
-                {claim?.reason_approver || "No decision provided"}
+              <div className="text-sm text-gray-600">
+                {localReason || REASON_STRINGS.NO_DECISION_REASON}
               </div>
             </div>
-
-            {/* Time Period Section */}
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm">
-              <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center">
-                <FaCalendarAlt className="mr-2 text-gray-500" />
-                Time Period
-              </h4>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-gray-500">From Date</p>
-                  <p className="text-sm font-medium">
-                    {claim.from 
-                      ? formatDate(claim.from)
-                      : "N/A"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">To Date</p>
-                  <p className="text-sm font-medium">
-                    {claim.to
-                      ? formatDate(claim.to)
-                      : "N/A"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Attachment Section - if applicable */}
-            {claim.attached_file && (
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm">
-                <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                  </svg>
-                  Attachment
-                </h4>
-                <a 
-                  href={claim.attached_file}
-                  target="_blank"
-                  rel="noopener noreferrer" 
-                  className="text-blue-600 hover:text-blue-800 flex items-center text-sm"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0l-4-4a4 4 0 010-5.656l4-4a4 4 0 015.656 0M6 10l4 4 4-4" />
-                  </svg>
-                  View Attachment
-                </a>
-              </div>
-            )}
           </div>
         </div>
 
         {/* Action Buttons */}
         <div className="px-3 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row sm:justify-end items-center gap-2 sm:gap-3">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/admin/claim-management")}
             className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium transition-colors flex items-center justify-center"
           >
             <FaArrowLeft className="mr-2" /> {BUTTON_STRINGS.BACK}
@@ -599,21 +557,40 @@ export default function AdminClaimDetail() {
       </div>
 
      
-      <div className="bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-3">
-          <h3 className="text-lg font-semibold text-white flex items-center">
-            <FaComment className="mr-2" />
+      <div className="bg-white rounded-xl shadow-md overflow-hidden mt-6">
+        {/* Header */}
+        <div className="border-b rounded border-gray-200 bg-gray-50 px-4 py-3">
+          <h3 className="text-base font-medium text-gray-700 flex items-center">
+            <FaComment className="mr-2 text-gray-500" />
             {SECTION_HEADERS.COMMENTS_HISTORY}
+            <span className="ml-2 text-xs bg-gray-200 text-gray-600 rounded-full px-2 py-0.5">
+              {Array.isArray(comments) ? comments.length : 0}
+            </span>
           </h3>
         </div>
 
-        <div className="flex flex-col h-[600px]">
-          {/* Comments List - Scrollable area */}
-          <div
-            ref={commentsContainerRef}
-            className="p-4 overflow-y-auto flex-grow"
-            style={{ maxHeight: "calc(100% - 180px)" }}
-          >
+        <div className="flex flex-col">
+          {/* Comment input area với thông báo khóa */}
+          <div className="p-4 bg-gray-50 border-b border-gray-200">
+            {claim.status?.name === "Reject" || claim.status?.name === "Cancel" || claim.status?.name === "Draft" ? (
+              <div className="flex items-center justify-center p-3 border bg-white rounded-lg">
+                <FaLock className="text-gray-400 mr-2" />
+                <span className="text-gray-500 text-sm">
+                  Comments are not available for {claim.status?.name} claims
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center p-3 border bg-white rounded-lg">
+                <FaLock className="text-gray-400 mr-2" />
+                <span className="text-gray-500 text-sm">
+                  Comments are not available in admin view
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Comments List */}
+          <div ref={commentsContainerRef} className="flex-1 overflow-y-auto p-4">
             {initialCommentsLoading || emptyCommentsLoading ? (
               <div className="flex justify-center items-center py-40">
                 <Loading
@@ -624,19 +601,16 @@ export default function AdminClaimDetail() {
                   }
                 />
               </div>
-            ) : comments &&
-              Array.isArray(comments) &&
-              comments.length > 0 ? (
-              <div className="flex flex-col gap-6">
-                {comments.map((comment, index) => (
+            ) : Array.isArray(comments) && comments.length > 0 ? (
+              <div className="space-y-6">
+                {currentComments.map((comment, index) => (
                   <div
                     key={comment._id || `comment-${index}`}
-                    className="comment-thread group border-b border-gray-100 pb-6 mb-2"
+                    className="comment-thread group border-b border-gray-100 pb-6 mb-6 last:border-0"
                     ref={
-                      index === comments.length - 1
-                        ? lastCommentRef
-                        : null
+                      index === currentComments.length - 1 ? lastCommentRef : null
                     }
+                    id={`comment-${comment._id}`}
                   >
                     {/* Main comment */}
                     <div
@@ -652,25 +626,40 @@ export default function AdminClaimDetail() {
                         <img
                           src={comment.user_id.avatar || profileImage}
                           alt="Profile"
-                          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-blue-100 shadow-sm"
+                          className="w-10 h-10 rounded-full object-cover"
                         />
                       </div>
                       <div className="flex-1">
-                        <div className="bg-gray-50 rounded-lg p-4 shadow-sm border border-gray-200">
+                        <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:border-gray-300 transition-colors">
                           <div className="flex flex-wrap items-center gap-2 mb-2">
-                            <span className="font-medium text-gray-900">
+                            <span className="font-semibold text-gray-900">
                               {formatName(comment.user_id.user_name)}
                             </span>
-                            <span className="text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full">
+                            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                               {comment.user_id.role_id.name}
                             </span>
                             <span className="text-xs text-gray-400">
-                              {formatTimeAgo(comment.createdAt)}
+                              {formatTimeAgo(comment.createdAt)} •{" "}
+                              {formatDate(comment.createdAt)}
                             </span>
                           </div>
-                          <p className="text-gray-700">
-                            {comment.content}
-                          </p>
+
+                          <p className="text-gray-700">{comment.content}</p>
+                        </div>
+                        <div className="mt-2 ml-2 flex items-center gap-3">
+                          {comment.user_id._id !== currentUserId && (
+                            <button
+                              className="text-xs text-gray-500 hover:text-blue-600 transition-all flex items-center"
+                              onClick={() =>
+                                handleReply(
+                                  formatName(comment.user_id.user_name),
+                                  comment._id
+                                )
+                              }
+                            >
+                              <span className="mr-1">↩️</span> {BUTTON_STRINGS.REPLY}
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -678,7 +667,7 @@ export default function AdminClaimDetail() {
                     {/* Replies */}
                     {Array.isArray(comment.replies) &&
                       comment.replies.length > 0 && (
-                        <div className="ml-12 sm:ml-16 mt-3 pl-4 border-l-2 border-blue-100">
+                        <div className="ml-10 mt-3 pl-6 border-l-2 border-gray-100 group-hover:border-gray-300 transition-colors">
                           {comment.replies.map((reply, replyIndex) => (
                             <div
                               key={reply._id || replyIndex}
@@ -688,31 +677,34 @@ export default function AdminClaimDetail() {
                                 }
                               }}
                               className="flex gap-3 mt-3"
+                              id={`reply-${reply._id}`}
                             >
                               <div className="flex-shrink-0">
                                 <img
                                   src={reply.user.avatar || profileImage}
                                   alt="Profile"
-                                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border-2 border-blue-50 shadow-sm"
+                                  className="w-8 h-8 rounded-full object-cover"
                                 />
                               </div>
                               <div className="flex-1">
-                                <div className="bg-gray-50 rounded-lg p-3 shadow-sm border border-gray-200">
+                                <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-200 hover:border-gray-300 transition-colors">
                                   <div className="flex flex-wrap items-center gap-2 mb-2">
                                     <span className="font-medium text-gray-900 text-sm">
                                       {formatName(reply.user.user_name)}
                                     </span>
-                                    <span className="text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full">
+                                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                                       {reply.user.role}
                                     </span>
                                     <span className="text-xs text-gray-400">
-                                      {formatTimeAgo(reply.createdAt)}
+                                      {formatTimeAgo(reply.createdAt)} •{" "}
+                                      {formatDate(reply.createdAt)}
                                     </span>
                                   </div>
                                   <p className="text-gray-700 text-sm">
                                     {reply.content}
                                   </p>
                                 </div>
+                                <div className="mt-1 ml-2"></div>
                               </div>
                             </div>
                           ))}
@@ -724,25 +716,59 @@ export default function AdminClaimDetail() {
             ) : (
               <div className="flex flex-col items-center justify-center py-32 text-gray-500">
                 <FaComment className="text-gray-300 text-4xl mb-3" />
-                <p className="font-medium text-base">
-                  {COMMENT_STRINGS.NO_COMMENTS}
-                </p>
-                <p className="text-sm text-gray-400 mt-1">
-                  {COMMENT_STRINGS.BE_FIRST}
-                </p>
+                <p className="font-medium text-base">{COMMENT_STRINGS.NO_COMMENTS}</p>
+                <p className="text-sm text-gray-400 mt-1">{COMMENT_STRINGS.BE_FIRST}</p>
               </div>
             )}
           </div>
 
-          {/* Comment input - Locked for admin view */}
-          <div className="border-t border-gray-200 p-4 bg-white">
-            <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <FaLock className="text-gray-400 mr-2" />
-              <span className="text-gray-500 text-sm">
-                {COMMENT_STRINGS.LOCKED_COMMENTS}
-              </span>
+          {/* Pagination Component */}
+          {Array.isArray(comments) && comments.length > commentsPerPage && (
+            <div className="flex justify-center items-center my-4 space-x-2 p-3 border-t rounded-b">
+              <button
+                onClick={handlePrevPage}
+                disabled={currentPage === 1}
+                className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${
+                  currentPage === 1
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                <span className="mr-1">◀</span> Previous
+              </button>
+
+              <div className="flex items-center space-x-1">
+                {[...Array(totalPages)].map((_, index) => {
+                  const pageNumber = index + 1;
+                  return (
+                    <button
+                      key={pageNumber}
+                      onClick={() => handlePageChange(pageNumber)}
+                      className={`w-8 h-8 rounded text-xs transition-colors ${
+                        currentPage === pageNumber
+                          ? "bg-blue-500 text-white"
+                          : "bg-gray-100 text-blue-600 hover:bg-blue-200"
+                      }`}
+                    >
+                      {pageNumber}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+                className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${
+                  currentPage === totalPages
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                Next <span className="ml-1">▶</span>
+              </button>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

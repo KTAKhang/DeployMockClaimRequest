@@ -10,7 +10,7 @@ import TypewriterText from "../../../components/Typewriter/TypewriterText.jsx";
 import { ClaimCard } from "./ClaimCard";
 
 import { CLAIM_STATUSES, ROUTES } from "./constants";
-import { DASHBOARD_TEXTS, DASHBOARD_STATS } from "./strings";
+import { DASHBOARD_TEXTS } from "./strings";
 import {
   filterClaimsByStatus,
   prepareClaimDisplay,
@@ -83,61 +83,71 @@ export default function Dashboard() {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 mb-4 sm:mb-8">
-            {[
-              {
-                ...DASHBOARD_STATS[0],
-                value: pendingClaims.length,
-                onClick: navigateToVetting,
-              },
-              {
-                ...DASHBOARD_STATS[1],
-                value: approvedClaims.length,
-                onClick: navigateToApprovedHistory,
-              },
-              {
-                ...DASHBOARD_STATS[2],
-                value: paidClaims.length,
-                onClick: navigateToPaidHistory,
-              },
-            ].map((stat, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                whileHover={{ y: -3, scale: 1.01 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-                className={`bg-gradient-to-br ${stat.color.gradient} p-3 sm:p-6 shadow-lg rounded-xl flex items-center space-x-2 sm:space-x-4 border ${stat.color.hoverGradient} transition-all cursor-pointer`}
-                onClick={stat.onClick}
-              >
-                <div className="bg-white p-2 sm:p-3 rounded-lg shadow-sm">
-                  {stat.icon === "FaClock" && (
-                    <FaClock
-                      className={`text-2xl sm:text-4xl ${stat.color.icon}`}
-                    />
-                  )}
-                  {stat.icon === "FaClipboardCheck" && (
-                    <FaClipboardCheck
-                      className={`text-2xl sm:text-4xl ${stat.color.icon}`}
-                    />
-                  )}
-                  {stat.icon === "FaMoneyCheckAlt" && (
-                    <FaMoneyCheckAlt
-                      className={`text-2xl sm:text-4xl ${stat.color.icon}`}
-                    />
-                  )}
-                </div>
-                <div>
-                  <p className="text-xs sm:text-sm text-gray-600 font-medium">
-                    {stat.label}
-                  </p>
-                  <p
-                    className={`text-lg sm:text-2xl font-bold ${stat.color.text}`}
-                  >
-                    {stat.value}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
+            {/* Pending Approvals */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -3, scale: 1.01 }}
+              transition={{ duration: 0.3 }}
+              className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-3 sm:p-6 shadow-lg rounded-xl flex items-center space-x-2 sm:space-x-4 border hover:from-yellow-100 hover:to-yellow-200 transition-all cursor-pointer"
+              onClick={navigateToVetting}
+            >
+              <div className="bg-white p-2 sm:p-3 rounded-lg shadow-sm">
+                <FaClock className="text-2xl sm:text-4xl text-yellow-500" />
+              </div>
+              <div>
+                <p className="text-xs sm:text-sm text-gray-600 font-medium">
+                  Pending Approvals
+                </p>
+                <p className="text-lg sm:text-2xl font-bold text-yellow-700">
+                  {pendingClaims.length}
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Approved Claims */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -3, scale: 1.01 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+              className="bg-gradient-to-br from-green-50 to-green-100 p-3 sm:p-6 shadow-lg rounded-xl flex items-center space-x-2 sm:space-x-4 border hover:from-green-100 hover:to-green-200 transition-all cursor-pointer"
+              onClick={navigateToApprovedHistory}
+            >
+              <div className="bg-white p-2 sm:p-3 rounded-lg shadow-sm">
+                <FaClipboardCheck className="text-2xl sm:text-4xl text-green-600" />
+              </div>
+              <div>
+                <p className="text-xs sm:text-sm text-gray-600 font-medium">
+                  Approved Claims
+                </p>
+                <p className="text-lg sm:text-2xl font-bold text-green-700">
+                  {approvedClaims.length}
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Paid Claims */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -3, scale: 1.01 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
+              className="bg-gradient-to-br from-blue-50 to-blue-100 p-3 sm:p-6 shadow-lg rounded-xl flex items-center space-x-2 sm:space-x-4 border hover:from-blue-100 hover:to-blue-200 transition-all cursor-pointer"
+              onClick={navigateToPaidHistory}
+            >
+              <div className="bg-white p-2 sm:p-3 rounded-lg shadow-sm">
+                <FaMoneyCheckAlt className="text-2xl sm:text-4xl text-blue-600" />
+              </div>
+              <div>
+                <p className="text-xs sm:text-sm text-gray-600 font-medium">
+                  Paid Claims
+                </p>
+                <p className="text-lg sm:text-2xl font-bold text-blue-700">
+                  {paidClaims.length}
+                </p>
+              </div>
+            </motion.div>
           </div>
 
           <motion.div

@@ -1,48 +1,22 @@
 import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
-import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import { sendMessageRequest } from "../../redux/actions/chatActions";
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const chatContainerRef = useRef(null);
 
-  const GEMINI_API_KEY = "AIzaSyDUynqdtb7LPVxHUMewcIDBtTrPcKYgGwc"; // 🔥 Thay thế bằng API Key của bạn
+  const dispatch = useDispatch();
+  const messages = useSelector((state) => state.chat.messages);
+  const isLoading = useSelector((state) => state.chat.isLoading);
+  const error = useSelector((state) => state.chat.error);
 
-  const sendMessage = async () => {
+  const sendMessage = () => {
     if (!input.trim()) return;
 
-    const userMessage = { sender: "user", text: input };
-    setMessages((prev) => [...prev, userMessage]);
-
-    try {
-      const response = await axios.post(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-        {
-          contents: [{ parts: [{ text: input }] }],
-        },
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-
-      const botMessage = {
-        sender: "bot",
-        text:
-          response.data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-          "I couldn't understand that.",
-      };
-
-      setMessages((prev) => [...prev, botMessage]);
-    } catch (error) {
-      console.error("Error:", error);
-      setMessages((prev) => [
-        ...prev,
-        { sender: "bot", text: "Network error, please try again." },
-      ]);
-    }
-
+    // Dispatch action to send message
+    dispatch(sendMessageRequest(input));
     setInput("");
   };
 
@@ -62,7 +36,7 @@ const Chatbot = () => {
 
   return (
     <>
-      {/* Nút mở chatbot */}
+      {/* Chatbot button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-6 right-6 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none z-40"
@@ -70,7 +44,7 @@ const Chatbot = () => {
         {isOpen ? "❌" : "💬"}
       </button>
 
-      {/* Khung chat */}
+      {/* Chat window */}
       {isOpen && (
         <div className="fixed bottom-5 right-5 w-80 bg-white shadow-lg rounded-lg flex flex-col h-[450px] border border-gray-300 z-50">
           {/* Header */}
@@ -84,7 +58,7 @@ const Chatbot = () => {
             </button>
           </div>
 
-          {/* Nội dung chat */}
+          {/* Chat content */}
           <div
             ref={chatContainerRef}
             className="flex-1 overflow-y-auto p-3 space-y-2"
@@ -92,19 +66,37 @@ const Chatbot = () => {
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"
-                  }`}
+                className={`flex ${
+                  msg.sender === "user" ? "justify-end" : "justify-start"
+                }`}
               >
                 <div
-                  className={`max-w-[75%] p-2 rounded-lg ${msg.sender === "user"
-                    ? "bg-blue-500 text-white rounded-br-none"
-                    : "bg-gray-200 text-gray-800 rounded-bl-none"
-                    }`}
+                  className={`max-w-[75%] p-2 rounded-lg ${
+                    msg.sender === "user"
+                      ? "bg-blue-500 text-white rounded-br-none"
+                      : "bg-gray-200 text-gray-800 rounded-bl-none"
+                  }`}
                 >
                   <p>{msg.text}</p>
                 </div>
               </div>
             ))}
+
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="bg-gray-200 text-gray-800 rounded-lg p-2">
+                  Typing...
+                </div>
+              </div>
+            )}
+
+            {error && (
+              <div className="flex justify-start">
+                <div className="bg-red-200 text-red-800 rounded-lg p-2">
+                  {error}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Input */}
@@ -116,10 +108,12 @@ const Chatbot = () => {
               onKeyDown={handleKeyPress}
               placeholder="Type something..."
               className="flex-1 border border-gray-300 rounded-l-lg py-2 px-3 focus:outline-none"
+              disabled={isLoading}
             />
             <button
               onClick={sendMessage}
               className="bg-blue-600 text-white p-2 rounded-r-lg hover:bg-blue-700"
+              disabled={isLoading}
             >
               Send
             </button>

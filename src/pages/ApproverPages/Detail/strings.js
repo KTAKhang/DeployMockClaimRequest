@@ -27,7 +27,6 @@ export const FORM = {
 
 // Button text
 export const BUTTONS = {
-  BACK: "Back",
   REJECT: "Reject",
   APPROVE: "Approve",
   REPLY: "Reply",

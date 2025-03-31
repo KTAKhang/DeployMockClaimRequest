@@ -10,6 +10,7 @@ import userReducer from "./reducers/userReducer";
 import claimerReducer from "./reducers/claimerReducer";
 import commentReducer from "./reducers/commentReducer";
 import notificationReducer from "./reducers/notificationReducer";
+import chatReducer from "./reducers/chatReducer";
 const rootReducer = combineReducers({
   auth: authReducer,
   claims: claimReducer,
@@ -20,6 +21,7 @@ const rootReducer = combineReducers({
   staff: staffReducer,
   comment: commentReducer,
   notifications: notificationReducer,
+  chat: chatReducer,
 });
 
 const sagaMiddleware = createSagaMiddleware();

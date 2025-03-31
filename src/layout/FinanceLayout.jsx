@@ -44,13 +44,15 @@ function FinanceLayout() {
         isMobileView={isMobileView}
       />
       <div className="flex">
-        <Sidebar
-          isFinance={true}
-          isOpen={isOpen}
-          toggleSidebar={toggleSidebar}
-          isMobileView={isMobileView}
-          setIsMobileView={setIsMobileView}
-        />
+        <div className={`${isMobileView ? "w-0" : isOpen ? "w-[290px]" : "w-16"}`}>
+          <Sidebar
+            isFinance={true}
+            isOpen={isOpen}
+            toggleSidebar={toggleSidebar}
+            isMobileView={isMobileView}
+            setIsMobileView={setIsMobileView}
+          />
+        </div>
         <div className="flex-1 p-4">
           <Outlet />
         </div>

@@ -2,8 +2,10 @@
 export const GET_NOTIFICATIONS_REQUEST = "GET_NOTIFICATIONS_REQUEST";
 export const GET_NOTIFICATIONS_SUCCESS = "GET_NOTIFICATIONS_SUCCESS";
 export const GET_NOTIFICATIONS_FAILURE = "GET_NOTIFICATIONS_FAILURE";
-export const CREATE_COMMENT_SUCCESS = "CREATE_COMMENT_SUCCESS";
-export const REPLY_COMMENT_SUCCESS = "REPLY_COMMENT_SUCCESS";
+
+export const UPDATE_COMMENT_STATUS_REQUEST = "UPDATE_COMMENT_STATUS_REQUEST";
+export const UPDATE_COMMENT_STATUS_SUCCESS = "UPDATE_COMMENT_STATUS_SUCCESS";
+export const UPDATE_COMMENT_STATUS_FAILURE = "UPDATE_COMMENT_STATUS_FAILURE";
 
 // Action Creators
 export const getNotificationsRequest = () => ({
@@ -20,12 +22,17 @@ export const getNotificationsFailure = (error) => ({
   payload: error,
 });
 
-export const createCommentSuccess = (commentData) => ({
-  type: CREATE_COMMENT_SUCCESS,
-  payload: commentData,
+export const updateCommentStatusRequest = (commentId, status) => ({
+  type: UPDATE_COMMENT_STATUS_REQUEST,
+  payload: { commentId, status: status === "read" ? true : status },
 });
 
-export const replyCommentSuccess = (replyData) => ({
-  type: REPLY_COMMENT_SUCCESS,
-  payload: replyData,
+export const updateCommentStatusSuccess = (commentId, status) => ({
+  type: UPDATE_COMMENT_STATUS_SUCCESS,
+  payload: { commentId, status },
+});
+
+export const updateCommentStatusFailure = (error) => ({
+  type: UPDATE_COMMENT_STATUS_FAILURE,
+  payload: error,
 });

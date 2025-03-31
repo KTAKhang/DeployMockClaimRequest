@@ -308,11 +308,14 @@ export default function CreateClaim() {
                                 required
                             >
                                 <option value="">{SELECT_OPTIONS.DEFAULT_PROJECT}</option>
-                                {projects.map(project => (
-                                    <option key={project._id} value={project._id}>
-                                        {project.project_name}
-                                    </option>
-                                ))}
+                                {projects
+                                    .filter(project => project.status === true)
+                                    .map(project => (
+                                        <option key={project._id} value={project._id}>
+                                            {project.project_name}
+                                        </option>
+                                    ))
+                                }
                             </select>
                             {errors[FIELD_NAMES.PROJECT_NAME] && (
                                 <span className="text-red-500 text-sm">{errors[FIELD_NAMES.PROJECT_NAME]}</span>

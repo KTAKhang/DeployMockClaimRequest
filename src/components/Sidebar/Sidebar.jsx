@@ -68,8 +68,8 @@ const Sidebar = ({
   const effectiveIsOpen = isMobileView
     ? mobileSidebarOpen
     : windowSizeOverride
-    ? false
-    : propIsOpen;
+      ? false
+      : propIsOpen;
 
   const toggleClaimsDropdown = () => {
     setIsClaimsOpen(!isClaimsOpen);
@@ -85,25 +85,25 @@ const Sidebar = ({
 
   const generalMenuItems = isAdmin
     ? [
-        { name: "Dashboard", path: "/admin", icon: <FaHome /> },
-        {
-          name: "Staff Management",
-          path: "/admin/staff",
-          icon: <HiUserGroup />,
-        },
-        {
-          name: "Project Management",
-          path: "/admin/project",
-          icon: <GoProjectRoadmap />,
-        },
-        {
-          name: "Claim Management",
-          path: "/admin/claim-management",
-          icon: <RiFileList2Line />,
-        },
-      ]
+      { name: "Dashboard", path: "/admin", icon: <FaHome /> },
+      {
+        name: "Staff Management",
+        path: "/admin/staff",
+        icon: <HiUserGroup />,
+      },
+      {
+        name: "Project Management",
+        path: "/admin/project",
+        icon: <GoProjectRoadmap />,
+      },
+      {
+        name: "Claim Management",
+        path: "/admin/claim-management",
+        icon: <RiFileList2Line />,
+      },
+    ]
     : isApprover
-    ? [
+      ? [
         { name: "Approver Dashboard", path: "/approver", icon: <FaHome /> },
         {
           name: "For my Vetting",
@@ -116,49 +116,49 @@ const Sidebar = ({
           icon: <FaShoppingCart />,
         },
       ]
-    : isClaimer
-    ? [
-        {
-          name: "Create Claim",
-          path: "/claimer/create-claim",
-          icon: <HiOutlinePencilSquare />,
-        },
-        {
-          name: "Draft Claims",
-          path: "/claimer/draft",
-          icon: <RiFileList2Line />,
-        },
-        {
-          name: "Pending Claims",
-          path: "/claimer/pending",
-          icon: <RiFileList2Line />,
-        },
-        {
-          name: "Approved Claims",
-          path: "/claimer/approved",
-          icon: <RiFileList2Line />,
-        },
-        {
-          name: "Paid Claims",
-          path: "/claimer/paid",
-          icon: <RiFileList2Line />,
-        },
-        {
-          name: "Rejected Claims",
-          path: "/claimer/rejected",
-          icon: <RiFileList2Line />,
-        },
-        {
-          name: "Cancelled Claims",
-          path: "/claimer/cancelled",
-          icon: <RiFileList2Line />,
-        },
-      ]
-    : [
-        { name: "Home", path: "/", icon: <FaHome /> },
-        { name: "Orders", path: "/orders", icon: <FaShoppingCart /> },
-        { name: "Profile", path: "/profile", icon: <FaUserCog /> },
-      ];
+      : isClaimer
+        ? [
+          {
+            name: "Create Claim",
+            path: "/claimer/create-claim",
+            icon: <HiOutlinePencilSquare />,
+          },
+          {
+            name: "Draft Claims",
+            path: "/claimer/draft",
+            icon: <RiFileList2Line />,
+          },
+          {
+            name: "Pending Claims",
+            path: "/claimer/pending",
+            icon: <RiFileList2Line />,
+          },
+          {
+            name: "Approved Claims",
+            path: "/claimer/approved",
+            icon: <RiFileList2Line />,
+          },
+          {
+            name: "Paid Claims",
+            path: "/claimer/paid",
+            icon: <RiFileList2Line />,
+          },
+          {
+            name: "Rejected Claims",
+            path: "/claimer/rejected",
+            icon: <RiFileList2Line />,
+          },
+          {
+            name: "Cancelled Claims",
+            path: "/claimer/cancelled",
+            icon: <RiFileList2Line />,
+          },
+        ]
+        : [
+          { name: "Home", path: "/", icon: <FaHome /> },
+          { name: "Orders", path: "/orders", icon: <FaShoppingCart /> },
+          { name: "Profile", path: "/profile", icon: <FaUserCog /> },
+        ];
 
   return (
     <>
@@ -166,12 +166,11 @@ const Sidebar = ({
       {isMobileView && (
         <button
           onClick={handleMobileToggle}
-          className={`absolute top-[0.9rem] left-2 sm:top-6 sm:left-4 z-50 p-1 sm:p-2 rounded-lg 
-    ${
-      mobileSidebarOpen
-        ? "bg-gray-100 text-blue-600"
-        : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
-    }
+          className={`fixed top-[0.9rem] left-2 sm:top-6 sm:left-4 z-50 p-1 sm:p-2 rounded-lg
+    ${mobileSidebarOpen
+              ? "bg-gray-100 text-blue-600"
+              : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+            }
     transition-colors duration-300`}
           aria-label="Toggle menu"
         >
@@ -186,9 +185,8 @@ const Sidebar = ({
       {/* Desktop sidebar - only visible when NOT in mobile view */}
       {!isMobileView && (
         <div
-          className={`h-fit min-h-[100vh] sticky top-0 bg-white shadow-lg transition-all duration-300 overflow-hidden ${
-            effectiveIsOpen ? "w-64" : "w-16"
-          } flex flex-col justify-between`}
+          className={`h-fit min-h-[100vh] fixed left-0 bg-white shadow-lg transition-all duration-300 overflow-hidden ${effectiveIsOpen ? "w-64" : "w-16"
+            } flex flex-col justify-between`}
           style={{ flexShrink: 0 }}
         >
           <ul className="space-y-2 flex-1 mt-4">
@@ -197,11 +195,10 @@ const Sidebar = ({
                 {financeMenuItems.map((item, index) => (
                   <li
                     key={index}
-                    className={`p-2 rounded-md hover:shadow-lg ${
-                      location.pathname === item.path
-                        ? "bg-blue-100 border-r-4 border-blue-500"
-                        : ""
-                    }`}
+                    className={`p-2 rounded-md hover:shadow-lg ${location.pathname === item.path
+                      ? "bg-blue-100 border-r-4 border-blue-500"
+                      : ""
+                      }`}
                   >
                     <Link
                       to={item.path}
@@ -211,11 +208,10 @@ const Sidebar = ({
                         <span className="text-xl text-black">{item.icon}</span>
                       </div>
                       <span
-                        className={`text-black whitespace-nowrap overflow-hidden absolute left-10 ${
-                          effectiveIsOpen
-                            ? "opacity-100 translate-x-0 transition-all duration-200"
-                            : "opacity-0 -translate-x-4 pointer-events-none transition-all duration-300"
-                        }`}
+                        className={`text-black whitespace-nowrap overflow-hidden absolute left-10 ${effectiveIsOpen
+                          ? "opacity-100 translate-x-0 transition-all duration-200"
+                          : "opacity-0 -translate-x-4 pointer-events-none transition-all duration-300"
+                          }`}
                       >
                         {item.name}
                       </span>
@@ -234,11 +230,10 @@ const Sidebar = ({
                       </span>
                     </div>
                     <span
-                      className={`text-black whitespace-nowrap overflow-hidden absolute left-10 ${
-                        effectiveIsOpen
-                          ? "opacity-100 translate-x-0 transition-all duration-200"
-                          : "opacity-0 -translate-x-4 pointer-events-none transition-all duration-300"
-                      }`}
+                      className={`text-black whitespace-nowrap overflow-hidden absolute left-10 ${effectiveIsOpen
+                        ? "opacity-100 translate-x-0 transition-all duration-200"
+                        : "opacity-0 -translate-x-4 pointer-events-none transition-all duration-300"
+                        }`}
                     >
                       Claims
                     </span>
@@ -249,11 +244,10 @@ const Sidebar = ({
                   claimsItems.map((item, index) => (
                     <li
                       key={index}
-                      className={`py-2 pl-[30px] rounded-md hover:shadow-lg ${
-                        location.pathname === item.path
-                          ? "bg-blue-100 border-r-4 border-blue-500"
-                          : ""
-                      }`}
+                      className={`py-2 pl-[30px] rounded-md hover:shadow-lg ${location.pathname === item.path
+                        ? "bg-blue-100 border-r-4 border-blue-500"
+                        : ""
+                        }`}
                     >
                       <Link
                         to={item.path}
@@ -265,11 +259,10 @@ const Sidebar = ({
                           </span>
                         </div>
                         <span
-                          className={`text-black whitespace-nowrap overflow-hidden absolute left-10 ${
-                            effectiveIsOpen
-                              ? "opacity-100 translate-x-0 transition-all duration-200"
-                              : "opacity-0 -translate-x-4 pointer-events-none transition-all duration-300"
-                          }`}
+                          className={`text-black whitespace-nowrap overflow-hidden absolute left-10 ${effectiveIsOpen
+                            ? "opacity-100 translate-x-0 transition-all duration-200"
+                            : "opacity-0 -translate-x-4 pointer-events-none transition-all duration-300"
+                            }`}
                         >
                           {item.name}
                         </span>
@@ -281,16 +274,15 @@ const Sidebar = ({
               generalMenuItems.map((item, index) => (
                 <li
                   key={index}
-                  className={`p-2 rounded-md hover:shadow-lg ${
-                    location.pathname === item.path ||
+                  className={`p-2 rounded-md hover:shadow-lg ${location.pathname === item.path ||
                     (isApprover &&
                       location.pathname.startsWith("/approver/vetting/") &&
                       item.path === "/approver/vetting") ||
                     (location.pathname.startsWith("/approver/history/") &&
                       item.path === "/approver/history")
-                      ? "bg-blue-100 border-r-4 border-blue-500"
-                      : ""
-                  }`}
+                    ? "bg-blue-100 border-r-4 border-blue-500"
+                    : ""
+                    }`}
                 >
                   <Link
                     to={item.path}
@@ -300,11 +292,10 @@ const Sidebar = ({
                       <span className="text-xl text-black">{item.icon}</span>
                     </div>
                     <span
-                      className={`text-black whitespace-nowrap overflow-hidden absolute left-10 ${
-                        effectiveIsOpen
-                          ? "opacity-100 translate-x-0 transition-all duration-200"
-                          : "opacity-0 -translate-x-4 pointer-events-none transition-all duration-300"
-                      }`}
+                      className={`text-black whitespace-nowrap overflow-hidden absolute left-10 ${effectiveIsOpen
+                        ? "opacity-100 translate-x-0 transition-all duration-200"
+                        : "opacity-0 -translate-x-4 pointer-events-none transition-all duration-300"
+                        }`}
                     >
                       {item.name}
                     </span>
@@ -320,11 +311,10 @@ const Sidebar = ({
       {isMobileView && (
         <>
           <div
-            className={`fixed top-0 left-0 right-0 bg-white transition-transform duration-300 transform z-40 ${
-              mobileSidebarOpen
-                ? "translate-y-0 shadow-xl"
-                : "-translate-y-full"
-            }`}
+            className={`fixed top-0 left-0 right-0 bg-white transition-transform duration-300 transform z-40 ${mobileSidebarOpen
+              ? "translate-y-0 shadow-xl"
+              : "-translate-y-full"
+              }`}
             style={{
               maxHeight: "80vh",
               overflowY: "auto",
@@ -338,11 +328,10 @@ const Sidebar = ({
                     {financeMenuItems.map((item, index) => (
                       <li
                         key={index}
-                        className={`p-3 rounded-md hover:bg-blue-50 ${
-                          location.pathname === item.path
-                            ? "bg-blue-100 border-l-4 border-blue-500"
-                            : ""
-                        }`}
+                        className={`p-3 rounded-md hover:bg-blue-50 ${location.pathname === item.path
+                          ? "bg-blue-100 border-l-4 border-blue-500"
+                          : ""
+                          }`}
                       >
                         <Link
                           to={item.path}
@@ -353,11 +342,10 @@ const Sidebar = ({
                             {item.icon}
                           </span>
                           <span
-                            className={`text-black ${
-                              mobileSidebarOpen
-                                ? "opacity-100 transform translate-x-0 transition-all duration-300 delay-200"
-                                : "opacity-0 transform -translate-x-4 transition-all duration-200"
-                            }`}
+                            className={`text-black ${mobileSidebarOpen
+                              ? "opacity-100 transform translate-x-0 transition-all duration-300 delay-200"
+                              : "opacity-0 transform -translate-x-4 transition-all duration-200"
+                              }`}
                           >
                             {item.name}
                           </span>
@@ -374,11 +362,10 @@ const Sidebar = ({
                           {isClaimsOpen ? <FaChevronUp /> : <FaChevronDown />}
                         </span>
                         <span
-                          className={`text-black ${
-                            mobileSidebarOpen
-                              ? "opacity-100 transform translate-x-0 transition-all duration-300 delay-200"
-                              : "opacity-0 transform -translate-x-4 transition-all duration-200"
-                          }`}
+                          className={`text-black ${mobileSidebarOpen
+                            ? "opacity-100 transform translate-x-0 transition-all duration-300 delay-200"
+                            : "opacity-0 transform -translate-x-4 transition-all duration-200"
+                            }`}
                         >
                           Claims
                         </span>
@@ -389,11 +376,10 @@ const Sidebar = ({
                       claimsItems.map((item, index) => (
                         <li
                           key={index}
-                          className={`py-3 pl-8 rounded-md hover:bg-blue-50 ${
-                            location.pathname === item.path
-                              ? "bg-blue-100 border-l-4 border-blue-500"
-                              : ""
-                          }`}
+                          className={`py-3 pl-8 rounded-md hover:bg-blue-50 ${location.pathname === item.path
+                            ? "bg-blue-100 border-l-4 border-blue-500"
+                            : ""
+                            }`}
                         >
                           <Link
                             to={item.path}
@@ -404,11 +390,10 @@ const Sidebar = ({
                               {item.icon}
                             </span>
                             <span
-                              className={`text-black ${
-                                mobileSidebarOpen
-                                  ? "opacity-100 transform translate-x-0 transition-all duration-300 delay-200"
-                                  : "opacity-0 transform -translate-x-4 transition-all duration-200"
-                              }`}
+                              className={`text-black ${mobileSidebarOpen
+                                ? "opacity-100 transform translate-x-0 transition-all duration-300 delay-200"
+                                : "opacity-0 transform -translate-x-4 transition-all duration-200"
+                                }`}
                             >
                               {item.name}
                             </span>
@@ -420,16 +405,15 @@ const Sidebar = ({
                   generalMenuItems.map((item, index) => (
                     <li
                       key={index}
-                      className={`p-3 rounded-md hover:bg-blue-50 ${
-                        location.pathname === item.path ||
+                      className={`p-3 rounded-md hover:bg-blue-50 ${location.pathname === item.path ||
                         (isApprover &&
                           location.pathname.startsWith("/approver/vetting/") &&
                           item.path === "/approver/vetting") ||
                         (location.pathname.startsWith("/approver/history/") &&
                           item.path === "/approver/history")
-                          ? "bg-blue-100 border-l-4 border-blue-500"
-                          : ""
-                      }`}
+                        ? "bg-blue-100 border-l-4 border-blue-500"
+                        : ""
+                        }`}
                     >
                       <Link
                         to={item.path}
@@ -438,11 +422,10 @@ const Sidebar = ({
                       >
                         <span className="text-xl text-black">{item.icon}</span>
                         <span
-                          className={`text-black ${
-                            mobileSidebarOpen
-                              ? "opacity-100 transform translate-x-0 transition-all duration-300 delay-200"
-                              : "opacity-0 transform -translate-x-4 transition-all duration-200"
-                          }`}
+                          className={`text-black ${mobileSidebarOpen
+                            ? "opacity-100 transform translate-x-0 transition-all duration-300 delay-200"
+                            : "opacity-0 transform -translate-x-4 transition-all duration-200"
+                            }`}
                         >
                           {item.name}
                         </span>

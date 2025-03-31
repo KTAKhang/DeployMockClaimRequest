@@ -32,7 +32,7 @@ export const PAGE_STRINGS = {
   export const COMMENT_STRINGS = {
     LOADING_COMMENTS: "Loading comments...",
     ADDING_COMMENT: "Adding comment...",
-    NO_COMMENTS: "No comments yet",
+    NO_COMMENTS: "No comments yet.",
     BE_FIRST: "Comments will appear here when added",
     LOCKED_COMMENTS: "Comments are not available in admin view",
     REPLYING_TO: "Replying to",
@@ -77,3 +77,4 @@ export const PAGE_STRINGS = {
     FROM_DATE: "From Date",
     TO_DATE: "To Date"
   };
+

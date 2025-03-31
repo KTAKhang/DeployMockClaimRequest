@@ -1,27 +1,29 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import {
-  MemoryRouter,
-  BrowserRouter as Router,
-  useNavigate,
-} from "react-router-dom";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import VerifyCodePage from "./VerifyCodePage"; // Đảm bảo đường dẫn này chính xác
 import axios from "axios";
 import { toast } from "react-toastify";
-import userEvent from "@testing-library/user-event";
 import { MESSAGES } from "./string";
 import { API_URL } from "./const";
 
 // Mock các phần phụ thuộc
-jest.mock("axios");
+jest.mock('axios');
 jest.mock("react-toastify", () => ({
   toast: {
     success: jest.fn(),
   },
 }));
 
+// Khai báo mockNavigate
+const mockNavigate = jest.fn();
+
+// Điều chỉnh mock của react-router-dom để sử dụng mockNavigate
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
-  useNavigate: () => jest.fn(),
+  useNavigate: () => mockNavigate, // Gán mockNavigate ở đây
+  useLocation: () => ({
+    search: "?email=test@example.com"
+  })
 }));
 
 // const renderWithRouter = () =>
@@ -30,7 +32,6 @@ jest.mock("react-router-dom", () => ({
 //       <VerifyCodePage />
 //     </Router>
 //   );
-const mockNavigate = jest.fn();
 describe("VerifyCodePage", () => {
   beforeEach(() => {
     // Reset mocks trước mỗi test
@@ -38,7 +39,7 @@ describe("VerifyCodePage", () => {
     jest.useFakeTimers();
   });
   afterEach(() => {
-    jest.useRealTimers;
+    jest.useRealTimers();
   });
   const renderComponent = (
     initialEntries = ["/verify-code?email=test@example.com"]
@@ -109,7 +110,6 @@ describe("VerifyCodePage", () => {
 
   test("displays success message and redirects when password reset is successful", async () => {
     // Mock API response thành công
-    // const mockNavigate = useNavigate();
     axios.post.mockResolvedValueOnce({
       data: { success: true },
     });
@@ -145,10 +145,13 @@ describe("VerifyCodePage", () => {
       );
     });
 
-    // Kiểm tra chuyển hướng
-    await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalled("/");
+    // Chạy setTimeout ngay lập tức
+    act(() => {
+      jest.advanceTimersByTime(3000);
     });
+
+    // Kiểm tra chuyển hướng - đã sửa lại đúng cú pháp
+    expect(mockNavigate).toHaveBeenCalledWith("/login");
   });
 
   test("displays error message when API call fails", async () => {

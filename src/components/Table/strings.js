@@ -59,7 +59,7 @@ export const NAVIGATION_PATHS = {
   Cancelled: (id) => `/claimer/cancelled/${id}`,
   FinanceApproved: (id) => `/finance/approved/${id}`,
   FinancePaid: (id) => `/finance/paid/${id}`,
-  ClaimManagement: (id) => `/admin/claim-management/${id}`, // Fixed typo from "ClaimManagerment"
+  ClaimManagerment: (id) => `/admin/claim-management/${id}`, // Fixed typo from "ClaimManagerment"
 };
 
 // Navigation states based on filter condition

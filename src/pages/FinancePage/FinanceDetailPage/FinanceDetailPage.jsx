@@ -75,7 +75,8 @@ const FinanceDetailPage = () => {
     const [lastActionType, setLastActionType] = useState(null);
     const [lastTargetId, setLastTargetId] = useState(null);
     const [fetchingComments, setFetchingComments] = useState(false);
-
+    const [currentPage, setCurrentPage] = useState(1);
+    const [commentsPerPage] = useState(5);
     // Get states from Redux
     const {
         claimDetail: claim,
@@ -285,6 +286,26 @@ const FinanceDetailPage = () => {
     const handleSend = () => {
         if (commentData.trim() === "") return;
 
+        // Check if user is a Claimer and needs to reply but hasn't selected a comment
+        const isUserClaimer = localStorage.getItem("role") === "Claimer";
+
+        if (isUserClaimer && !commentId) {
+            // Show notification
+            setShowNotification(true);
+
+            // Clear any existing timeout
+            if (notificationTimeoutRef.current) {
+                clearTimeout(notificationTimeoutRef.current);
+            }
+
+            // Auto-hide notification after 3 seconds
+            notificationTimeoutRef.current = setTimeout(() => {
+                setShowNotification(false);
+            }, 3000);
+
+            return;
+        }
+
         const targetCommentId = commentId; // Save the ID before resetting
 
         // Check if this is the first comment
@@ -361,6 +382,33 @@ const FinanceDetailPage = () => {
             </div>
         );
     }
+    // Pagination logic
+    const reversedComments = Array.isArray(comments)
+        ? [...comments].reverse()
+        : [];
+    const currentComments = reversedComments.slice(
+        (currentPage - 1) * commentsPerPage,
+        currentPage * commentsPerPage
+    );
+
+    const totalPages = comments
+        ? Math.ceil(comments.length / commentsPerPage)
+        : 0;
+
+    // Pagination handler functions
+    const handleNextPage = () => {
+        setCurrentPage((prevPage) =>
+            prevPage < totalPages ? prevPage + 1 : prevPage
+        );
+    };
+
+    const handlePrevPage = () => {
+        setCurrentPage((prevPage) => (prevPage > 1 ? prevPage - 1 : prevPage));
+    };
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
 
     // Use localClaimDetail if available, otherwise use claim
     const displayData = localClaimDetail || claim;
@@ -559,12 +607,7 @@ const FinanceDetailPage = () => {
 
                 {/* Action Buttons */}
                 <div className="px-3 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row sm:justify-end items-center gap-2 sm:gap-3">
-                    <button
-                        onClick={() => handleNavigate(currentStatus)}
-                        className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium transition-colors flex items-center justify-center"
-                    >
-                        <FaArrowLeft className="mr-2" /> {BUTTON.BACK}
-                    </button>
+
 
                     {currentStatus === "Approved" && (
                         <button
@@ -585,129 +628,213 @@ const FinanceDetailPage = () => {
                 />
             </div>
 
-            <div className="bg-white rounded-xl shadow-md overflow-hidden">
-                <div className="border-b border-gray-200 bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-3">
-                    <h3 className="text-lg font-semibold text-white flex items-center">
-                        <FaComment className="mr-2" />
-                        {LABELS.COMMENTS_HISTORY}
-                    </h3>
+            <div className="border-b rounded border-gray-200 bg-gray-50 px-4 py-3">
+                <h3 className="text-base font-medium text-gray-700 flex items-center">
+                    <FaComment className="mr-2 text-gray-500" />
+                    {LABELS.COMMENTS_HISTORY}
+                    <span className="ml-2 text-xs bg-gray-200 text-gray-600 rounded-full px-2 py-0.5">
+                        {comments?.length || 0}
+                    </span>
+                </h3>
+            </div>
+
+            <div className="flex flex-col">
+
+                <div className="p-4 bg-gray-50 border-b border-gray-200">
+                    {/* Comment input */}
+                    {["paid", "cancelled", "rejected"].includes(
+                        currentStatus?.toLowerCase()
+                    ) ? (
+                        <div className="flex items-center justify-center p-3 border bg-white rounded-lg">
+                            <FaLock className="text-gray-400 mr-2" />
+                            <span className="text-gray-500 text-sm">
+                                {MESSAGES.COMMENTS_LOCKED}
+                            </span>
+                        </div>
+                    ) : (
+                        <>
+                            {replyTo && (
+                                <div className="bg-blue-50 rounded-lg flex items-center justify-between p-2 mb-3 border border-blue-100">
+                                    <p className="text-blue-700 text-xs flex items-center">
+                                        <span className="mr-1">↩️</span> {LABELS.REPLYING_TO} {replyTo}
+                                    </p>
+                                    <button
+                                        onClick={() => {
+                                            setReplyTo("");
+                                            setCommentId(null);
+                                        }}
+                                        className="ml-2 text-gray-500 hover:text-gray-700 text-xs bg-gray-100 rounded-full w-5 h-5 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                                    >
+                                        ✖️
+                                    </button>
+                                </div>
+                            )}
+                            <div className="flex gap-2">
+                                <div className="flex-1 rounded-lg border border-gray-200 overflow-hidden">
+                                    <textarea
+                                        ref={commentInputRef}
+                                        className="w-full bg-white p-4 text-sm focus:outline-none resize-none shadow-inner min-h-[50px]"
+                                        placeholder="Type your comment..."
+                                        value={replyTo ? replyTo + commentData : commentData}
+                                        onChange={(e) => {
+                                            if (replyTo && e.target.value.startsWith(replyTo)) {
+                                                setCommentData(
+                                                    e.target.value.substring(replyTo.length)
+                                                );
+                                            } else if (
+                                                replyTo &&
+                                                !e.target.value.startsWith(replyTo)
+                                            ) {
+                                                setReplyTo("");
+                                                setCommentData(e.target.value);
+                                                setCommentId(null);
+                                            } else {
+                                                setCommentData(e.target.value);
+                                            }
+                                        }}
+                                        onKeyDown={handleKeyDown}
+                                    ></textarea>
+
+                                    <div className="bg-gray-50 p-3 border-t border-gray-200 flex justify-end">
+                                        <button
+                                            onClick={handleSend}
+                                            disabled={loadingComment || !commentData.trim()}
+                                            className={`px-2 sm:px-4 py-1 sm:py-2 rounded-lg font-medium text-xs sm:text-sm text-white flex items-center ${loadingComment || !commentData.trim()
+                                                ? "bg-gray-300 cursor-not-allowed"
+                                                : "bg-blue-500 hover:bg-blue-600"
+                                                } transition-colors shadow-sm`}
+                                        >
+                                            {loadingComment ? (
+                                                <>
+                                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                                                    {BUTTON.SENDING}
+                                                </>
+                                            ) : (
+                                                <>{BUTTON.SEND}</>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </div>
 
-                <div className="bg-gray-50 rounded-lg shadow-sm overflow-hidden border border-gray-200">
-                    <div
-                        ref={commentsContainerRef}
-                        className="h-64 overflow-y-auto p-2 sm:p-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
-                    >
-                        {initialCommentsLoading || emptyCommentsLoading ? (
-                            <div className="flex justify-center items-center h-full">
-                                <Loading
-                                    message={
-                                        emptyCommentsLoading
-                                            ? MESSAGES.ADDING_COMMENT
-                                            : MESSAGES.LOADING_COMMENTS
+                {/* Comments List */}
+                <div
+                    ref={commentsContainerRef}
+                    className="flex-1 overflow-y-auto p-4"
+                >
+                    {initialCommentsLoading || emptyCommentsLoading ? (
+                        <div className="flex justify-center items-center h-full">
+                            <Loading
+                                message={
+                                    emptyCommentsLoading
+                                        ? MESSAGES.ADDING_COMMENT
+                                        : MESSAGES.LOADING_COMMENTS
+                                }
+                            />
+                        </div>
+                    ) : comments &&
+                        Array.isArray(comments) &&
+                        comments.length > 0 ? (
+                        <div className="space-y-6">
+                            {currentComments.map((comment, index) => (
+                                <div
+                                    key={comment._id || `comment-${index}`} // ✅ Ensure unique key
+                                    className="comment-thread group border-b border-gray-100 pb-6 mb-6 last:border-0"
+                                    ref={
+                                        index === comments.length - 1 ? lastCommentRef : null
                                     }
-                                />
-                            </div>
-                        ) : comments &&
-                            Array.isArray(comments) &&
-                            comments.length > 0 ? (
-                            <div className="flex flex-col gap-6">
-                                {comments.map((comment, index) => (
+                                >
+                                    {/* Main comment */}
                                     <div
-                                        key={comment._id || `comment-${index}`} // ✅ Ensure unique key
-                                        className="comment-thread group border-b border-gray-100 pb-6 mb-2"
-                                        ref={
-                                            index === comments.length - 1 ? lastCommentRef : null
-                                        }
+                                        ref={(el) => {
+                                            commentRefs.current[comment._id] = el;
+                                            if (index === comments.length - 1) {
+                                                lastCommentRef.current = el;
+                                            }
+                                        }}
+                                        className="flex gap-3"
                                     >
-                                        {/* Main comment */}
-                                        <div
-                                            ref={(el) => {
-                                                commentRefs.current[comment._id] = el;
-                                                if (index === comments.length - 1) {
-                                                    lastCommentRef.current = el;
-                                                }
-                                            }}
-                                            className="flex items-start gap-2 sm:gap-3 pb-2 hover:bg-gray-50 p-1 sm:p-2 rounded-lg transition-colors"
-                                        >
-                                            <div className="flex-shrink-0">
-                                                <img
-                                                    src={comment.user_id.avatar || profileImage}
-                                                    alt={MESSAGES.PROFILE}
-                                                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border-2 border-blue-400 shadow-sm"
-                                                />
+                                        <div className="flex-shrink-0">
+                                            <img
+                                                src={comment.user_id.avatar || profileImage}
+                                                alt={MESSAGES.PROFILE}
+                                                className="w-10 h-10 rounded-full object-cover"
+                                            />
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:border-gray-300 transition-colors">
+                                                <div className="flex flex-wrap items-center gap-2 mb-2">
+                                                    <span className="font-medium text-gray-900 text-xs sm:text-sm">
+                                                        {formatName(comment.user_id.user_name)}
+                                                    </span>
+                                                    <span className="text-xs text-gray-500 bg-gray-100 px-1 py-0.5 rounded-full">
+                                                        {comment.user_id.role_id.name}
+                                                    </span>
+                                                    <span className="text-xs text-gray-400">
+                                                        {formatTimeAgo(comment.createdAt)}•{" "}
+                                                        {formatDate(comment.createdAt)}
+                                                    </span>
+
+
+
+                                                </div>
+                                                <p className="text-gray-700">
+                                                    {comment.content}
+                                                </p>
                                             </div>
-                                            <div className="flex-1">
-                                                <div className="bg-gray-50 rounded-lg p-4 shadow-sm border border-gray-200">
-                                                    <div className="flex flex-wrap items-center gap-2 mb-2">
-
-                                                        <div className="flex flex-wrap items-center gap-1">
-                                                            <span className="font-medium text-gray-900 text-xs sm:text-sm">
-                                                                {formatName(comment.user_id.user_name)}
-                                                            </span>
-                                                            <span className="text-xs text-gray-500 bg-gray-100 px-1 py-0.5 rounded-full">
-                                                                {comment.user_id.role_id.name}
-                                                            </span>
-                                                            <span className="text-xs text-gray-400">
-                                                                {formatTimeAgo(comment.createdAt)}•{" "}
-                                                                {formatDate(comment.createdAt)}
-                                                            </span>
-                                                        </div>
-
-
-                                                    </div>
-                                                    <p className="text-gray-700">
-                                                        {comment.content}
-                                                    </p>
-                                                </div>
-                                                <div className="mt-2 ml-2">
-                                                    {comment.user_id._id !== currentUserId && (
-                                                        <button
-                                                            className="text-sm text-blue-500 hover:text-blue-700 transition-all"
-                                                            onClick={() =>
-                                                                handleReply(
-                                                                    formatName(comment.user_id.user_name),
-                                                                    comment._id
-                                                                )
-                                                            }
-                                                        >
-                                                            {BUTTON.REPLY}
-                                                        </button>
-                                                    )}
-                                                </div>
+                                            <div className="mt-2 ml-2 flex items-center gap-3">
+                                                {comment.user_id._id !== currentUserId && (
+                                                    <button
+                                                        className="text-xs text-gray-500 hover:text-blue-600 transition-all flex items-center"
+                                                        onClick={() =>
+                                                            handleReply(
+                                                                formatName(comment.user_id.user_name),
+                                                                comment._id
+                                                            )
+                                                        }
+                                                    >
+                                                        <span className="mr-1">↩️</span> {BUTTON.REPLY}
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
+                                    </div>
 
-                                        {/* Render replies */}
-                                        {comment.replies && comment.replies.length > 0 && (
-                                            <div className="ml-8 sm:ml-12 border-l-2 border-blue-100 pl-2 sm:pl-4">
-                                                {comment.replies.map((reply) => (
-                                                    <div
-                                                        key={reply._id}
-                                                        ref={(el) => {
-                                                            replyRefs.current[reply._id] = el;
-                                                        }}
-                                                        className="flex items-start gap-2 sm:gap-3 mt-2 hover:bg-gray-50 p-1 rounded-lg transition-colors"
-                                                    >
-                                                        <div className="flex-shrink-0">
-                                                            <img
-                                                                src={reply.user?.avatar || profileImage}
-                                                                alt="Profile"
-                                                                className="w-6 h-6 sm:w-8 sm:h-8 rounded-full object-cover border-2 border-blue-200 shadow-sm"
-                                                            />
-                                                        </div>
-                                                        <div className="flex-1 bg-white rounded-lg p-2 shadow-sm border border-gray-100">
+                                    {/* Render replies */}
+                                    {comment.replies && comment.replies.length > 0 && (
+                                        <div className="ml-10 mt-3 pl-6 border-l-2 border-gray-100 group-hover:border-gray-300 transition-colors">
+                                            {comment.replies.map((reply) => (
+                                                <div
+                                                    key={reply._id}
+                                                    ref={(el) => {
+                                                        replyRefs.current[reply._id] = el;
+                                                    }}
+                                                    className="flex gap-3 mt-3"
+                                                >
+                                                    <div className="flex-shrink-0">
+                                                        <img
+                                                            src={reply.user?.avatar || profileImage}
+                                                            alt="Profile"
+                                                            className="w-8 h-8 rounded-full object-cover"
+                                                        />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-200 hover:border-gray-300 transition-colors">
                                                             <div className="flex flex-wrap items-center gap-2 mb-2">
                                                                 <span className="font-medium text-gray-900 text-xs">
                                                                     {formatName(
                                                                         reply.user?.user_name || ROLES.DEFAULT
                                                                     )}
                                                                 </span>
-                                                                <span className="text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full">
+                                                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                                                                     {reply.user.role}
                                                                 </span>
-                                                                <span className="text-xs text-gray-400 mt-1 sm:mt-0 sm:ml-2">
-                                                                    {formatTimeAgo(reply.createdAt)}
+                                                                <span className="text-xs text-gray-400">
+                                                                    {formatTimeAgo(reply.createdAt)} •{" "}
+                                                                    {formatDate(reply.createdAt)}
                                                                 </span>
                                                             </div>
                                                             <p className="text-gray-700 text-xs whitespace-pre-wrap">
@@ -715,105 +842,71 @@ const FinanceDetailPage = () => {
                                                             </p>
                                                         </div>
                                                     </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center h-full text-gray-500 py-8">
-                                <FaComment className="text-gray-300 text-3xl sm:text-4xl mb-3" />
-                                <p className="font-medium text-sm sm:text-base">
-                                    {MESSAGES.NO_COMMENTS}
-                                </p>
-                                <p className="text-xs sm:text-sm text-gray-400 mt-1">
-                                    {MESSAGES.FIRST_COMMENT_PROMPT}
-                                </p>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Comment input */}
-                    <div className="border-t border-gray-200 p-4 bg-white">
-                        {["paid", "cancelled", "rejected"].includes(
-                            currentStatus?.toLowerCase()
-                        ) ? (
-                            <div className="flex items-center justify-center p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                <FaLock className="text-gray-400 mr-2" />
-                                <span className="text-gray-500 text-sm">
-                                    {MESSAGES.COMMENTS_LOCKED}
-                                </span>
-                            </div>
-                        ) : (
-                            <>
-                                {replyTo && (
-                                    <div className="bg-blue-50 rounded-lg flex items-center justify-between p-2 mb-3 border border-blue-100">
-                                        <p className="text-blue-700 text-xs flex items-center">
-                                            <span className="mr-1">↩️</span> {LABELS.REPLYING_TO} {replyTo}
-                                        </p>
-                                        <button
-                                            onClick={() => {
-                                                setReplyTo("");
-                                                setCommentId(null);
-                                            }}
-                                            className="ml-2 text-gray-500 hover:text-gray-700 text-xs bg-gray-100 rounded-full w-5 h-5 flex items-center justify-center hover:bg-gray-200 transition-colors"
-                                        >
-                                            ✖️
-                                        </button>
-                                    </div>
-                                )}
-                                <div className="flex gap-2">
-                                    <div className="flex-1 rounded-lg border border-gray-200 overflow-hidden">
-                                        <textarea
-                                            ref={commentInputRef}
-                                            className="w-full bg-white p-4 text-sm focus:outline-none resize-none shadow-inner min-h-[50px]"
-                                            placeholder="Type your comment..."
-                                            value={replyTo ? replyTo + commentData : commentData}
-                                            onChange={(e) => {
-                                                if (replyTo && e.target.value.startsWith(replyTo)) {
-                                                    setCommentData(
-                                                        e.target.value.substring(replyTo.length)
-                                                    );
-                                                } else if (
-                                                    replyTo &&
-                                                    !e.target.value.startsWith(replyTo)
-                                                ) {
-                                                    setReplyTo("");
-                                                    setCommentData(e.target.value);
-                                                    setCommentId(null);
-                                                } else {
-                                                    setCommentData(e.target.value);
-                                                }
-                                            }}
-                                            onKeyDown={handleKeyDown}
-                                        ></textarea>
-
-                                        <div className="bg-gray-50 p-3 border-t border-gray-200 flex justify-end">
-                                            <button
-                                                onClick={handleSend}
-                                                disabled={loadingComment || !commentData.trim()}
-                                                className={`px-2 sm:px-4 py-1 sm:py-2 rounded-lg font-medium text-xs sm:text-sm text-white flex items-center ${loadingComment || !commentData.trim()
-                                                    ? "bg-gray-300 cursor-not-allowed"
-                                                    : "bg-blue-500 hover:bg-blue-600"
-                                                    } transition-colors shadow-sm`}
-                                            >
-                                                {loadingComment ? (
-                                                    <>
-                                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                                                        {BUTTON.SENDING}
-                                                    </>
-                                                ) : (
-                                                    <>{BUTTON.SEND}</>
-                                                )}
-                                            </button>
+                                                </div>
+                                            ))}
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
-                            </>
-                        )}
-                    </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center py-32 text-gray-500">
+                            <FaComment className="text-gray-300 text-4xl mb-3" />
+                            <p className="font-medium text-base">
+                                {MESSAGES.NO_COMMENTS}
+                            </p>
+                            <p className="text-sm text-gray-400 mt-1">
+                                {MESSAGES.FIRST_COMMENT_PROMPT}
+                            </p>
+                        </div>
+                    )}
                 </div>
+
+                {/* Pagination Component */}
+                {comments && comments.length > commentsPerPage && (
+                    <div className="flex justify-center items-center mt-6 space-x-2 p-3 border-t rounded-b">
+                        <button
+                            onClick={handlePrevPage}
+                            disabled={currentPage === 1}
+                            className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${currentPage === 1
+                                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                }`}
+                        >
+                            <span className="mr-1">◀</span> Previous
+                        </button>
+
+                        <div className="flex items-center space-x-1">
+                            {[...Array(totalPages)].map((_, index) => {
+                                const pageNumber = index + 1;
+                                return (
+                                    <button
+                                        key={pageNumber}
+                                        onClick={() => handlePageChange(pageNumber)}
+                                        className={`w-8 h-8 rounded text-xs transition-colors ${currentPage === pageNumber
+                                            ? "bg-blue-500 text-white"
+                                            : "bg-gray-100 text-blue-600 hover:bg-blue-200"
+                                            }`}
+                                    >
+                                        {pageNumber}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        <button
+                            onClick={handleNextPage}
+                            disabled={currentPage === totalPages}
+                            className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${currentPage === totalPages
+                                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                }`}
+                        >
+                            Next <span className="ml-1">▶</span>
+                        </button>
+                    </div>
+                )}
+
             </div>
 
 

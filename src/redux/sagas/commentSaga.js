@@ -43,6 +43,8 @@ function* handleCreateComment(action) {
 
     toast.success("Comment created successfully!");
     console.log("Comment created successfully!", data);
+
+    // Dispatch success action
     yield put(
       createCommentSuccess({
         claim_id: data.claim_id,
@@ -63,6 +65,9 @@ function* handleCreateComment(action) {
         replies: [],
       })
     );
+
+    // Refetch comments for the same claim
+    yield put({ type: GET_COMMENTS_REQUEST, payload: data.claim_id });
   } catch (error) {
     yield put(createCommentFailure(error.message));
   }
@@ -89,6 +94,10 @@ function* handleReplyComment(action) {
         },
       })
     );
+
+    // Refetch comments for the claim associated with the comment
+    yield put({ type: GET_COMMENTS_REQUEST, payload: action.payload.claim_id });
+
     toast.success("Reply created successfully!");
   } catch (error) {
     yield put(replyCommentFailure(error.message));

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { RxTextAlignJustify, RxCross2 } from "react-icons/rx";
 import {
   FaUser,
@@ -10,18 +10,16 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/actions/authActions";
-import { getNotificationsRequest } from "../../redux/actions/notificationActions";
+import {
+  getNotificationsRequest,
+  updateCommentStatusRequest,
+} from "../../redux/actions/notificationActions";
 import { toast } from "react-toastify";
 
 const useNotificationManager = () => {
   const dispatch = useDispatch();
   const { notifications } = useSelector((state) => state.notifications);
   const { user } = useSelector((state) => state.auth);
-
-  const [seenNotifications, setSeenNotifications] = useState(() => {
-    const savedSeenNotifications = localStorage.getItem("seenNotifications");
-    return savedSeenNotifications ? JSON.parse(savedSeenNotifications) : [];
-  });
 
   useEffect(() => {
     dispatch(getNotificationsRequest());
@@ -34,39 +32,62 @@ const useNotificationManager = () => {
   }, [dispatch]);
 
   const markNotificationAsSeen = (notificationId) => {
-    const updatedSeenNotifications = [
-      ...new Set([...seenNotifications, notificationId]),
-    ];
+    if (!notificationId) {
+      console.error("Invalid notification ID");
+      return;
+    }
 
-    setSeenNotifications(updatedSeenNotifications);
-    localStorage.setItem(
-      "seenNotifications",
-      JSON.stringify(updatedSeenNotifications)
-    );
+    dispatch(updateCommentStatusRequest(notificationId, true));
+
+    // Refetch notifications after update
+    setTimeout(() => {
+      dispatch(getNotificationsRequest());
+    }, 500); // Delay for smooth UX
   };
 
-  // Filter out notifications that are from the logged-in user
+  // Filter notifications that are not from the logged-in user
   const filteredNotifications = notifications.filter(
     (notification) => notification.user_id !== user?.user_id
   );
 
   const unseenNotifications = filteredNotifications.filter(
-    (notification) => !seenNotifications.includes(notification._id)
+    (notification) => !notification.status
   );
 
-  const seenNotificationsList = filteredNotifications.filter((notification) =>
-    seenNotifications.includes(notification._id)
+  const seenNotifications = filteredNotifications.filter(
+    (notification) => notification.status
   );
 
   const clearSeenNotifications = () => {
-    setSeenNotifications([]);
-    localStorage.removeItem("seenNotifications");
+    try {
+      // Get the current user's ID to create a user-specific key
+      const userId = user?.user_id;
+      if (!userId) {
+        console.error("No user ID found");
+        return;
+      }
+
+      // Create a key specific to the user's seen notifications
+      const storageKey = `seenNotifications_${userId}`;
+
+      // Remove seen notifications from localStorage
+      localStorage.removeItem(storageKey);
+
+      // Optional: You might want to dispatch an action to refresh notifications
+      dispatch(getNotificationsRequest());
+
+      // Optionally show a toast notification
+      toast.success("Seen notifications cleared");
+    } catch (error) {
+      console.error("Error clearing seen notifications:", error);
+      toast.error("Failed to clear seen notifications");
+    }
   };
 
   return {
     allNotifications: filteredNotifications,
     unseenNotifications,
-    seenNotifications: seenNotificationsList,
+    seenNotifications,
     markNotificationAsSeen,
     clearSeenNotifications,
   };
@@ -83,7 +104,11 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, isMobileView }) => {
   const dispatch = useDispatch();
 
   const { user } = useSelector((state) => state.auth);
-  const { claimDetail: claim } = useSelector((state) => state.claims);
+  const { claimDetail: claim = {} } = useSelector((state) => {
+    if (user?.role_name === "Claimer") return state.claimer || {};
+    if (user?.role_name === "Approver") return state.claims || {};
+    return state.finance || {};
+  });
 
   const {
     allNotifications,
@@ -92,6 +117,17 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, isMobileView }) => {
     markNotificationAsSeen,
     clearSeenNotifications,
   } = useNotificationManager();
+
+  // New method for updating comment status
+  const handleUpdateCommentStatus = (commentId, status) => {
+    try {
+      dispatch(updateCommentStatusRequest(commentId, status));
+      toast.success("Notification status updated");
+    } catch (error) {
+      console.error("Error updating comment status:", error);
+      toast.error("Failed to update notification status");
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -117,13 +153,19 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, isMobileView }) => {
 
   const getNotificationDetails = (notification) => {
     switch (notification.type) {
-      case "new_comment":
+      case "claims":
         return {
           icon: <FaComment />,
           text: "New Comment",
           color: "bg-blue-100 text-blue-600",
         };
-      case "comment_reply":
+      case "comments":
+        return {
+          icon: <FaComment />,
+          text: "New Comment",
+          color: "bg-blue-100 text-blue-600",
+        };
+      case "replies":
         return {
           icon: <FaReply />,
           text: "Comment Reply",
@@ -192,28 +234,31 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, isMobileView }) => {
   };
 
   const handleNotificationClick = (notification) => {
+    // Immediately update the local state to mark as seen
     markNotificationAsSeen(notification._id);
 
     if (notification.claim_id) {
-      const navigatePath = () => {
-        const userRole = user?.role_name;
-        const claimStatus = claim?.status;
+      const userRole = user?.role_name;
+      const claimStatus = claim?.status;
 
-        switch (userRole) {
-          case "Approver":
-            return `/approver/${
-              claimStatus === "pending" ? "history" : "vetting"
-            }/${notification.claim_id}`;
-          case "Claimer":
-            return `/claimer/${
-              claimStatus === "pending" ? "pending" : "approved"
-            }/${notification.claim_id}`;
-          default:
-            return `/finance/approved/${notification.claim_id}`;
-        }
+      const navigationMap = {
+        Approver: {
+          pending: `/approver/history/${notification.claim_id}`,
+          default: `/approver/vetting/${notification.claim_id}`,
+        },
+        Claimer: {
+          pending: `/claimer/pending/${notification.claim_id}`,
+          default: `/claimer/approved/${notification.claim_id}`,
+        },
+        Finance: `/finance/approved/${notification.claim_id}`,
       };
 
-      navigate(navigatePath());
+      const navigatePath =
+        navigationMap[userRole]?.[claimStatus] ||
+        navigationMap[userRole]?.["default"] ||
+        navigationMap["Finance"];
+
+      navigate(navigatePath);
     }
 
     setIsNotificationOpen(false);
@@ -225,52 +270,69 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, isMobileView }) => {
       return (
         <div
           key={notification._id}
+          className="relative group"
           onClick={() => handleNotificationClick(notification)}
-          className={`px-3 py-2.5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 ${
-            isSeen ? "bg-gray-50" : "bg-blue-50"
-          }`}
         >
-          <div className="flex items-start space-x-2.5">
-            <div className="flex-shrink-0">
-              <div
-                className={`h-7 w-7 rounded-full flex items-center justify-center ${notificationDetails.color}`}
-              >
-                {notificationDetails.icon}
+          <div
+            className={`px-3 py-2.5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 ${isSeen ? "bg-gray-50" : "bg-blue-50"
+              }`}
+          >
+            <div className="flex items-start space-x-2.5">
+              <div className="flex-shrink-0">
+                <div
+                  className={`h-7 w-7 rounded-full flex items-center justify-center ${notificationDetails.color}`}
+                >
+                  {notificationDetails.icon}
+                </div>
+              </div>
+              <div className="flex-grow min-w-0">
+                <p className="text-xs text-gray-700 line-clamp-2 break-words">
+                  {notificationDetails.text}: {notification.content}
+                </p>
+                <p className="text-[10px] text-gray-500 mt-0.5">
+                  {formatTimeAgo(notification.createdAt)} •{" "}
+                  {formatDate(notification.createdAt)}
+                  {!isSeen && (
+                    <span className="ml-1.5 text-blue-600 font-semibold">
+                      New
+                    </span>
+                  )}
+                </p>
               </div>
             </div>
-            <div className="flex-grow min-w-0">
-              <p className="text-xs text-gray-700 line-clamp-2 break-words">
-                {notificationDetails.text}: {notification.content}
-              </p>
-              <p className="text-[10px] text-gray-500 mt-0.5">
-                {formatTimeAgo(notification.createdAt)} •{" "}
-                {formatDate(notification.createdAt)}
-                {!isSeen && (
-                  <span className="ml-1.5 text-blue-600 font-semibold">
-                    New
-                  </span>
-                )}
-              </p>
-            </div>
           </div>
+
+          {/* Status update buttons */}
+          {!isSeen && (
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 hidden group-hover:flex space-x-2 z-10">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUpdateCommentStatus(notification._id, "read");
+                }}
+                className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded"
+              >
+                Mark Read
+              </button>
+            </div>
+          )}
         </div>
       );
     });
   };
 
   return (
-    <div className="w-full bg-white shadow-sm">
+    <div className="w-full bg-white shadow-sm sticky top-0 z-50">
       <div className="flex justify-between items-center p-2 sm:p-4">
         {/* Sidebar Toggle */}
         <div className="flex items-center">
           {!isMobileView && (
             <button
               onClick={toggleSidebar}
-              className={`p-1 sm:p-2 rounded-lg transition-colors ${
-                isSidebarOpen
+              className={`p-1 sm:p-2 rounded-lg transition-colors ${isSidebarOpen
                   ? "bg-gray-100 text-blue-600"
                   : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
-              }`}
+                }`}
               aria-label="Toggle sidebar"
             >
               {isSidebarOpen ? (
@@ -302,18 +364,20 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, isMobileView }) => {
         <div className="flex items-center space-x-2 sm:space-x-4">
           {/* Notification Button */}
           <div className="relative" ref={notificationRef}>
-            <button
-              ref={notificationButtonRef}
-              onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-              className="relative p-2 rounded-full hover:bg-gray-50 transition-colors"
-            >
-              <FaBell className="text-gray-600 text-base sm:text-lg" />
-              {unseenNotifications.length > 0 && (
-                <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px]">
-                  {unseenNotifications.length}
-                </span>
-              )}
-            </button>
+            {user?.role_name !== "Administrator" && (
+              <button
+                ref={notificationButtonRef}
+                onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                className="relative p-2 rounded-full hover:bg-gray-50 transition-colors"
+              >
+                <FaBell className="text-gray-600 text-base sm:text-lg" />
+                {unseenNotifications.length > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px]">
+                    {unseenNotifications.length}
+                  </span>
+                )}
+              </button>
+            )}
 
             {/* Desktop Notification Dropdown */}
             {isNotificationOpen && !isMobileView && (
@@ -325,21 +389,19 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, isMobileView }) => {
                 <div className="flex">
                   <button
                     onClick={() => setActiveNotificationTab("unseen")}
-                    className={`flex-1 py-2 text-sm ${
-                      activeNotificationTab === "unseen"
+                    className={`flex-1 py-2 text-sm ${activeNotificationTab === "unseen"
                         ? "border-b-2 border-blue-500 text-blue-600"
                         : "text-gray-500"
-                    }`}
+                      }`}
                   >
                     Unseen ({unseenNotifications.length})
                   </button>
                   <button
                     onClick={() => setActiveNotificationTab("seen")}
-                    className={`flex-1 py-2 text-sm ${
-                      activeNotificationTab === "seen"
+                    className={`flex-1 py-2 text-sm ${activeNotificationTab === "seen"
                         ? "border-b-2 border-blue-500 text-blue-600"
                         : "text-gray-500"
-                    }`}
+                      }`}
                   >
                     Seen ({seenNotifications.length})
                   </button>
@@ -406,21 +468,19 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, isMobileView }) => {
                   <div className="flex">
                     <button
                       onClick={() => setActiveNotificationTab("unseen")}
-                      className={`flex-1 py-2 text-sm ${
-                        activeNotificationTab === "unseen"
+                      className={`flex-1 py-2 text-sm ${activeNotificationTab === "unseen"
                           ? "border-b-2 border-blue-500 text-blue-600"
                           : "text-gray-500"
-                      }`}
+                        }`}
                     >
                       Unseen ({unseenNotifications.length})
                     </button>
                     <button
                       onClick={() => setActiveNotificationTab("seen")}
-                      className={`flex-1 py-2 text-sm ${
-                        activeNotificationTab === "seen"
+                      className={`flex-1 py-2 text-sm ${activeNotificationTab === "seen"
                           ? "border-b-2 border-blue-500 text-blue-600"
                           : "text-gray-500"
-                      }`}
+                        }`}
                     >
                       Seen ({seenNotifications.length})
                     </button>

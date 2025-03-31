@@ -31,7 +31,7 @@ import {
 
 // API Call Function: Fetch projects
 const fetchProjectsAPI = async () => {
-  return await api.get("project");
+  return await api.get("project", null, { status: true});
 };
 
 // API Functions
