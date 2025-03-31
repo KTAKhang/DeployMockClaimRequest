@@ -48,16 +48,17 @@ export const notificationReducer = (state = initialState, action) => {
       };
 
     case UPDATE_COMMENT_STATUS_SUCCESS:
-      // Update the status of the specific notification in the list
       return {
         ...state,
-        notifications: state.notifications.map((notification) =>
-          notification._id === action.payload.commentId
-            ? { ...notification, status: action.payload.status }
-            : notification
-        ),
-        updatingCommentStatus: false,
-        updateCommentStatusError: null,
+        notifications: state.notifications.map((notification) => {
+          // Check if this notification is in the updated list
+          const updatedNotification = action.payload.find(
+            (updated) => updated._id === notification._id
+          );
+
+          // If found in updated list, return the updated version, otherwise return original
+          return updatedNotification || notification;
+        }),
       };
 
     case UPDATE_COMMENT_STATUS_FAILURE:

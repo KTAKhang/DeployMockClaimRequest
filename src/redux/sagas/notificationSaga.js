@@ -16,93 +16,121 @@ import api from "../api/apiUtils";
 const transformClaimComments = (comments, currentUserId, roleName) => {
   const transformedNotifications = [];
 
-  comments.forEach((comment) => {
-    // Approver and Finance should only receive replies
+  // Process all comments, including those in nested arrays
+  const processComment = (comment) => {
+    // Skip if not an object
+    if (!comment || typeof comment !== "object" || !comment._id) return;
+
+    // Process based on role
     if (roleName === "Approver" || roleName === "Finance") {
-      if (comment.type === "replies" && comment.user._id !== currentUserId) {
+      // Only process replies for these roles
+      if (comment.type === "replies" && comment.user?._id !== currentUserId) {
         transformedNotifications.push({
           _id: comment._id,
           type: "replies",
           claim_id: comment.claim_id,
           original_comment_id: comment.original_comment_id,
           content: comment.content,
-          user_id: comment.user._id,
-          user_name: comment.user.user_name,
+          user_id: comment.user?._id,
+          user_name: comment.user?.user_name,
           createdAt: comment.createdAt,
           status: comment.status,
-          claim_status: comment.claim_status, // Make sure this is included in your API response
+          claim_status: comment.claim_status,
+          delete_status: comment.delete_status || false, // Include delete_status
         });
       }
     } else {
-      // Other users receive all relevant notifications
+      // For Claimer and other roles
 
-      // Handle "comments" type (user's own comments)
-      if (comment.type === "comments" && comment.user._id === currentUserId) {
+      // Handle regular comments (user's own comments)
+      if (comment.type === "comments" && comment.user?._id === currentUserId) {
         transformedNotifications.push({
           _id: comment._id,
           type: "comments",
           claim_id: comment.claim_id,
           content: comment.content,
-          user_id: comment.user._id,
+          user_id: comment.user?._id,
+          user_name: comment.user?.user_name,
           createdAt: comment.createdAt,
           status: comment.status,
-          claim_status: comment.claim_status, // Make sure this is included in your API response
+          claim_status: comment.claim_status,
+          delete_status: comment.delete_status || false, // Include delete_status
         });
       }
 
-      // Handle "replies" type (replies to the user's comments)
-      if (comment.type === "replies" && comment.user._id !== currentUserId) {
+      // Handle replies (to the user's comments)
+      if (comment.type === "replies" && comment.user?._id !== currentUserId) {
         transformedNotifications.push({
           _id: comment._id,
           type: "replies",
           claim_id: comment.claim_id,
           original_comment_id: comment.original_comment_id,
           content: comment.content,
-          user_id: comment.user._id,
-          user_name: comment.user.user_name,
+          user_id: comment.user?._id,
+          user_name: comment.user?.user_name,
           createdAt: comment.createdAt,
           status: comment.status,
-          claim_status: comment.claim_status, // Make sure this is included in your API response
+          claim_status: comment.claim_status,
+          delete_status: comment.delete_status || false, // Include delete_status
         });
       }
 
-      // Handle "claims" type (when someone comments on the user's claim)
-      if (comment.type === "claims" && comment.user._id !== currentUserId) {
+      // Handle claims (comments on the user's claims)
+      if (comment.type === "claims" && comment.user?._id !== currentUserId) {
         transformedNotifications.push({
           _id: comment._id,
           type: "claims",
           claim_id: comment.claim_id,
           content: comment.content,
-          user_id: comment.user._id,
-          user_name: comment.user.user_name,
+          user_id: comment.user?._id,
+          user_name: comment.user?.user_name,
           createdAt: comment.createdAt,
           status: comment.status,
-          claim_status: comment.claim_status, // Make sure this is included in your API response
+          claim_status: comment.claim_status,
+          delete_status: comment.delete_status || false, // Include delete_status
         });
       }
     }
+  };
+
+  // Process all comments, handling nested arrays
+  comments.forEach((item) => {
+    if (Array.isArray(item)) {
+      // Handle nested arrays
+      item.forEach((subItem) => {
+        if (Array.isArray(subItem)) {
+          // Handle doubly nested arrays
+          subItem.forEach(processComment);
+        } else {
+          processComment(subItem);
+        }
+      });
+    } else {
+      processComment(item);
+    }
   });
 
-  // Sort notifications by most recent first
-  return transformedNotifications.sort(
-    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-  );
+  // Sort notifications by most recent first and filter out deleted notifications
+  return transformedNotifications
+    .filter((notification) => !notification.delete_status)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 };
 
 function* handleUpdateCommentStatus(action) {
   try {
-    const { commentId, status } = action.payload;
+    const { commentId, status, deleteStatus } = action.payload;
     const commentIds = Array.isArray(commentId) ? commentId : [commentId];
     const booleanStatus = status === "read" || status === true;
 
     const response = yield call(api.put, `comment/update`, {
       comment_ids: commentIds,
       status: booleanStatus,
+      delete_status: deleteStatus || false, // Include delete_status in the API request
     });
 
     const responseData = response?.data || response; // Handle Axios wrapping
 
-    // ✅ Check if response is an array and contains updated comments
+    // Check if response is an array and contains updated comments
     if (Array.isArray(responseData) && responseData.length > 0) {
       yield put({
         type: UPDATE_COMMENT_STATUS_SUCCESS,

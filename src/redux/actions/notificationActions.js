@@ -27,9 +27,17 @@ export const getNotificationsFailure = (error) => ({
   payload: error,
 });
 
-export const updateCommentStatusRequest = (commentId, status) => ({
+export const updateCommentStatusRequest = (
+  commentId,
+  status,
+  deleteStatus = false
+) => ({
   type: UPDATE_COMMENT_STATUS_REQUEST,
-  payload: { commentId, status: status === "read" ? true : status },
+  payload: {
+    commentId,
+    status,
+    deleteStatus,
+  },
 });
 
 export const updateCommentStatusSuccess = (commentId, status) => ({

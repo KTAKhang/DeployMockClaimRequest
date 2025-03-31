@@ -46,9 +46,11 @@ const useNotificationManager = () => {
     }, 500); // Delay for smooth UX
   };
 
-  // Filter notifications that are not from the logged-in user
+  // Filter notifications that are not from the logged-in user and not deleted
   const filteredNotifications = notifications.filter(
-    (notification) => notification.user_id !== user?.user_id
+    (notification) =>
+      notification.user_id !== user?.user_id &&
+      notification.delete_status !== true
   );
 
   const unseenNotifications = filteredNotifications.filter(
@@ -61,24 +63,26 @@ const useNotificationManager = () => {
 
   const clearSeenNotifications = () => {
     try {
-      // Get the current user's ID to create a user-specific key
-      const userId = user?.user_id;
-      if (!userId) {
-        console.error("No user ID found");
+      // Get all seen notification IDs
+      const seenNotificationIds = seenNotifications.map(
+        (notification) => notification._id
+      );
+
+      if (seenNotificationIds.length === 0) {
+        toast.info("No seen notifications to clear");
         return;
       }
 
-      // Create a key specific to the user's seen notifications
-      const storageKey = `seenNotifications_${userId}`;
+      // Update all seen notifications with delete_status: true
+      dispatch(updateCommentStatusRequest(seenNotificationIds, true, true));
 
-      // Remove seen notifications from localStorage
-      localStorage.removeItem(storageKey);
-
-      // Optional: You might want to dispatch an action to refresh notifications
-      dispatch(getNotificationsRequest());
-
-      // Optionally show a toast notification
+      // Show success toast
       toast.success("Seen notifications cleared");
+
+      // Refetch notifications after a short delay
+      setTimeout(() => {
+        dispatch(getNotificationsRequest());
+      }, 500);
     } catch (error) {
       console.error("Error clearing seen notifications:", error);
       toast.error("Failed to clear seen notifications");
@@ -93,7 +97,6 @@ const useNotificationManager = () => {
     clearSeenNotifications,
   };
 };
-
 const Navbar = ({ toggleSidebar, isSidebarOpen, isMobileView }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -105,11 +108,6 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, isMobileView }) => {
   const dispatch = useDispatch();
 
   const { user } = useSelector((state) => state.auth);
-  const { claimDetail: claim = {} } = useSelector((state) => {
-    if (user?.role_name === "Claimer") return state.claimer || {};
-    if (user?.role_name === "Approver") return state.claims || {};
-    return state.finance || {};
-  });
 
   const {
     allNotifications,
@@ -146,13 +144,7 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, isMobileView }) => {
       case "claims":
         return {
           icon: <FaComment />,
-          text: "New Comment",
-          color: "bg-blue-100 text-blue-600",
-        };
-      case "comments":
-        return {
-          icon: <FaComment />,
-          text: "New Comment",
+          text: "Commented on your claim",
           color: "bg-blue-100 text-blue-600",
         };
       case "replies":
@@ -251,8 +243,9 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, isMobileView }) => {
           onClick={() => handleNotificationClick(notification)}
         >
           <div
-            className={`px-3 py-2.5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 ${isSeen ? "bg-gray-50" : "bg-blue-50"
-              }`}
+            className={`px-3 py-2.5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 ${
+              isSeen ? "bg-gray-50" : "bg-blue-50"
+            }`}
           >
             <div className="flex items-start space-x-2.5">
               <div className="flex-shrink-0">
@@ -291,10 +284,11 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, isMobileView }) => {
           {!isMobileView && (
             <button
               onClick={toggleSidebar}
-              className={`p-1 sm:p-2 rounded-lg transition-colors ${isSidebarOpen
+              className={`p-1 sm:p-2 rounded-lg transition-colors ${
+                isSidebarOpen
                   ? "bg-gray-100 text-blue-600"
                   : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
-                }`}
+              }`}
               aria-label="Toggle sidebar"
             >
               {isSidebarOpen ? (
@@ -351,19 +345,21 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, isMobileView }) => {
                 <div className="flex">
                   <button
                     onClick={() => setActiveNotificationTab("unseen")}
-                    className={`flex-1 py-2 text-sm ${activeNotificationTab === "unseen"
+                    className={`flex-1 py-2 text-sm ${
+                      activeNotificationTab === "unseen"
                         ? "border-b-2 border-blue-500 text-blue-600"
                         : "text-gray-500"
-                      }`}
+                    }`}
                   >
                     Unseen ({unseenNotifications.length})
                   </button>
                   <button
                     onClick={() => setActiveNotificationTab("seen")}
-                    className={`flex-1 py-2 text-sm ${activeNotificationTab === "seen"
+                    className={`flex-1 py-2 text-sm ${
+                      activeNotificationTab === "seen"
                         ? "border-b-2 border-blue-500 text-blue-600"
                         : "text-gray-500"
-                      }`}
+                    }`}
                   >
                     Seen ({seenNotifications.length})
                   </button>
@@ -430,19 +426,21 @@ const Navbar = ({ toggleSidebar, isSidebarOpen, isMobileView }) => {
                   <div className="flex">
                     <button
                       onClick={() => setActiveNotificationTab("unseen")}
-                      className={`flex-1 py-2 text-sm ${activeNotificationTab === "unseen"
+                      className={`flex-1 py-2 text-sm ${
+                        activeNotificationTab === "unseen"
                           ? "border-b-2 border-blue-500 text-blue-600"
                           : "text-gray-500"
-                        }`}
+                      }`}
                     >
                       Unseen ({unseenNotifications.length})
                     </button>
                     <button
                       onClick={() => setActiveNotificationTab("seen")}
-                      className={`flex-1 py-2 text-sm ${activeNotificationTab === "seen"
+                      className={`flex-1 py-2 text-sm ${
+                        activeNotificationTab === "seen"
                           ? "border-b-2 border-blue-500 text-blue-600"
                           : "text-gray-500"
-                        }`}
+                      }`}
                     >
                       Seen ({seenNotifications.length})
                     </button>
