@@ -86,24 +86,7 @@ describe('FinancePaidPage Component', () => {
         expect(screen.getByTestId('filter-condition').textContent).toBe('FinancePaid');
     });
 
-    it('should display error message when there is an error', () => {
 
-        store = mockStore({
-            finance: {
-                claims: [],
-                error: 'Failed to fetch claims'
-            }
-        });
-
-        render(
-            <Provider store={store}>
-                <FinancePaidPage />
-            </Provider>
-        );
-
-
-        expect(screen.getByText(/Error: Failed to fetch claims/i)).toBeInTheDocument();
-    });
 
     it('should handle empty claims array', () => {
 

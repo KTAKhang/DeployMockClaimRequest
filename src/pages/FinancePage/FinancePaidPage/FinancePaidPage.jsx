@@ -18,7 +18,7 @@ const FinancePaidPage = () => {
 
     return (
         <div className="p-0 bg-white">
-            {error && <p className="text-red-500">{STRINGS.ERROR_PREFIX}{error}</p>}
+
             <ClaimsTable
                 title={STRINGS.PAID_CLAIMS_TITLE}
                 claimsData={paidClaims}

@@ -30,7 +30,7 @@ const FinanceDownLoadModal = ({ isOpenDownloadModal, setIsOpenDownloadModal }) =
     useEffect(() => {
         if (error) {
             setErrors({ ...errors });
-            toast.error(error);
+            toast.error(DOWNLOAD_MODAL_STRINGS.DOWNLOAD_FAILURE);
             setMonth("");
             setYear("");
         }

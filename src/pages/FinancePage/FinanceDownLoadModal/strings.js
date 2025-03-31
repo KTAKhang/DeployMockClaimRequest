@@ -10,4 +10,5 @@ export const DOWNLOAD_MODAL_STRINGS = {
     DOWNLOAD_BUTTON: 'Download',
     PROCESSING_BUTTON: 'Processing...',
     DOWNLOAD_SUCCESS: 'Download succeed',
+    DOWNLOAD_FAILURE: 'No Paid Claims data found for the requested month',
 };
