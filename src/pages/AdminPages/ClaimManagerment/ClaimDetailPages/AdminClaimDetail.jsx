@@ -26,15 +26,15 @@ import {
 import { toast } from "react-hot-toast";
 
 // Import from separated files
-import { 
-  STATUS, 
+import {
+  STATUS,
   VIEW_MODE,
   COMMENT_ACTIONS,
-  LOADING_TIMEOUTS 
+  LOADING_TIMEOUTS
 } from "./constants";
-import { 
-  PAGE_STRINGS, 
-  BUTTON_STRINGS, 
+import {
+  PAGE_STRINGS,
+  BUTTON_STRINGS,
   SECTION_HEADERS,
   COMMENT_STRINGS,
   ERROR_STRINGS,
@@ -366,15 +366,6 @@ export default function AdminClaimDetail() {
           <FaArrowLeft className="mr-1 sm:mr-2" /> {BUTTON_STRINGS.BACK}
         </button>
         <span className="mx-1 sm:mx-2">|</span>
-        <span>Pages</span>
-        <span className="mx-1 sm:mx-2">&gt;</span>
-        <button
-          className="hover:text-blue-600 transition-colors"
-          onClick={() => navigate("/admin")}
-        >
-          Dashboard
-        </button>
-        <span className="mx-1 sm:mx-2">&gt;</span>
         <button
           className="hover:text-blue-600 transition-colors"
           onClick={() => navigate("/admin/claim-management")}
@@ -399,7 +390,7 @@ export default function AdminClaimDetail() {
               <span className="text-xs sm:text-sm opacity-80 mr-1 sm:mr-2">
                 ID:
               </span>
-              <div 
+              <div
                 className="bg-white bg-opacity-20 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm flex items-center group cursor-pointer hover:bg-opacity-30 transition-all"
                 onClick={handleCopyId}
               >
@@ -504,7 +495,7 @@ export default function AdminClaimDetail() {
           </div>
         </div>
 
-       
+
         <div className="p-3 sm:p-6">
           <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center">
             <FaClipboard className="mr-2 text-blue-600" />
@@ -532,12 +523,6 @@ export default function AdminClaimDetail() {
                 <FaComment className="mr-2 text-gray-500" />
                 {SECTION_HEADERS.DECISION_REASON_TITLE}
               </h4>
-              <div className="flex items-center mb-2">
-                <div className={`w-3 h-3 rounded-full ${getStatusColor(claim.status?.name)} mr-2`}></div>
-                <span className={`text-sm font-medium ${getStatusTextColor(claim.status?.name)}`}>
-                  {claim.status?.name || "Pending"}
-                </span>
-              </div>
               <div className="text-sm text-gray-600">
                 {localReason || REASON_STRINGS.NO_DECISION_REASON}
               </div>
@@ -546,17 +531,9 @@ export default function AdminClaimDetail() {
         </div>
 
         {/* Action Buttons */}
-        <div className="px-3 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row sm:justify-end items-center gap-2 sm:gap-3">
-          <button
-            onClick={() => navigate("/admin/claim-management")}
-            className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium transition-colors flex items-center justify-center"
-          >
-            <FaArrowLeft className="mr-2" /> {BUTTON_STRINGS.BACK}
-          </button>
-        </div>
       </div>
 
-     
+
       <div className="bg-white rounded-xl shadow-md overflow-hidden mt-6">
         {/* Header */}
         <div className="border-b rounded border-gray-200 bg-gray-50 px-4 py-3">
@@ -728,11 +705,10 @@ export default function AdminClaimDetail() {
               <button
                 onClick={handlePrevPage}
                 disabled={currentPage === 1}
-                className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${
-                  currentPage === 1
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
+                className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${currentPage === 1
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
               >
                 <span className="mr-1">◀</span> Previous
               </button>
@@ -744,11 +720,10 @@ export default function AdminClaimDetail() {
                     <button
                       key={pageNumber}
                       onClick={() => handlePageChange(pageNumber)}
-                      className={`w-8 h-8 rounded text-xs transition-colors ${
-                        currentPage === pageNumber
-                          ? "bg-blue-500 text-white"
-                          : "bg-gray-100 text-blue-600 hover:bg-blue-200"
-                      }`}
+                      className={`w-8 h-8 rounded text-xs transition-colors ${currentPage === pageNumber
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 text-blue-600 hover:bg-blue-200"
+                        }`}
                     >
                       {pageNumber}
                     </button>
@@ -759,11 +734,10 @@ export default function AdminClaimDetail() {
               <button
                 onClick={handleNextPage}
                 disabled={currentPage === totalPages}
-                className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${
-                  currentPage === totalPages
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
+                className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${currentPage === totalPages
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
               >
                 Next <span className="ml-1">▶</span>
               </button>
