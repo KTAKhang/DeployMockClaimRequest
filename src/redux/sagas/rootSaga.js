@@ -10,6 +10,9 @@ import { claimerSaga } from "./claimerSaga";
 import { commentSaga } from "./commentSaga";
 import { notificationSaga } from "./notificationSaga";
 import chatSaga from "./chatSaga";
+import { watchForgotPassword } from "./forgotPasswordSaga";
+import { watchVerifyCodeRequest } from "./verifyCodeSaga";
+import watchChangePassword from "./changePasswordSaga";
 export default function* rootSaga() {
   yield all([
     authSaga(),
@@ -22,5 +25,8 @@ export default function* rootSaga() {
     commentSaga(),
     notificationSaga(),
     chatSaga(),
+    watchForgotPassword(),
+    watchVerifyCodeRequest(),
+    watchChangePassword(),
   ]);
 }

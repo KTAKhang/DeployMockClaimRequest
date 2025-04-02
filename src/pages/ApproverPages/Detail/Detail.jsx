@@ -1,6 +1,7 @@
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import {
+  FaReply,
   FaArrowLeft,
   FaCheck,
   FaTimes,
@@ -11,6 +12,7 @@ import {
   FaExclamationCircle,
   FaComment,
   FaLock,
+  FaCopy,
 } from "react-icons/fa";
 import ApproverModal from "../../../components/Modal/Modal.jsx";
 import profileImage from "../../../assets/img/profile.png";
@@ -91,6 +93,7 @@ export default function Detail() {
   const [lastTargetId, setLastTargetId] = useState(null);
   const notificationTimeoutRef = useRef(null);
   const [showNotification, setShowNotification] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   // Refs for scrolling and focus
   const commentsContainerRef = useRef(null);
@@ -266,6 +269,18 @@ export default function Detail() {
         </button>
       </div>
     );
+
+  const handleCopyId = () => {
+    navigator.clipboard
+      .writeText(id)
+      .then(() => {
+        setIsCopied(true);
+        setTimeout(() => {
+          setIsCopied(false);
+        }, 2000);
+      })
+      .catch(() => {});
+  };
 
   const handleOpenModal = (action) => {
     if (!localReason.trim()) {
@@ -455,9 +470,17 @@ export default function Detail() {
               <span className="text-xs sm:text-sm opacity-80 mr-1 sm:mr-2">
                 ID:
               </span>
-              <span className="text-xs sm:text-sm bg-white bg-opacity-20 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full truncate max-w-[150px] sm:max-w-none">
-                {claim._id}
-              </span>
+              <div
+                className="bg-white bg-opacity-20 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm flex items-center group cursor-pointer hover:bg-opacity-30 transition-all"
+                onClick={handleCopyId}
+              >
+                <span className="font-mono mr-2">{claim._id}</span>
+                {isCopied ? (
+                  <FaCheck className="text-green-400 group-hover:text-green-300 transition-colors" />
+                ) : (
+                  <FaCopy className="text-white opacity-70 group-hover:opacity-100 transition-opacity" />
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -517,10 +540,10 @@ export default function Detail() {
                     <p className="text-xs text-gray-500">Duration</p>
                     <p className="font-medium text-gray-800 text-sm">
                       {claim.project?.duration?.from &&
-                        claim.project?.duration?.to
+                      claim.project?.duration?.to
                         ? `From ${formatDate(
-                          claim.project.duration.from
-                        )} To ${formatDate(claim.project.duration.to)}`
+                            claim.project.duration.from
+                          )} To ${formatDate(claim.project.duration.to)}`
                         : "N/A"}
                     </p>
                   </div>
@@ -592,12 +615,13 @@ export default function Detail() {
               {mode === "vetting" ? (
                 <>
                   <textarea
-                    className={`w-full border ${reasonError
-                      ? "border-red-400"
-                      : reasonFocused
+                    className={`w-full border ${
+                      reasonError
+                        ? "border-red-400"
+                        : reasonFocused
                         ? "border-blue-400"
                         : "border-gray-200"
-                      } p-2 sm:p-4 rounded-lg bg-white shadow-sm resize-none transition-all focus:outline-none focus:ring-2 focus:ring-blue-200`}
+                    } p-2 sm:p-4 rounded-lg bg-white shadow-sm resize-none transition-all focus:outline-none focus:ring-2 focus:ring-blue-200`}
                     style={{ minHeight: "100px" }}
                     placeholder={FORM.REASON_PLACEHOLDER}
                     value={localReason}
@@ -721,13 +745,14 @@ export default function Detail() {
                         (localStorage.getItem("role") === "Claimer" &&
                           replyTo === "")
                       }
-                      className={`px-4 py-2 rounded-md font-medium text-sm text-white flex items-center ${loadingComment ||
+                      className={`px-4 py-2 rounded-md font-medium text-sm text-white flex items-center ${
+                        loadingComment ||
                         !commentData.trim() ||
                         (localStorage.getItem("role") === "Claimer" &&
                           replyTo === "")
-                        ? "bg-gray-300 cursor-not-allowed"
-                        : "bg-blue-500 hover:bg-blue-600"
-                        } transition-colors`}
+                          ? "bg-gray-300 cursor-not-allowed"
+                          : "bg-blue-500 hover:bg-blue-600"
+                      } transition-colors`}
                     >
                       {loadingComment ? (
                         <>
@@ -808,12 +833,12 @@ export default function Detail() {
                             className="text-xs text-gray-500 hover:text-blue-600 transition-all flex items-center"
                             onClick={() =>
                               handleReply(
-                                formatName(comment.user_id.user_name),
+                                formatName(comment.user_id?.user_name),
                                 comment._id
                               )
                             }
                           >
-                            <span className="mr-1">↩️</span> {BUTTONS.REPLY}
+                            <FaReply className="mr-1" /> {BUTTONS.REPLY}
                           </button>
                         )}
                       </div>
@@ -884,10 +909,11 @@ export default function Detail() {
             <button
               onClick={handlePrevPage}
               disabled={currentPage === 1}
-              className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${currentPage === 1
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
+              className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${
+                currentPage === 1
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
             >
               <span className="mr-1">◀</span> Previous
             </button>
@@ -899,10 +925,11 @@ export default function Detail() {
                   <button
                     key={pageNumber}
                     onClick={() => handlePageChange(pageNumber)}
-                    className={`w-8 h-8 rounded text-xs transition-colors ${currentPage === pageNumber
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 text-blue-600 hover:bg-blue-200"
-                      }`}
+                    className={`w-8 h-8 rounded text-xs transition-colors ${
+                      currentPage === pageNumber
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 text-blue-600 hover:bg-blue-200"
+                    }`}
                   >
                     {pageNumber}
                   </button>
@@ -913,10 +940,11 @@ export default function Detail() {
             <button
               onClick={handleNextPage}
               disabled={currentPage === totalPages}
-              className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${currentPage === totalPages
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
+              className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${
+                currentPage === totalPages
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
             >
               Next <span className="ml-1">▶</span>
             </button>

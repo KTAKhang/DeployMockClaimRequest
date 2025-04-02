@@ -11,12 +11,11 @@ import {
   FaCopy,
   FaCheck,
   FaLock,
+  FaReply,
 } from "react-icons/fa";
 import profileImage from "../../../../assets/img/profile.png";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  FETCH_CLAIM_DETAIL_REQUEST,
-} from "../../../../redux/actions/approverClaimActions.js";
+import { FETCH_CLAIM_DETAIL_REQUEST } from "../../../../redux/actions/approverClaimActions.js";
 import Loading from "../../../../components/Loading/Loading.jsx";
 import {
   createCommentRequest,
@@ -30,7 +29,7 @@ import {
   STATUS,
   VIEW_MODE,
   COMMENT_ACTIONS,
-  LOADING_TIMEOUTS
+  LOADING_TIMEOUTS,
 } from "./constants";
 import {
   PAGE_STRINGS,
@@ -40,7 +39,7 @@ import {
   ERROR_STRINGS,
   LOADING_STRINGS,
   REASON_STRINGS,
-  FIELD_LABELS
+  FIELD_LABELS,
 } from "./strings";
 import {
   getStatusColor,
@@ -48,7 +47,7 @@ import {
   formatDate,
   formatTimeAgo,
   formatName,
-  getImageSrc
+  getImageSrc,
 } from "./utils";
 
 export default function AdminClaimDetail() {
@@ -190,7 +189,10 @@ export default function AdminClaimDetail() {
           });
           setLastActionType(null);
           setLastTargetId(null);
-        } else if (lastActionType === COMMENT_ACTIONS.ADD && lastCommentRef.current) {
+        } else if (
+          lastActionType === COMMENT_ACTIONS.ADD &&
+          lastCommentRef.current
+        ) {
           lastCommentRef.current.scrollIntoView({
             behavior: "smooth",
             block: "nearest",
@@ -316,7 +318,8 @@ export default function AdminClaimDetail() {
 
   // Hàm xử lý copy ID
   const handleCopyId = () => {
-    navigator.clipboard.writeText(id)
+    navigator.clipboard
+      .writeText(id)
       .then(() => {
         setIsCopied(true);
         toast.success(TOAST_STRINGS.COPY_SUCCESS);
@@ -330,15 +333,18 @@ export default function AdminClaimDetail() {
   };
 
   // Pagination logic
-  const reversedComments = Array.isArray(comments) ? [...comments].reverse() : [];
+  const reversedComments = Array.isArray(comments)
+    ? [...comments].reverse()
+    : [];
   const currentComments = reversedComments.slice(
     (currentPage - 1) * commentsPerPage,
     currentPage * commentsPerPage
   );
 
-  const totalPages = Array.isArray(comments) && comments.length > 0
-    ? Math.ceil(comments.length / commentsPerPage)
-    : 0;
+  const totalPages =
+    Array.isArray(comments) && comments.length > 0
+      ? Math.ceil(comments.length / commentsPerPage)
+      : 0;
 
   // Pagination handler functions
   const handleNextPage = () => {
@@ -366,6 +372,15 @@ export default function AdminClaimDetail() {
           <FaArrowLeft className="mr-1 sm:mr-2" /> {BUTTON_STRINGS.BACK}
         </button>
         <span className="mx-1 sm:mx-2">|</span>
+        <span>Pages</span>
+        <span className="mx-1 sm:mx-2">&gt;</span>
+        <button
+          className="hover:text-blue-600 transition-colors"
+          onClick={() => navigate("/admin")}
+        >
+          Dashboard
+        </button>
+        <span className="mx-1 sm:mx-2">&gt;</span>
         <button
           className="hover:text-blue-600 transition-colors"
           onClick={() => navigate("/admin/claim-management")}
@@ -373,9 +388,7 @@ export default function AdminClaimDetail() {
           Claim Management
         </button>
         <span className="mx-1 sm:mx-2">&gt;</span>
-        <span className="text-blue-600 font-semibold">
-          Claim Details
-        </span>
+        <span className="text-blue-600 font-semibold">Claim Details</span>
       </div>
 
       {/* Claim Details Card - Giữ nguyên */}
@@ -433,7 +446,9 @@ export default function AdminClaimDetail() {
                     <FaProjectDiagram className="text-blue-600" />
                   </div>
                   <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0 w-full sm:w-auto">
-                    <p className="text-xs text-gray-500">{FIELD_LABELS.PROJECT}</p>
+                    <p className="text-xs text-gray-500">
+                      {FIELD_LABELS.PROJECT}
+                    </p>
                     <p className="font-medium text-gray-800 text-sm">
                       {claim.project?.project_name || "N/A"}
                     </p>
@@ -445,7 +460,9 @@ export default function AdminClaimDetail() {
                     <FaClock className="text-green-600" />
                   </div>
                   <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0 w-full sm:w-auto">
-                    <p className="text-xs text-gray-500">{FIELD_LABELS.WORKING_HOURS}</p>
+                    <p className="text-xs text-gray-500">
+                      {FIELD_LABELS.WORKING_HOURS}
+                    </p>
                     <p className="font-medium text-gray-800 text-sm">
                       {claim.total_no_of_hours
                         ? `${claim.total_no_of_hours} hrs`
@@ -459,10 +476,14 @@ export default function AdminClaimDetail() {
                     <FaCalendarAlt className="text-purple-600" />
                   </div>
                   <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0 w-full sm:w-auto">
-                    <p className="text-xs text-gray-500">{FIELD_LABELS.DURATION}</p>
+                    <p className="text-xs text-gray-500">
+                      {FIELD_LABELS.DURATION}
+                    </p>
                     <p className="font-medium text-gray-800 text-sm">
                       {claim.from && claim.to
-                        ? `From ${formatDate(claim.from)} To ${formatDate(claim.to)}`
+                        ? `From ${formatDate(claim.from)} To ${formatDate(
+                            claim.to
+                          )}`
                         : "N/A"}
                     </p>
                   </div>
@@ -472,15 +493,20 @@ export default function AdminClaimDetail() {
                   <div
                     className={`flex items-center justify-center w-8 h-8 ${getStatusColor(
                       claim.status?.name
-                    ).replace("bg-", "bg-").replace("500", "100")} rounded-full`}
+                    )
+                      .replace("bg-", "bg-")
+                      .replace("500", "100")} rounded-full`}
                   >
                     <FaClipboard
                       className={getStatusColor(claim.status?.name)
-                        .replace("bg-", "text-").replace("500", "600")}
+                        .replace("bg-", "text-")
+                        .replace("500", "600")}
                     />
                   </div>
                   <div className="ml-0 sm:ml-2 text-center sm:text-left mt-1 sm:mt-0 w-full sm:w-auto">
-                    <p className="text-xs text-gray-500">{FIELD_LABELS.STATUS}</p>
+                    <p className="text-xs text-gray-500">
+                      {FIELD_LABELS.STATUS}
+                    </p>
                     <p
                       className={`font-semibold text-sm ${getStatusTextColor(
                         claim.status?.name
@@ -494,7 +520,6 @@ export default function AdminClaimDetail() {
             </div>
           </div>
         </div>
-
 
         <div className="p-3 sm:p-6">
           <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center">
@@ -529,14 +554,11 @@ export default function AdminClaimDetail() {
             </div>
           </div>
         </div>
-
-        {/* Action Buttons */}
       </div>
 
-
-      <div className="bg-white rounded-xl shadow-md overflow-hidden mt-6">
+      <div className="bg-white overflow-hidden mt-6">
         {/* Header */}
-        <div className="border-b rounded border-gray-200 bg-gray-50 px-4 py-3">
+        <div className="border-b border-gray-200 bg-gray-50 px-4 py-3">
           <h3 className="text-base font-medium text-gray-700 flex items-center">
             <FaComment className="mr-2 text-gray-500" />
             {SECTION_HEADERS.COMMENTS_HISTORY}
@@ -549,25 +571,30 @@ export default function AdminClaimDetail() {
         <div className="flex flex-col">
           {/* Comment input area với thông báo khóa */}
           <div className="p-4 bg-gray-50 border-b border-gray-200">
-            {claim.status?.name === "Reject" || claim.status?.name === "Cancel" || claim.status?.name === "Draft" ? (
+            {claim.status?.name === "Reject" ||
+            claim.status?.name === "Cancel" ||
+            claim.status?.name === "Draft" ? (
               <div className="flex items-center justify-center p-3 border bg-white rounded-lg">
                 <FaLock className="text-gray-400 mr-2" />
                 <span className="text-gray-500 text-sm">
-                  Comments are not available for {claim.status?.name} claims
+                  Comments are not available for {claim.status?.name} claims.
                 </span>
               </div>
             ) : (
               <div className="flex items-center justify-center p-3 border bg-white rounded-lg">
                 <FaLock className="text-gray-400 mr-2" />
                 <span className="text-gray-500 text-sm">
-                  Comments are not available in admin view
+                  Comments are not available in admin view.
                 </span>
               </div>
             )}
           </div>
 
           {/* Comments List */}
-          <div ref={commentsContainerRef} className="flex-1 overflow-y-auto p-4">
+          <div
+            ref={commentsContainerRef}
+            className="flex-1 overflow-y-auto p-4"
+          >
             {initialCommentsLoading || emptyCommentsLoading ? (
               <div className="flex justify-center items-center py-40">
                 <Loading
@@ -585,7 +612,9 @@ export default function AdminClaimDetail() {
                     key={comment._id || `comment-${index}`}
                     className="comment-thread group border-b border-gray-100 pb-6 mb-6 last:border-0"
                     ref={
-                      index === currentComments.length - 1 ? lastCommentRef : null
+                      index === currentComments.length - 1
+                        ? lastCommentRef
+                        : null
                     }
                     id={`comment-${comment._id}`}
                   >
@@ -634,7 +663,8 @@ export default function AdminClaimDetail() {
                                 )
                               }
                             >
-                              <span className="mr-1">↩️</span> {BUTTON_STRINGS.REPLY}
+                              <FaReply className="mr-1" />{" "}
+                              {BUTTON_STRINGS.REPLY}
                             </button>
                           )}
                         </div>
@@ -693,8 +723,12 @@ export default function AdminClaimDetail() {
             ) : (
               <div className="flex flex-col items-center justify-center py-32 text-gray-500">
                 <FaComment className="text-gray-300 text-4xl mb-3" />
-                <p className="font-medium text-base">{COMMENT_STRINGS.NO_COMMENTS}</p>
-                <p className="text-sm text-gray-400 mt-1">{COMMENT_STRINGS.BE_FIRST}</p>
+                <p className="font-medium text-base">
+                  {COMMENT_STRINGS.NO_COMMENTS}
+                </p>
+                <p className="text-sm text-gray-400 mt-1">
+                  {COMMENT_STRINGS.BE_FIRST}
+                </p>
               </div>
             )}
           </div>
@@ -705,10 +739,11 @@ export default function AdminClaimDetail() {
               <button
                 onClick={handlePrevPage}
                 disabled={currentPage === 1}
-                className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${currentPage === 1
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${
+                  currentPage === 1
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
               >
                 <span className="mr-1">◀</span> Previous
               </button>
@@ -720,10 +755,11 @@ export default function AdminClaimDetail() {
                     <button
                       key={pageNumber}
                       onClick={() => handlePageChange(pageNumber)}
-                      className={`w-8 h-8 rounded text-xs transition-colors ${currentPage === pageNumber
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-100 text-blue-600 hover:bg-blue-200"
-                        }`}
+                      className={`w-8 h-8 rounded text-xs transition-colors ${
+                        currentPage === pageNumber
+                          ? "bg-blue-500 text-white"
+                          : "bg-gray-100 text-blue-600 hover:bg-blue-200"
+                      }`}
                     >
                       {pageNumber}
                     </button>
@@ -734,10 +770,11 @@ export default function AdminClaimDetail() {
               <button
                 onClick={handleNextPage}
                 disabled={currentPage === totalPages}
-                className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${currentPage === totalPages
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${
+                  currentPage === totalPages
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
               >
                 Next <span className="ml-1">▶</span>
               </button>

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getStaffAll } from "../../../redux/actions/staffActions";
 import { createProject } from "../../../redux/actions/projectActions";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 
 export default function PopupProjectInfo({
   initialData,
@@ -13,13 +13,15 @@ export default function PopupProjectInfo({
 }) {
   const dispatch = useDispatch();
   const { staffAll } = useSelector((state) => state.staff);
-  const { loading: projectLoading, error: projectError } = useSelector((state) => ({
-    loading: state.project?.loading || false,
-    error: state.project?.error || null
-  }));
+  const { loading: projectLoading, error: projectError } = useSelector(
+    (state) => ({
+      loading: state.project?.loading || false,
+      error: state.project?.error || null,
+    })
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [staffList, setStaffList] = useState([]);
-  
+
   // Fetch staff list khi component mount
   useEffect(() => {
     const fetchStaff = async () => {
@@ -40,7 +42,7 @@ export default function PopupProjectInfo({
   // Cập nhật staffList khi Redux state thay đổi
   useEffect(() => {
     console.log("staffAll changed:", staffAll); // Debug log
-    
+
     if (staffAll?.data) {
       console.log("Setting staff list:", staffAll.data);
       setStaffList(staffAll.data);
@@ -53,7 +55,7 @@ export default function PopupProjectInfo({
       project_name: "",
       duration: {
         from: "",
-        to: ""
+        to: "",
       },
       pm: "",
       qa: "",
@@ -61,7 +63,7 @@ export default function PopupProjectInfo({
       ba: [],
       developers: [],
       testers: [],
-      technical_consultancy: []
+      technical_consultancy: [],
     }
   );
 
@@ -69,14 +71,18 @@ export default function PopupProjectInfo({
   useEffect(() => {
     if (initialData) {
       console.log("Initializing form with data:", initialData);
-      
+
       // Create a formatted version of initialData
       const formattedData = {
         _id: initialData._id || "",
         project_name: initialData.project_name || "",
         duration: {
-          from: initialData.duration?.from ? initialData.duration.from.split('T')[0] : "",
-          to: initialData.duration?.to ? initialData.duration.to.split('T')[0] : ""
+          from: initialData.duration?.from
+            ? initialData.duration.from.split("T")[0]
+            : "",
+          to: initialData.duration?.to
+            ? initialData.duration.to.split("T")[0]
+            : "",
         },
         // Handle staff fields - convert objects to IDs if needed
         pm: initialData.pm?._id || initialData.pm || "",
@@ -85,9 +91,11 @@ export default function PopupProjectInfo({
         ba: formatStaffArray(initialData.ba),
         developers: formatStaffArray(initialData.developers),
         testers: formatStaffArray(initialData.testers),
-        technical_consultancy: formatStaffArray(initialData.technical_consultancy)
+        technical_consultancy: formatStaffArray(
+          initialData.technical_consultancy
+        ),
       };
-      
+
       console.log("Formatted form data:", formattedData);
       setForm(formattedData);
     }
@@ -101,80 +109,91 @@ export default function PopupProjectInfo({
       return staffArray._id ? [staffArray._id] : [];
     }
     // If it's already an array, extract IDs
-    return staffArray.map(staff => staff._id || staff);
+    return staffArray.map((staff) => staff._id || staff);
   };
 
   // Thêm hàm để kiểm tra xem một staff đã được chọn vào vị trí nào chưa
   const isStaffSelectedElsewhere = (staffId, currentFieldName) => {
     // Danh sách các trường cần kiểm tra
     const fieldsToCheck = [
-      'pm', 'qa', 'technical_lead', 'ba', 'developers', 'testers', 'technical_consultancy'
+      "pm",
+      "qa",
+      "technical_lead",
+      "ba",
+      "developers",
+      "testers",
+      "technical_consultancy",
     ];
-    
+
     // Kiểm tra từng trường
     for (const field of fieldsToCheck) {
       // Bỏ qua trường hiện tại
       if (field === currentFieldName) continue;
-      
+
       // Kiểm tra nếu là trường đơn (pm, qa)
-      if (field === 'pm' || field === 'qa') {
+      if (field === "pm" || field === "qa") {
         if (form[field] === staffId) return true;
-      } 
+      }
       // Kiểm tra nếu là trường mảng (technical_lead, ba, developers, ...)
       else if (Array.isArray(form[field]) && form[field].includes(staffId)) {
         return true;
       }
     }
-    
+
     return false;
   };
 
   // Cập nhật hàm handleCheckboxSelect để kiểm tra trước khi chọn
   const handleCheckboxSelect = (fieldName, staffId) => {
-    setForm(prev => {
-      const currentSelected = Array.isArray(prev[fieldName]) ? prev[fieldName] : [];
+    setForm((prev) => {
+      const currentSelected = Array.isArray(prev[fieldName])
+        ? prev[fieldName]
+        : [];
       const isSelected = currentSelected.includes(staffId);
-      
+
       // Nếu đang bỏ chọn, luôn cho phép
       if (isSelected) {
-        const newValue = currentSelected.filter(id => id !== staffId);
+        const newValue = currentSelected.filter((id) => id !== staffId);
         // Nếu mảng rỗng, không xóa lỗi
         if (newValue.length === 0) {
-          setErrors(prev => ({
+          setErrors((prev) => ({
             ...prev,
-            [fieldName]: "At least one staff member is required"
+            [fieldName]: "At least one staff member is required",
           }));
         } else {
           // Xóa lỗi nếu vẫn còn staff được chọn
-          setErrors(prev => ({
+          setErrors((prev) => ({
             ...prev,
-            [fieldName]: ""
+            [fieldName]: "",
           }));
         }
         return {
           ...prev,
-          [fieldName]: newValue
+          [fieldName]: newValue,
         };
       }
-      
+
       // Nếu đang chọn, kiểm tra xem staff đã được chọn ở vị trí khác chưa
       if (isStaffSelectedElsewhere(staffId, fieldName)) {
-        toast.warning('This staff is already assigned to another role. Please remove them from that role first.', {
-          position: "top-right",
-          autoClose: 3000
-        });
+        toast.warning(
+          "This staff is already assigned to another role. Please remove them from that role first.",
+          {
+            position: "top-right",
+            autoClose: 3000,
+          }
+        );
         return prev;
       }
-      
+
       // Xóa lỗi khi thêm staff
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [fieldName]: ""
+        [fieldName]: "",
       }));
-      
+
       return {
         ...prev,
-        [fieldName]: [...currentSelected, staffId]
+        [fieldName]: [...currentSelected, staffId],
       };
     });
   };
@@ -184,7 +203,7 @@ export default function PopupProjectInfo({
     project_name: "",
     duration: {
       from: "",
-      to: ""
+      to: "",
     },
     pm: "",
     qa: "",
@@ -192,82 +211,82 @@ export default function PopupProjectInfo({
     ba: "",
     developers: "",
     testers: "",
-    technical_consultancy: ""
+    technical_consultancy: "",
   });
 
   // Cập nhật hàm handleChange để xóa lỗi khi user nhập
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Xử lý đặc biệt cho ngày tháng
     if (name === "from" || name === "to") {
       if (name === "to" && form.duration?.from && value) {
         if (value < form.duration.from) {
-          setErrors(prev => ({
+          setErrors((prev) => ({
             ...prev,
             duration: {
               ...prev.duration,
-              to: "End date must be after start date"
-            }
+              to: "End date must be after start date",
+            },
           }));
           return;
         }
       }
-      
+
       if (name === "from" && form.duration?.to && value) {
         if (value > form.duration.to) {
-          setErrors(prev => ({
+          setErrors((prev) => ({
             ...prev,
             duration: {
               ...prev.duration,
-              from: "Start date must be before end date"
-            }
+              from: "Start date must be before end date",
+            },
           }));
           return;
         }
       }
-      
+
       setForm({
         ...form,
         duration: {
-          ...form.duration || {},
-          [name]: value
-        }
+          ...(form.duration || {}),
+          [name]: value,
+        },
       });
 
       // Clear error
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
         duration: {
           ...prev.duration,
-          [name]: ""
-        }
+          [name]: "",
+        },
       }));
       return;
     }
-    
+
     // Xử lý các trường khác
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
 
     // Clear error
-    setErrors(prev => ({
+    setErrors((prev) => ({
       ...prev,
-      [name]: ""
+      [name]: "",
     }));
   };
 
   const handleMultiSelect = (e, fieldName) => {
     const selectedValues = Array.from(
-      e.target.selectedOptions, 
-      option => option.value
+      e.target.selectedOptions,
+      (option) => option.value
     );
-    
-    setForm(prev => ({
+
+    setForm((prev) => ({
       ...prev,
-      [fieldName]: selectedValues
+      [fieldName]: selectedValues,
     }));
   };
 
@@ -277,7 +296,7 @@ export default function PopupProjectInfo({
       project_name: "",
       duration: {
         from: "",
-        to: ""
+        to: "",
       },
       pm: "",
       qa: "",
@@ -285,7 +304,7 @@ export default function PopupProjectInfo({
       ba: "",
       developers: "",
       testers: "",
-      technical_consultancy: ""
+      technical_consultancy: "",
     };
 
     let isValid = true;
@@ -305,7 +324,11 @@ export default function PopupProjectInfo({
       newErrors.duration.to = "End date is required";
       isValid = false;
     }
-    if (form.duration?.from && form.duration?.to && form.duration.from > form.duration.to) {
+    if (
+      form.duration?.from &&
+      form.duration?.to &&
+      form.duration.from > form.duration.to
+    ) {
       newErrors.duration.to = "End date must be after start date";
       isValid = false;
     }
@@ -340,7 +363,8 @@ export default function PopupProjectInfo({
       isValid = false;
     }
     if (!form.technical_consultancy?.length) {
-      newErrors.technical_consultancy = "At least one Technical Consultant is required";
+      newErrors.technical_consultancy =
+        "At least one Technical Consultant is required";
       isValid = false;
     }
 
@@ -357,19 +381,19 @@ export default function PopupProjectInfo({
       // Format data và loại bỏ _id
       const formattedData = formatFormData(form);
       delete formattedData._id;
-      
-      console.log('Submitting project data:', formattedData);
+
+      console.log("Submitting project data:", formattedData);
 
       // Dispatch action và để saga xử lý
       dispatch(createProject(formattedData));
-      
+
       // Đóng popup ngay sau khi gửi request
       onClose();
     } catch (error) {
-      console.error('Error creating project:', error);
-      toast.error('Failed to create project. Please try again.', {
+      console.error("Error creating project:", error);
+      toast.error("Failed to create project. Please try again.", {
         position: "top-right",
-        autoClose: 5000
+        autoClose: 5000,
       });
     }
   };
@@ -380,41 +404,41 @@ export default function PopupProjectInfo({
     }
     try {
       const formattedData = formatFormData(form);
-      
+
       // Đảm bảo _id được giữ nguyên
       if (!formattedData._id && form._id) {
         formattedData._id = form._id;
       }
-      
-      console.log('Sending update data to BE:', formattedData);
-      console.log('Project ID:', formattedData._id);
-      
+
+      console.log("Sending update data to BE:", formattedData);
+      console.log("Project ID:", formattedData._id);
+
       if (!formattedData._id) {
         toast.error("Cannot update: Missing project ID");
         return;
       }
-      
+
       onUpdate?.(formattedData);
-    onClose();
+      onClose();
     } catch (error) {
-      console.error('Error updating project:', error);
-      toast.error('Failed to update project. Please try again.');
+      console.error("Error updating project:", error);
+      toast.error("Failed to update project. Please try again.");
     }
   };
 
   // Thêm hàm clear selection
   const handleClearSelection = (fieldName) => {
     // Check if it's a single-select field (pm, qa) or multi-select field
-    if (fieldName === 'pm' || fieldName === 'qa') {
-      setForm(prev => ({
+    if (fieldName === "pm" || fieldName === "qa") {
+      setForm((prev) => ({
         ...prev,
-        [fieldName]: ""
+        [fieldName]: "",
       }));
     } else {
       // For multi-select fields (arrays)
-      setForm(prev => ({
+      setForm((prev) => ({
         ...prev,
-        [fieldName]: []
+        [fieldName]: [],
       }));
     }
   };
@@ -432,9 +456,11 @@ export default function PopupProjectInfo({
     const selectedCount = form[fieldName]?.length || 0;
 
     return (
-      <div className={`bg-white rounded-lg border ${
-        errors[fieldName] ? "border-red-500" : "border-gray-300"
-      }`}>
+      <div
+        className={`bg-white rounded-lg border ${
+          errors[fieldName] ? "border-red-500" : "border-gray-300"
+        }`}
+      >
         {/* Header với số lượng và nút clear */}
         <div className="flex items-center justify-between p-2 border-b bg-gray-50">
           <span className="text-sm text-gray-600">
@@ -445,8 +471,18 @@ export default function PopupProjectInfo({
               onClick={() => handleClearSelection(fieldName)}
               className="text-sm text-red-600 hover:text-red-700 flex items-center"
             >
-              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              <svg
+                className="w-4 h-4 mr-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
               </svg>
               Clear
             </button>
@@ -455,15 +491,16 @@ export default function PopupProjectInfo({
 
         {/* Danh sách staff */}
         <div className="max-h-48 overflow-y-auto p-2">
-          {staffList.map(staff => {
+          {staffList.map((staff) => {
             const isSelected = form[fieldName]?.includes(staff._id);
-            const isDisabled = !isSelected && isStaffSelectedElsewhere(staff._id, fieldName);
-            
+            const isDisabled =
+              !isSelected && isStaffSelectedElsewhere(staff._id, fieldName);
+
             return (
-              <div 
-                key={staff._id} 
+              <div
+                key={staff._id}
                 className={`flex items-center gap-2 p-1.5 rounded ${
-                  isDisabled ? 'opacity-50 bg-gray-100' : 'hover:bg-gray-50'
+                  isDisabled ? "opacity-50 bg-gray-100" : "hover:bg-gray-50"
                 }`}
               >
                 <input
@@ -473,19 +510,27 @@ export default function PopupProjectInfo({
                   onChange={() => handleCheckboxSelect(fieldName, staff._id)}
                   disabled={isDisabled}
                   className={`w-4 h-4 rounded border-gray-300 focus:ring-blue-500 ${
-                    isDisabled ? 'cursor-not-allowed' : 'text-blue-600'
+                    isDisabled ? "cursor-not-allowed" : "text-blue-600"
                   }`}
                 />
-                <label 
+                <label
                   htmlFor={`${fieldName}-${staff._id}`}
                   className={`flex-1 cursor-pointer text-sm ${
-                    isDisabled ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:text-gray-900'
+                    isDisabled
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-gray-700 hover:text-gray-900"
                   }`}
-                  title={isDisabled ? "This staff is already assigned to another role" : ""}
+                  title={
+                    isDisabled
+                      ? "This staff is already assigned to another role"
+                      : ""
+                  }
                 >
                   {staff.user_name}
                   {isDisabled && (
-                    <span className="ml-2 text-xs text-gray-400">(already in another role)</span>
+                    <span className="ml-2 text-xs text-gray-400">
+                      (already in another role)
+                    </span>
                   )}
                 </label>
               </div>
@@ -506,7 +551,7 @@ export default function PopupProjectInfo({
     console.log("Current state:", {
       isLoading,
       staffListLength: staffList.length,
-      formData: form
+      formData: form,
     });
   }, [isLoading, staffList, form]);
 
@@ -525,18 +570,18 @@ export default function PopupProjectInfo({
       return <option value="">No staff available</option>;
     }
 
-    return staffList.map(user => {
-      const isDisabled = isStaffSelectedElsewhere(user._id, '');
-      
+    return staffList.map((user) => {
+      const isDisabled = isStaffSelectedElsewhere(user._id, "");
+
       return (
-        <option 
-          key={user._id} 
+        <option
+          key={user._id}
           value={user._id}
           disabled={isDisabled}
-          className={isDisabled ? 'text-gray-400' : ''}
+          className={isDisabled ? "text-gray-400" : ""}
         >
-          {user.user_name || 'Unnamed Staff'} 
-          {isDisabled ? ' (assigned elsewhere)' : ''}
+          {user.user_name || "Unnamed Staff"}
+          {isDisabled ? " (assigned elsewhere)" : ""}
         </option>
       );
     });
@@ -559,18 +604,20 @@ export default function PopupProjectInfo({
           } shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 pr-8`}
         >
           <option value="">Select {label}</option>
-          {staffList.map(user => {
-            const isDisabled = user._id !== form[fieldName] && isStaffSelectedElsewhere(user._id, fieldName);
-            
+          {staffList.map((user) => {
+            const isDisabled =
+              user._id !== form[fieldName] &&
+              isStaffSelectedElsewhere(user._id, fieldName);
+
             return (
-              <option 
-                key={user._id} 
+              <option
+                key={user._id}
                 value={user._id}
                 disabled={isDisabled}
-                className={isDisabled ? 'text-gray-400' : ''}
+                className={isDisabled ? "text-gray-400" : ""}
               >
-                {user.user_name || 'Unnamed Staff'} 
-                {isDisabled ? ' (assigned elsewhere)' : ''}
+                {user.user_name || "Unnamed Staff"}
+                {isDisabled ? " (assigned elsewhere)" : ""}
               </option>
             );
           })}
@@ -580,8 +627,18 @@ export default function PopupProjectInfo({
             onClick={() => handleClearSelection(fieldName)}
             className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         )}
@@ -595,27 +652,31 @@ export default function PopupProjectInfo({
   // Thêm hàm format data
   const formatFormData = (data) => {
     // Validate input data
-    if (!data) throw new Error('No data provided');
+    if (!data) throw new Error("No data provided");
 
     // Format data
     const formatted = {
       _id: data._id, // Đảm bảo _id được giữ nguyên
-      project_name: data.project_name?.trim() || '',
+      project_name: data.project_name?.trim() || "",
       duration: {
-        from: data.duration?.from || '',
-        to: data.duration?.to || ''
+        from: data.duration?.from || "",
+        to: data.duration?.to || "",
       },
-      pm: data.pm || '',
-      qa: data.qa || '',
-      technical_lead: Array.isArray(data.technical_lead) ? data.technical_lead : [],
+      pm: data.pm || "",
+      qa: data.qa || "",
+      technical_lead: Array.isArray(data.technical_lead)
+        ? data.technical_lead
+        : [],
       ba: Array.isArray(data.ba) ? data.ba : [],
       developers: Array.isArray(data.developers) ? data.developers : [],
       testers: Array.isArray(data.testers) ? data.testers : [],
-      technical_consultancy: Array.isArray(data.technical_consultancy) ? data.technical_consultancy : []
+      technical_consultancy: Array.isArray(data.technical_consultancy)
+        ? data.technical_consultancy
+        : [],
     };
 
     // Log formatted data
-    console.log('Formatted project data:', formatted);
+    console.log("Formatted project data:", formatted);
 
     return formatted;
   };
@@ -625,18 +686,22 @@ export default function PopupProjectInfo({
     if (projectError) {
       toast.error(`Failed to create project: ${projectError}`, {
         position: "top-right",
-        autoClose: 5000
+        autoClose: 5000,
       });
     }
   }, [projectError]);
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl shadow-2xl p-8 w-[900px] max-h-[90vh] overflow-y-auto relative">
         {/* Header */}
         <div className="border-b pb-4 mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">Project Information</h2>
-          <p className="text-gray-500 text-sm mt-1">Fill in the project details and assign team members</p>
+          <h2 className="text-2xl font-bold text-gray-800">
+            Project Information
+          </h2>
+          <p className="text-gray-500 text-sm mt-1">
+            Fill in the project details and assign team members
+          </p>
         </div>
 
         {/* Loading State */}
@@ -672,7 +737,9 @@ export default function PopupProjectInfo({
         <div className="grid grid-cols-2 gap-x-8 gap-y-6">
           {/* Project Basic Info Section */}
           <div className="col-span-2 bg-gray-50 p-4 rounded-lg mb-4">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">Basic Information</h3>
+            <h3 className="text-lg font-semibold text-gray-700 mb-4">
+              Basic Information
+            </h3>
             <div className="grid grid-cols-2 gap-6">
               {/* Project Name */}
               <div className="space-y-2">
@@ -691,7 +758,9 @@ export default function PopupProjectInfo({
                   } shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
                 />
                 {errors.project_name && (
-                  <span className="text-red-500 text-xs">{errors.project_name}</span>
+                  <span className="text-red-500 text-xs">
+                    {errors.project_name}
+                  </span>
                 )}
               </div>
 
@@ -708,11 +777,15 @@ export default function PopupProjectInfo({
                     onChange={handleChange}
                     max={form.duration?.to || ""}
                     className={`w-full rounded-lg border ${
-                      errors.duration?.from ? "border-red-500" : "border-gray-300"
+                      errors.duration?.from
+                        ? "border-red-500"
+                        : "border-gray-300"
                     } shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
                   />
                   {errors.duration?.from && (
-                    <span className="text-red-500 text-xs">{errors.duration.from}</span>
+                    <span className="text-red-500 text-xs">
+                      {errors.duration.from}
+                    </span>
                   )}
                 </div>
                 <div className="space-y-2">
@@ -730,7 +803,9 @@ export default function PopupProjectInfo({
                     } shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
                   />
                   {errors.duration?.to && (
-                    <span className="text-red-500 text-xs">{errors.duration.to}</span>
+                    <span className="text-red-500 text-xs">
+                      {errors.duration.to}
+                    </span>
                   )}
                 </div>
               </div>
@@ -739,7 +814,9 @@ export default function PopupProjectInfo({
 
           {/* Project Leaders Section */}
           <div className="col-span-2 bg-gray-50 p-4 rounded-lg mb-4">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">Project Leaders</h3>
+            <h3 className="text-lg font-semibold text-gray-700 mb-4">
+              Project Leaders
+            </h3>
             <div className="grid grid-cols-2 gap-6">
               {renderSingleSelect("pm", "Project Manager")}
               {renderSingleSelect("qa", "QA Lead")}
@@ -748,7 +825,9 @@ export default function PopupProjectInfo({
 
           {/* Team Members Section */}
           <div className="col-span-2 bg-gray-50 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">Team Members</h3>
+            <h3 className="text-lg font-semibold text-gray-700 mb-4">
+              Team Members
+            </h3>
             <div className="grid grid-cols-2 gap-6">
               {/* Technical Lead */}
               <div className="space-y-2">
@@ -818,7 +897,7 @@ export default function PopupProjectInfo({
               disabled={isLoading || projectLoading}
               className="px-6 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
-              {projectLoading ? 'Updating...' : 'Update Project'}
+              {projectLoading ? "Updating..." : "Update Project"}
             </button>
           )}
           {onAdd && (
@@ -833,7 +912,7 @@ export default function PopupProjectInfo({
                   Creating...
                 </div>
               ) : (
-                'Create Project'
+                "Create Project"
               )}
             </button>
           )}

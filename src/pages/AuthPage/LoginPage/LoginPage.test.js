@@ -1,54 +1,84 @@
+import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { Provider } from "react-redux";
+import configureStore from "redux-mock-store";
 import { BrowserRouter } from "react-router-dom";
-import LoginPage from "./LoginPage"; // Đảm bảo đường dẫn chính xác đến file LoginPage
-import store from "../../../redux/store"; // Đảm bảo bạn có store redux đúng
+import LoginPage from "./LoginPage";
+import { loginRequest } from "../../../redux/actions/authActions";
+import { MESSAGES } from "./string";
+import { validateForm, handleRememberMeChange } from "./utils";
+import { ROLE_REDIRECTS } from "./const";
+import { toast } from "react-toastify";
+
+jest.mock("../../../redux/actions/authActions", () => ({
+  loginRequest: jest.fn(() => ({ type: "LOGIN_REQUEST" })),
+}));
+
+jest.mock("./utils", () => ({
+  validateForm: jest.fn(),
+  handleRememberMeChange: jest.fn(),
+}));
 
 jest.mock("react-toastify", () => ({
   toast: {
+    error: jest.fn(),
     dismiss: jest.fn(),
-    success: jest.fn(),
   },
 }));
 
-import { useNavigate } from "react-router-dom";
-jest.mock("react-router-dom", () => ({
-  ...jest.requireActual("react-router-dom"),
-  useNavigate: jest.fn(),
+jest.mock("./const", () => ({
+  BACKGROUND_IMAGE_URL: "test-background-url.jpg",
+  ROLE_REDIRECTS: {
+    ADMIN: "/admin",
+    USER: "/dashboard",
+  },
 }));
 
-describe("LoginPage", () => {
-  test("click on 'Forgot Password' redirects to forgot-password page", async () => {
-    const navigateMock = jest.fn(); // Tạo mock cho navigate
+jest.mock("./string", () => ({
+  MESSAGES: {
+    SIGN_IN: "SIGN IN",
+    SIGNING_IN: "SIGNING IN...",
+    FORGOT_PASSWORD: "Forgot Password?",
+    PLEASE_ENTER_ACCOUNT: "Please enter your email and password",
+  },
+}));
 
-    // Sử dụng mock navigate
-    useNavigate.mockReturnValue(navigateMock);
+const mockNavigate = jest.fn();
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: () => mockNavigate,
+}));
 
-    render(
-      <Provider store={store}>
-        <BrowserRouter>
-          <LoginPage />
-        </BrowserRouter>
-      </Provider>
-    );
+const mockStore = configureStore([]);
 
-    // Tìm nút "Forgot Password" và mô phỏng click vào đó
-    const forgotPasswordButton = screen.getByText(/forgot password/i);
+describe("LoginPage Component", () => {
+  let store;
 
-    // Click vào nút "Forgot Password"
-    fireEvent.click(forgotPasswordButton);
+  beforeEach(() => {
+    jest.clearAllMocks();
 
-    // Kiểm tra xem navigate có được gọi với đường dẫn đúng không
-    await waitFor(() => {
-      expect(navigateMock).toHaveBeenCalledWith("/forgot-password");
+    Object.defineProperty(window, "localStorage", {
+      value: {
+        getItem: jest.fn(),
+        setItem: jest.fn(),
+        removeItem: jest.fn(),
+      },
+      writable: true,
     });
+
+    store = mockStore({
+      auth: {
+        loading: false,
+        error: null,
+        token: null,
+        role: null,
+      },
+    });
+
+    validateForm.mockImplementation(() => false);
   });
 
-  // Các test khác vẫn giữ nguyên ở đây
-});
-
-describe("LoginPage", () => {
-  test("renders login form correctly", () => {
+  it("clears all toasts when component mounts", () => {
     render(
       <Provider store={store}>
         <BrowserRouter>
@@ -57,14 +87,12 @@ describe("LoginPage", () => {
       </Provider>
     );
 
-    // Kiểm tra các phần tử trong form
-    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-    expect(screen.getByText(/sign in/i)).toBeInTheDocument();
-    expect(screen.getByText(/forgot password/i)).toBeInTheDocument();
+    expect(toast.dismiss).toHaveBeenCalled();
   });
 
-  test("submit button is disabled when form is invalid", () => {
+  it("disables login button when form is invalid", () => {
+    validateForm.mockImplementation(() => false);
+
     render(
       <Provider store={store}>
         <BrowserRouter>
@@ -73,103 +101,211 @@ describe("LoginPage", () => {
       </Provider>
     );
 
-    // Kiểm tra khi email và password chưa nhập
-    expect(screen.getByRole("button", { name: /sign in/i })).toBeDisabled();
+    const loginButton = screen.getByRole("button", { name: MESSAGES.SIGN_IN });
+    expect(loginButton).toBeDisabled();
+    expect(loginButton).toHaveClass("bg-gray-400");
+    expect(loginButton).toHaveClass("cursor-not-allowed");
+  });
 
-    // Nhập email và password nhưng không submit
-    fireEvent.change(screen.getByLabelText(/email/i), {
+  it("enables login button when form is valid", () => {
+    validateForm.mockImplementation(() => true);
+
+    render(
+      <Provider store={store}>
+        <BrowserRouter>
+          <LoginPage />
+        </BrowserRouter>
+      </Provider>
+    );
+
+    const loginButton = screen.getByRole("button", { name: MESSAGES.SIGN_IN });
+    expect(loginButton).not.toBeDisabled();
+    expect(loginButton).toHaveClass("bg-blue-500");
+    expect(loginButton).not.toHaveClass("cursor-not-allowed");
+  });
+
+  it("shows loading state when loading is true", () => {
+    validateForm.mockImplementation(() => true);
+
+    store = mockStore({
+      auth: {
+        loading: true,
+        error: null,
+        token: null,
+        role: null,
+      },
+    });
+
+    render(
+      <Provider store={store}>
+        <BrowserRouter>
+          <LoginPage />
+        </BrowserRouter>
+      </Provider>
+    );
+
+    expect(screen.getByText(MESSAGES.SIGNING_IN)).toBeInTheDocument();
+  });
+
+  it("dispatches loginRequest when form is submitted with valid inputs", () => {
+    validateForm.mockImplementation(() => true);
+
+    render(
+      <Provider store={store}>
+        <BrowserRouter>
+          <LoginPage />
+        </BrowserRouter>
+      </Provider>
+    );
+
+    fireEvent.change(screen.getByLabelText(/Email/i), {
       target: { value: "test@example.com" },
     });
-    expect(screen.getByRole("button", { name: /sign in/i })).toBeDisabled();
-
-    fireEvent.change(screen.getByLabelText(/password/i), {
-      target: { value: "123456" },
-    });
-    expect(screen.getByRole("button", { name: /sign in/i })).toBeEnabled();
-  });
-
-  test("shows error message when login fails", async () => {
-    render(
-      <Provider store={store}>
-        <BrowserRouter>
-          <LoginPage />
-        </BrowserRouter>
-      </Provider>
-    );
-
-    // Mô phỏng một lỗi từ redux
-    fireEvent.change(screen.getByLabelText(/email/i), {
-      target: { value: "test@example.com" },
-    });
-    fireEvent.change(screen.getByLabelText(/password/i), {
-      target: { value: "wrongpassword" },
-    });
-
-    fireEvent.click(screen.getByRole("button", { name: /sign in/i }));
-
-    // Mô phỏng hành động dispatch loginRequest và tạo response lỗi
-    await waitFor(() => {
-      expect(screen.getByText(/account does not exist/i)).toBeInTheDocument(); // Xác định thông báo lỗi
-    });
-  });
-
-  // test("redirects to correct page based on role", async () => {
-  //   render(
-  //     <Provider store={store}>
-  //       <BrowserRouter>
-  //         <LoginPage />
-  //       </BrowserRouter>
-  //     </Provider>
-  //   );
-
-  //   // Mô phỏng login thành công với token và role
-  //   fireEvent.change(screen.getByLabelText(/email/i), {
-  //     target: { value: "admin@example.com" },
-  //   });
-  //   fireEvent.change(screen.getByLabelText(/password/i), {
-  //     target: { value: "adminpassword" },
-  //   });
-
-  //   fireEvent.click(screen.getByRole("button", { name: /sign in/i }));
-
-  //   // Giả lập action redux dispatch và response
-  //   await waitFor(() => {
-  //     expect(window.location.pathname).toBe("/admin");
-  //   });
-  // });
-
-  test("remembers user when 'remember me' is checked", () => {
-    window.confirm = jest.fn().mockReturnValue(true);
-    render(
-      <Provider store={store}>
-        <BrowserRouter>
-          <LoginPage />
-        </BrowserRouter>
-      </Provider>
-    );
-
-    fireEvent.change(screen.getByLabelText(/email/i), {
-      target: { value: "test@example.com" },
-    });
-    fireEvent.change(screen.getByLabelText(/password/i), {
+    fireEvent.change(screen.getByLabelText(/Password/i), {
       target: { value: "password123" },
     });
 
-    // Tìm checkbox "Remember me" và click vào đó
-    const rememberMeCheckbox = screen.getByLabelText(/remember me/i);
+    fireEvent.submit(screen.getByRole("button", { name: MESSAGES.SIGN_IN }));
 
-    // Kiểm tra checkbox trước khi nhấp
-    expect(rememberMeCheckbox).not.toBeChecked();
+    expect(loginRequest).toHaveBeenCalledWith({
+      email: "test@example.com",
+      password: "password123",
+    });
+  });
 
-    // Click vào checkbox "Remember me"
-    fireEvent.click(rememberMeCheckbox);
+  it("shows error toast when form is submitted with invalid inputs", () => {
+    validateForm.mockImplementation(() => false);
 
-    // Kiểm tra nếu confirm đã được gọi
-    expect(window.confirm).toHaveBeenCalledWith(
-      "Are you sure to save your account?"
+    render(
+      <Provider store={store}>
+        <BrowserRouter>
+          <LoginPage />
+        </BrowserRouter>
+      </Provider>
     );
 
-    // Kiểm tra nếu checkbox được đánh dấu sau khi xác nhận
-    expect(rememberMeCheckbox).toBeChecked();
+    fireEvent.submit(screen.getByRole("button", { name: MESSAGES.SIGN_IN }));
+
+    expect(toast.error).toHaveBeenCalledWith(MESSAGES.PLEASE_ENTER_ACCOUNT);
+
+    expect(loginRequest).not.toHaveBeenCalled();
+  });
+
+  it("displays error message when authentication fails", () => {
+    store = mockStore({
+      auth: {
+        loading: false,
+        error: "Invalid credentials",
+        token: null,
+        role: null,
+      },
+    });
+
+    render(
+      <Provider store={store}>
+        <BrowserRouter>
+          <LoginPage />
+        </BrowserRouter>
+      </Provider>
+    );
+
+    expect(screen.getByText("Invalid credentials")).toBeInTheDocument();
+  });
+
+  it("navigates to forgot password page when forgot password button is clicked", () => {
+    render(
+      <Provider store={store}>
+        <BrowserRouter>
+          <LoginPage />
+        </BrowserRouter>
+      </Provider>
+    );
+
+    fireEvent.click(screen.getByText(MESSAGES.FORGOT_PASSWORD));
+
+    expect(mockNavigate).toHaveBeenCalledWith("/forgot-password");
+  });
+
+  it("handles remember me checkbox change", () => {
+    render(
+      <Provider store={store}>
+        <BrowserRouter>
+          <LoginPage />
+        </BrowserRouter>
+      </Provider>
+    );
+
+    fireEvent.click(screen.getByLabelText(/Remember me/i));
+
+    expect(handleRememberMeChange).toHaveBeenCalled();
+  });
+
+  it("redirects when token is available", () => {
+    store = mockStore({
+      auth: {
+        loading: false,
+        error: null,
+        token: { access_token: "test-token" },
+        role: "USER",
+      },
+    });
+
+    render(
+      <Provider store={store}>
+        <BrowserRouter>
+          <LoginPage />
+        </BrowserRouter>
+      </Provider>
+    );
+
+    expect(window.localStorage.setItem).toHaveBeenCalledWith(
+      "accessToken",
+      "test-token"
+    );
+    expect(window.localStorage.setItem).toHaveBeenCalledWith("role", "USER");
+
+    expect(mockNavigate).toHaveBeenCalledWith(ROLE_REDIRECTS.USER);
+  });
+
+  it("redirects to login if role is not found in ROLE_REDIRECTS", () => {
+    store = mockStore({
+      auth: {
+        loading: false,
+        error: null,
+        token: { access_token: "test-token" },
+        role: "UNKNOWN_ROLE",
+      },
+    });
+
+    render(
+      <Provider store={store}>
+        <BrowserRouter>
+          <LoginPage />
+        </BrowserRouter>
+      </Provider>
+    );
+
+    expect(mockNavigate).toHaveBeenCalledWith("/login");
+  });
+
+  it("returns null when token is available", () => {
+    store = mockStore({
+      auth: {
+        loading: false,
+        error: null,
+        token: { access_token: "test-token" },
+        role: "USER",
+      },
+    });
+
+    const { container } = render(
+      <Provider store={store}>
+        <BrowserRouter>
+          <LoginPage />
+        </BrowserRouter>
+      </Provider>
+    );
+
+    expect(container.firstChild).toBeNull();
   });
 });

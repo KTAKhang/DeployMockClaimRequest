@@ -15,9 +15,10 @@ import {
 } from "../../../redux/actions/commentAction";
 import profileImage from "../../../assets/img/profile.png";
 import {
-  FaFileAlt,
+  FaReply,
   FaExclamationCircle,
   FaArrowLeft,
+  FaCopy,
   FaProjectDiagram,
   FaClock,
   FaCalendarAlt,
@@ -101,6 +102,7 @@ const ClaimDetail = () => {
   const [fetchingComments, setFetchingComments] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   // Get current user ID and User for checking comment ownership
   const currentUserId = useSelector((state) => state.auth?.user?._id);
@@ -357,6 +359,18 @@ const ClaimDetail = () => {
     }
   };
 
+  const handleCopyId = () => {
+    navigator.clipboard
+      .writeText(id)
+      .then(() => {
+        setIsCopied(true);
+        setTimeout(() => {
+          setIsCopied(false);
+        }, 2000);
+      })
+      .catch(() => {});
+  };
+
   const handleBulkAction = (action, claimIds) => {
     if (!claimIds.length) return;
 
@@ -505,9 +519,17 @@ const ClaimDetail = () => {
               <span className="text-xs sm:text-sm opacity-80 mr-1 sm:mr-2">
                 ID:
               </span>
-              <span className="text-xs sm:text-sm bg-white bg-opacity-20 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full truncate max-w-[150px] sm:max-w-none">
-                {id}
-              </span>
+              <div
+                className="bg-white bg-opacity-20 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm flex items-center group cursor-pointer hover:bg-opacity-30 transition-all"
+                onClick={handleCopyId}
+              >
+                <span className="font-mono mr-2"> {id} </span>
+                {isCopied ? (
+                  <FaCheck className="text-green-400 group-hover:text-green-300 transition-colors" />
+                ) : (
+                  <FaCopy className="text-white opacity-70 group-hover:opacity-100 transition-opacity" />
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -847,12 +869,12 @@ const ClaimDetail = () => {
                                   className="text-xs text-gray-500 hover:text-blue-600 transition-all flex items-center"
                                   onClick={() =>
                                     handleReply(
-                                      formatName(comment.user_id.user_name),
+                                      formatName(comment.user_id?.user_name),
                                       comment._id
                                     )
                                   }
                                 >
-                                  <span className="mr-1">↩️</span>{" "}
+                                  <FaReply className="mr-1" />
                                   {BUTTON_STRINGS.REPLY}
                                 </button>
                               )}

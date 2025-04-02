@@ -43,6 +43,7 @@ function FinanceLayout() {
         isSidebarOpen={isOpen}
         isMobileView={isMobileView}
       />
+
       <div className="flex">
         <div
           className={`transition-all duration-300 ease-in-out ${isMobileView ? "w-0" : isOpen ? "w-[290px]" : "w-16"

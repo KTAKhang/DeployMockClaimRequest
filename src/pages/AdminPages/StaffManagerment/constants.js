@@ -69,9 +69,9 @@ export const COLUMN_CONFIGURATIONS = [
 
 export const STATUS_CLASSES = {
   active:
-    "bg-green-200 text-green-700 px-2 py-1 rounded-full text-xs font-medium",
+    "bg-green-200 text-green-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] xs:text-xs sm:text-sm font-medium",
   inactive:
-    "bg-red-200 text-red-700 px-2 py-1 rounded-full text-xs font-medium",
+    "bg-red-200 text-red-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] xs:text-xs sm:text-sm font-medium",
 };
 
 export const SEARCH_FILTER_TYPES = {

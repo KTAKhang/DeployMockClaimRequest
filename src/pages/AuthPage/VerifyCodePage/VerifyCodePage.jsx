@@ -1,24 +1,34 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
-import { toast } from "react-toastify";
-
-import { API_URL } from "./const";
-import { MESSAGES } from "./string";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  resetVerificationCodeState,
+  verifyCodeRequest,
+} from "../../../redux/actions/verifyCodeActions";
 import { validateVerificationCode, validatePassword } from "./utils";
+import { toast } from "react-toastify";
+import { MESSAGES } from "./string";
 
 function VerifyCodePage() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const { isLoading, isCodeVerified, redirectToLoginFlag, error } = useSelector(
+    (state) => state.verifyCode
+  );
+
   const [password, setPassword] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [email, setEmail] = useState("");
-  const [isCodeVerified, setIsCodeVerified] = useState(false);
   const [errors, setErrors] = useState({
     verificationCode: "",
     password: "",
   });
-  const [isLoading, setIsLoading] = useState(false); // Thêm trạng thái loading
-  const navigate = useNavigate();
-  const location = useLocation();
+
+  useEffect(() => {
+    dispatch(resetVerificationCodeState());
+  }, [dispatch]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -29,12 +39,11 @@ function VerifyCodePage() {
     }
   }, [location]);
 
-  const handleVerificationSubmit = async (e) => {
+  const handleVerificationSubmit = (e) => {
     e.preventDefault();
 
     let formErrors = {};
 
-    // Xác thực mã OTP và mật khẩu
     formErrors.verificationCode = validateVerificationCode(verificationCode);
     formErrors.password = validatePassword(password);
 
@@ -43,53 +52,40 @@ function VerifyCodePage() {
       return;
     }
 
-    if (verificationCode && password && email) {
-      setIsLoading(true); // Đặt trạng thái loading là true khi bắt đầu gửi
-
-      try {
-        const result = await axios.post(API_URL, {
-          email,
-          otp: verificationCode,
-          newPassword: password,
-        });
-
-        if (result.data) {
-          setIsCodeVerified(true);
-          toast.success(MESSAGES.PASSWORD_RESET_SUCCESS, {
-            autoClose: 8000,
-          });
-          setTimeout(() => {
-            navigate("/login");
-          }, 3000);
-        } else {
-          setErrors({
-            ...formErrors,
-            verificationCode: MESSAGES.INVALID_VERIFICATION_CODE,
-          });
-        }
-      } catch (error) {
-        console.error("Lỗi trong quá trình đặt lại mật khẩu:", error);
-        setErrors({
-          ...formErrors,
-          verificationCode: MESSAGES.WRONG_OTP,
-        });
-      } finally {
-        setIsLoading(false); // Đặt trạng thái loading là false khi hoàn thành
-      }
-    }
+    dispatch(verifyCodeRequest({ email, verificationCode, password }));
   };
+
+  useEffect(() => {
+    console.log("Navigation effect running");
+    console.log("isCodeVerified:", isCodeVerified);
+    console.log("redirectToLoginFlag:", redirectToLoginFlag);
+    console.log("error:", error);
+
+    if (isCodeVerified || redirectToLoginFlag) {
+      console.log("Navigation condition met - will redirect in 3 seconds");
+      setTimeout(() => {
+        console.log("Executing navigation to /login");
+        navigate("/login");
+      }, 3000);
+    }
+
+    if (error) {
+      toast.error(error.verificationCode, { autoClose: 8000 });
+    }
+  }, [isCodeVerified, redirectToLoginFlag, error, navigate]);
 
   return (
     <div
       className="flex min-h-screen justify-center items-center bg-cover bg-center"
       style={{
-        backgroundImage: `url('https://career.fpt-software.com/wp-content/uploads/2020/07/fville-hanoi.jpg')`,
+        backgroundImage:
+          "url('https://career.fpt-software.com/wp-content/uploads/2020/07/fville-hanoi.jpg')",
       }}
     >
       <div className="absolute inset-0 bg-black opacity-50"></div>
       <div className="relative bg-white p-12 rounded-lg shadow-xl w-[550px] max-w-[90%]">
         <h2 className="text-2xl font-bold text-center mb-6">
-          {isCodeVerified ? "Nhập Mật Khẩu Mới" : "Nhập Mã Xác Minh"}
+          {isCodeVerified ? "VERIFICATION" : "VERIFICATION"}
         </h2>
 
         <form onSubmit={handleVerificationSubmit} className="space-y-4">
@@ -106,7 +102,7 @@ function VerifyCodePage() {
               htmlFor="verificationCode"
               className="block text-lg font-semibold"
             >
-              Nhập Mã Xác Minh
+              Enter Verification Code
             </label>
             <input
               id="verificationCode"
@@ -114,7 +110,7 @@ function VerifyCodePage() {
               value={verificationCode}
               onChange={(e) => setVerificationCode(e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-md"
-              placeholder="Nhập mã xác minh của bạn"
+              placeholder="Enter the verification code"
             />
             {errors.verificationCode && (
               <p className="text-red-500 text-sm">{errors.verificationCode}</p>
@@ -123,7 +119,7 @@ function VerifyCodePage() {
 
           <div className="mb-4">
             <label htmlFor="password" className="block text-lg font-semibold">
-              Mật Khẩu Mới
+              New password
             </label>
             <input
               id="password"
@@ -131,7 +127,7 @@ function VerifyCodePage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-md"
-              placeholder="Nhập mật khẩu mới"
+              placeholder="Enter your new password"
             />
             {errors.password && (
               <p className="text-red-500 text-sm">{errors.password}</p>

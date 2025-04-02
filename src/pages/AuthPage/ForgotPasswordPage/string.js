@@ -1,5 +1,3 @@
-// string.js
-
 export const MESSAGES = {
   FORGOT_PASSWORD_TITLE: "Forgot Password",
   VERIFICATION_CODE_SENT: "A verification code has been sent to your email",

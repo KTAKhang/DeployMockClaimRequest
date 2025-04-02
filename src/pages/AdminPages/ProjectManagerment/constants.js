@@ -57,45 +57,47 @@ export const COLUMNS = [
 // Pagination constants
 export const PAGINATION = {
   ITEMS_PER_PAGE: 10,
-  DEFAULT_CURRENT_PAGE: 1
+  DEFAULT_CURRENT_PAGE: 1,
 };
 
 // Sort direction constants
 export const SORT_DIRECTION = {
   ASC: "asc",
-  DESC: "desc"
+  DESC: "desc",
 };
 
 // Project status constants
 export const PROJECT_STATUS = {
   ACTIVE: "Active",
-  INACTIVE: "Inactive"
+  INACTIVE: "Inactive",
 };
 
 // CSS classes for status
 export const STATUS_CLASSES = {
-  ACTIVE: "bg-green-200 text-green-700 px-2 py-1 rounded-full text-xs font-medium",
-  INACTIVE: "bg-yellow-200 text-yellow-700 px-2 py-1 rounded-full text-xs font-medium"
+  ACTIVE:
+    "bg-green-200 text-green-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] xs:text-xs sm:text-sm font-medium",
+  INACTIVE:
+    "bg-red-200 text-red-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[10px] xs:text-xs sm:text-sm font-medium",
 };
 
 // Routes
 export const ROUTES = {
-  PROJECT_DETAIL: "/admin/project/detail/"
+  PROJECT_DETAIL: "/admin/project/",
 };
 
 // Filter types
 export const FILTER_TYPES = {
   TEXT: "text",
-  DATE: "date"
+  DATE: "date",
 };
 
 // Field names for date filters
 export const DATE_FILTER_FIELDS = {
   DATE_FROM: "dateFrom",
-  DATE_TO: "dateTo"
+  DATE_TO: "dateTo",
 };
 
 // Delay times (in milliseconds)
 export const DELAY_TIMES = {
-  RELOAD_PROJECTS: 1000
+  RELOAD_PROJECTS: 1000,
 };

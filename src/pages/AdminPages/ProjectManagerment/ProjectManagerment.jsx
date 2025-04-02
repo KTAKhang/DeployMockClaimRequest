@@ -19,7 +19,7 @@ import {
   ROUTES,
   FILTER_TYPES,
   DATE_FILTER_FIELDS,
-  DELAY_TIMES
+  DELAY_TIMES,
 } from "./constants";
 
 import {
@@ -30,7 +30,7 @@ import {
   EMPTY_STATE_STRINGS,
   LOADING_STRINGS,
   FIELD_VALUES,
-  STATUS_TEXT
+  STATUS_TEXT,
 } from "./strings";
 
 import {
@@ -42,21 +42,23 @@ import {
   createFiltersFromSearchParams,
   buildSearchParamsFromFilters,
   getPaginatedItems,
-  calculateTotalPages
+  calculateTotalPages,
 } from "./utils";
 
 export default function ProjectTable() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [currentPage, setCurrentPage] = useState(PAGINATION.DEFAULT_CURRENT_PAGE);
+  const [currentPage, setCurrentPage] = useState(
+    PAGINATION.DEFAULT_CURRENT_PAGE
+  );
   const [inputValue, setInputValue] = useState(currentPage.toString());
   const itemsPerPage = PAGINATION.ITEMS_PER_PAGE;
   const [popupData, setPopupData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [sortConfig, setSortConfig] = useState({ 
-    key: null, 
-    direction: SORT_DIRECTION.ASC 
+  const [sortConfig, setSortConfig] = useState({
+    key: null,
+    direction: SORT_DIRECTION.ASC,
   });
 
   // Add state for search filters
@@ -92,9 +94,10 @@ export default function ProjectTable() {
   const handleSort = (key) => {
     setSortConfig((prev) => ({
       key,
-      direction: prev.key === key && prev.direction === SORT_DIRECTION.ASC 
-        ? SORT_DIRECTION.DESC 
-        : SORT_DIRECTION.ASC,
+      direction:
+        prev.key === key && prev.direction === SORT_DIRECTION.ASC
+          ? SORT_DIRECTION.DESC
+          : SORT_DIRECTION.ASC,
     }));
   };
 
@@ -137,7 +140,7 @@ export default function ProjectTable() {
 
   const totalProjects = filteredProjects.length;
   const totalPages = calculateTotalPages(totalProjects, itemsPerPage);
-  
+
   // Get paginated projects for display
   const paginatedProjects = useMemo(() => {
     return getPaginatedItems(sortedProjects, currentPage, itemsPerPage);
@@ -184,7 +187,9 @@ export default function ProjectTable() {
         {/* Display active filters - Centered on mobile */}
         {searchFilters.length > 0 && (
           <div className="flex flex-wrap justify-center lg:justify-start gap-2 mb-4">
-            <span className="text-sm text-gray-600">{FILTER_STRINGS.ACTIVE_FILTERS}</span>
+            <span className="text-sm text-gray-600">
+              {FILTER_STRINGS.ACTIVE_FILTERS}
+            </span>
             {searchFilters.map((filter, index) => (
               <div
                 key={index}
@@ -201,10 +206,16 @@ export default function ProjectTable() {
                     </>
                   )}
                   {filter.field === DATE_FILTER_FIELDS.DATE_FROM && (
-                    <>{FILTER_STRINGS.FROM_DATE} {new Date(filter.value).toLocaleDateString()}</>
+                    <>
+                      {FILTER_STRINGS.FROM_DATE}{" "}
+                      {new Date(filter.value).toLocaleDateString()}
+                    </>
                   )}
                   {filter.field === DATE_FILTER_FIELDS.DATE_TO && (
-                    <>{FILTER_STRINGS.TO_DATE} {new Date(filter.value).toLocaleDateString()}</>
+                    <>
+                      {FILTER_STRINGS.TO_DATE}{" "}
+                      {new Date(filter.value).toLocaleDateString()}
+                    </>
                   )}
                 </span>
                 <button
@@ -324,7 +335,9 @@ export default function ProjectTable() {
                       </td>
                       <td className="px-1 sm:px-2 md:px-4 py-2 sm:py-3 md:py-4 min-w-[60px] sm:min-w-[80px] md:min-w-[100px]">
                         <span className={getStatusClass(project?.status)}>
-                          {project?.status ? STATUS_TEXT.ACTIVE : STATUS_TEXT.INACTIVE}
+                          {project?.status
+                            ? STATUS_TEXT.ACTIVE
+                            : STATUS_TEXT.INACTIVE}
                         </span>
                       </td>
                       <td className="px-1 sm:px-2 md:px-4 py-2 sm:py-3 md:py-4 min-w-[100px] sm:min-w-[120px] hidden md:table-cell">
@@ -332,18 +345,23 @@ export default function ProjectTable() {
                       </td>
                       <td className="px-1 sm:px-2 md:px-4 py-2 sm:py-3 md:py-4 text-center align-middle">
                         <div className="inline-flex items-center justify-center w-full h-full">
-                          <FaEye
-                            className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500 cursor-pointer hover:text-blue-600 transition"
-                            onClick={() => {
-                              if (!project?._id) {
-                                console.error("Invalid project ID:", project);
-                                return;
-                              }
-                              navigate(`${ROUTES.PROJECT_DETAIL}${project._id}`, {
-                                state: { project },
-                              });
-                            }}
-                          />
+                          <div className="flex gap-1 sm:gap-2 md:gap-3">
+                            <FaEye
+                              className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500 cursor-pointer hover:text-blue-600 transition"
+                              onClick={() => {
+                                if (!project?._id) {
+                                  console.error("Invalid project ID:", project);
+                                  return;
+                                }
+                                navigate(
+                                  `${ROUTES.PROJECT_DETAIL}${project._id}`,
+                                  {
+                                    state: { project },
+                                  }
+                                );
+                              }}
+                            />
+                          </div>
                         </div>
                       </td>
                     </tr>
@@ -388,8 +406,12 @@ export default function ProjectTable() {
                     : "text-blue-600 hover:bg-blue-100"
                 }`}
               >
-                <span className="hidden sm:inline">{BUTTON_STRINGS.PREVIOUS}</span>
-                <span className="sm:hidden">{BUTTON_STRINGS.PREVIOUS_SYMBOL}</span>
+                <span className="hidden sm:inline">
+                  {BUTTON_STRINGS.PREVIOUS}
+                </span>
+                <span className="sm:hidden">
+                  {BUTTON_STRINGS.PREVIOUS_SYMBOL}
+                </span>
               </button>
             </div>
 

@@ -29,12 +29,21 @@ export const formatTimeAgo = (dateString) => {
     return `${days} ${days === 1 ? "day" : "days"} ago`;
   }
 
-  // Otherwise show the date
-  return commentDate.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  // Less than a month (approx 30 days)
+  if (diffInSeconds < 2592000) {
+    const weeks = Math.floor(diffInSeconds / 604800);
+    return `${weeks} ${weeks === 1 ? "week" : "weeks"} ago`;
+  }
+
+  // Less than a year
+  if (diffInSeconds < 31536000) {
+    const months = Math.floor(diffInSeconds / 2592000);
+    return `${months} ${months === 1 ? "month" : "months"} ago`;
+  }
+
+  // More than a year
+  const years = Math.floor(diffInSeconds / 31536000);
+  return `${years} ${years === 1 ? "year" : "years"} ago`;
 };
 
 // Format a user's full name to a shorter version with initials

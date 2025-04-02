@@ -101,9 +101,9 @@ export const routes = [
     children: [
       { path: "", element: <AdminPage /> },
       { path: "staff", element: <StaffManagement /> },
-      { path: "staff/detail/:id", element: <StaffDetail /> },
+      { path: "staff/:id", element: <StaffDetail /> },
       { path: "project", element: <ProjectManagement /> },
-      { path: "project/detail/:id", element: <ProjectDetail /> },
+      { path: "project/:id", element: <ProjectDetail /> },
       { path: "profile", element: <ProfilePage /> },
       {
         path: "change-password",

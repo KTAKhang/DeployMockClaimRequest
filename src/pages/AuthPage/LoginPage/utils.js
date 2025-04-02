@@ -1,5 +1,3 @@
-// utils.js
-
 export const validateForm = (email, password) => {
   return email !== "" && password !== "";
 };

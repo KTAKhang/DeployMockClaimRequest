@@ -1,3 +1,4 @@
+// store.js
 import { createStore, applyMiddleware, combineReducers } from "redux";
 import createSagaMiddleware from "redux-saga";
 import rootSaga from "./sagas/rootSaga";
@@ -11,9 +12,22 @@ import claimerReducer from "./reducers/claimerReducer";
 import commentReducer from "./reducers/commentReducer";
 import notificationReducer from "./reducers/notificationReducer";
 import chatReducer from "./reducers/chatReducer";
+import changePasswordReducer from "./reducers/changePasswordReducer";
+import forgotPasswordReducer from "./reducers/forgotPasswordReducer";
+import { verifyCodeReducer } from "./reducers/verifyCodeReducer";
 
-// Define the navigation action type
+// Define navigation action types
 export const NAVIGATE_TO_CLAIM = "NAVIGATE_TO_CLAIM";
+export const SET_NAVIGATOR = "SET_NAVIGATOR";
+
+// Create a navigator function that will be set from the component
+let navigate = null;
+
+// Action creator to set the navigator function
+export const setNavigator = (navigatorFn) => ({
+  type: SET_NAVIGATOR,
+  payload: navigatorFn,
+});
 
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -26,15 +40,24 @@ const rootReducer = combineReducers({
   comment: commentReducer,
   notifications: notificationReducer,
   chat: chatReducer,
+  changePassword: changePasswordReducer,
+  forgotPassword: forgotPasswordReducer,
+  verifyCode: verifyCodeReducer,
 });
 
-// Navigation middleware
-const navigateMiddleware = (store) => (next) => (action) => {
+// Updated navigation middleware
+const navigateMiddleware = () => (next) => (action) => {
   if (action.type === NAVIGATE_TO_CLAIM) {
-    // Use your router's navigate function
-    // For React Router v6, you might use a custom hook approach instead
-    window.location.href = action.payload; // Simple but causes full page refresh
-    // Or better: history.push(action.payload); if you're using history
+    if (navigate) {
+      // Use the navigate function from React Router
+      navigate(action.payload);
+    } else {
+      console.warn(
+        "Navigation function not set. Make sure to dispatch setNavigator action."
+      );
+    }
+  } else if (action.type === SET_NAVIGATOR) {
+    navigate = action.payload;
   }
   return next(action);
 };

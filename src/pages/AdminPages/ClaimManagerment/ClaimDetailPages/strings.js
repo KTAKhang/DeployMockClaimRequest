@@ -1,6 +1,6 @@
 // Page titles and navigation
 export const PAGE_STRINGS = {
-    TITLE: "Claim Details",
+    TITLE: "Claim Detailed Information",
     CLAIM_DETAILS: "Claim Details",
     PAGES: "Pages",
     DASHBOARD: "Dashboard",

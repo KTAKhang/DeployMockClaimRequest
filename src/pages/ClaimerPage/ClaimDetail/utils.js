@@ -1,4 +1,4 @@
-import { STATUS_COLORS, TIME_CONSTANTS } from "./constants";
+import { STATUS_COLORS } from "./constants";
 import profileImage from "../../../assets/img/profile.png";
 
 /**
@@ -7,10 +7,10 @@ import profileImage from "../../../assets/img/profile.png";
  * @returns {object} The color classes for the status
  */
 export const getStatusColor = (status) => {
-    if (!status) return STATUS_COLORS.default.bg;
+  if (!status) return STATUS_COLORS.default.bg;
 
-    const statusLower = typeof status === "string" ? status.toLowerCase() : "";
-    return STATUS_COLORS[statusLower]?.bg || STATUS_COLORS.default.bg;
+  const statusLower = typeof status === "string" ? status.toLowerCase() : "";
+  return STATUS_COLORS[statusLower]?.bg || STATUS_COLORS.default.bg;
 };
 
 /**
@@ -19,10 +19,10 @@ export const getStatusColor = (status) => {
  * @returns {string} The text color class for the status
  */
 export const getStatusTextColor = (status) => {
-    if (!status) return STATUS_COLORS.default.text;
+  if (!status) return STATUS_COLORS.default.text;
 
-    const statusLower = typeof status === "string" ? status.toLowerCase() : "";
-    return STATUS_COLORS[statusLower]?.text || STATUS_COLORS.default.text;
+  const statusLower = typeof status === "string" ? status.toLowerCase() : "";
+  return STATUS_COLORS[statusLower]?.text || STATUS_COLORS.default.text;
 };
 
 /**
@@ -31,41 +31,50 @@ export const getStatusTextColor = (status) => {
  * @returns {string} A formatted "time ago" string
  */
 export const formatTimeAgo = (dateString) => {
-    if (!dateString) return "just now";
+  if (!dateString) return "just now";
 
-    const commentDate = new Date(dateString);
-    const now = new Date();
-    const diffInSeconds = Math.floor((now - commentDate) / 1000);
+  const commentDate = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now - commentDate) / 1000);
 
-    // Less than a minute
-    if (diffInSeconds < 60) {
-        return "just now";
-    }
+  // Less than a minute
+  if (diffInSeconds < 60) {
+    return "just now";
+  }
 
-    // Less than an hour
-    if (diffInSeconds < TIME_CONSTANTS.HOUR) {
-        const minutes = Math.floor(diffInSeconds / TIME_CONSTANTS.MINUTE);
-        return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
-    }
+  // Less than an hour
+  if (diffInSeconds < 3600) {
+    const minutes = Math.floor(diffInSeconds / 60);
+    return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
+  }
 
-    // Less than a day
-    if (diffInSeconds < TIME_CONSTANTS.DAY) {
-        const hours = Math.floor(diffInSeconds / TIME_CONSTANTS.HOUR);
-        return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
-    }
+  // Less than a day
+  if (diffInSeconds < 86400) {
+    const hours = Math.floor(diffInSeconds / 3600);
+    return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+  }
 
-    // Less than a week
-    if (diffInSeconds < TIME_CONSTANTS.WEEK) {
-        const days = Math.floor(diffInSeconds / TIME_CONSTANTS.DAY);
-        return `${days} ${days === 1 ? "day" : "days"} ago`;
-    }
+  // Less than a week
+  if (diffInSeconds < 604800) {
+    const days = Math.floor(diffInSeconds / 86400);
+    return `${days} ${days === 1 ? "day" : "days"} ago`;
+  }
 
-    // Otherwise show the date
-    return commentDate.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-    });
+  // Less than a month (approx 30 days)
+  if (diffInSeconds < 2592000) {
+    const weeks = Math.floor(diffInSeconds / 604800);
+    return `${weeks} ${weeks === 1 ? "week" : "weeks"} ago`;
+  }
+
+  // Less than a year
+  if (diffInSeconds < 31536000) {
+    const months = Math.floor(diffInSeconds / 2592000);
+    return `${months} ${months === 1 ? "month" : "months"} ago`;
+  }
+
+  // More than a year
+  const years = Math.floor(diffInSeconds / 31536000);
+  return `${years} ${years === 1 ? "year" : "years"} ago`;
 };
 
 /**
@@ -74,26 +83,26 @@ export const formatTimeAgo = (dateString) => {
  * @returns {string} A formatted name for display
  */
 export const formatName = (fullName) => {
-    const parts = fullName.split(" ");
-    if (parts.length > 2) {
-        const lastPart = parts[parts.length - 1];
-        const secondLastPart = parts[parts.length - 2];
+  const parts = fullName.split(" ");
+  if (parts.length > 2) {
+    const lastPart = parts[parts.length - 1];
+    const secondLastPart = parts[parts.length - 2];
 
-        if (!isNaN(lastPart)) {
-            const initials = parts
-                .slice(0, -2)
-                .map((name) => name[0])
-                .join("");
-            return `${initials}. ${secondLastPart} ${lastPart}`;
-        } else {
-            const initials = parts
-                .slice(0, -1)
-                .map((name) => name[0])
-                .join("");
-            return `${initials}. ${lastPart}`;
-        }
+    if (!isNaN(lastPart)) {
+      const initials = parts
+        .slice(0, -2)
+        .map((name) => name[0])
+        .join("");
+      return `${initials}. ${secondLastPart} ${lastPart}`;
+    } else {
+      const initials = parts
+        .slice(0, -1)
+        .map((name) => name[0])
+        .join("");
+      return `${initials}. ${lastPart}`;
     }
-    return fullName;
+  }
+  return fullName;
 };
 
 /**
@@ -102,12 +111,12 @@ export const formatName = (fullName) => {
  * @returns {object} The from and to dates
  */
 export const extractDateRange = (duration) => {
-    if (!duration) return { from: "", to: "" };
+  if (!duration) return { from: "", to: "" };
 
-    const fromDate = duration.split("From ")[1]?.split(" To ")[0]?.trim() || "";
-    const toDate = duration.split("To ")[1]?.trim() || "";
+  const fromDate = duration.split("From ")[1]?.split(" To ")[0]?.trim() || "";
+  const toDate = duration.split("To ")[1]?.trim() || "";
 
-    return { from: fromDate, to: toDate };
+  return { from: fromDate, to: toDate };
 };
 
 /**
@@ -116,7 +125,7 @@ export const extractDateRange = (duration) => {
  * @returns {string} The image source or fallback
  */
 export const getImageSrc = (src) => {
-    return src || profileImage;
+  return src || profileImage;
 };
 
 /**
@@ -125,17 +134,17 @@ export const getImageSrc = (src) => {
  * @returns {object} Initial form data for update form
  */
 export const createInitialFormData = (claimDetail) => {
-    if (!claimDetail) return {};
+  if (!claimDetail) return {};
 
-    const { from, to } = extractDateRange(claimDetail.duration);
+  const { from, to } = extractDateRange(claimDetail.duration);
 
-    return {
-        staffName: claimDetail.staff || "",
-        projectName: claimDetail.project || "",
-        from_date: from,
-        to_date: to,
-        totalHours: claimDetail.hours?.toString() || "",
-        reason: claimDetail.reason_claimer || "",
-        projectId: claimDetail.project_id || "",
-    };
+  return {
+    staffName: claimDetail.staff || "",
+    projectName: claimDetail.project || "",
+    from_date: from,
+    to_date: to,
+    totalHours: claimDetail.hours?.toString() || "",
+    reason: claimDetail.reason_claimer || "",
+    projectId: claimDetail.project_id || "",
+  };
 };

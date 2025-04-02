@@ -1,5 +1,3 @@
-// utils.js
-
 import { OTP_REGEX, PASSWORD_REGEX } from "./const";
 import { MESSAGES } from "./string";
 

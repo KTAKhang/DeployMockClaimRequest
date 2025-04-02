@@ -2,8 +2,8 @@ import { PieChart, Pie, Cell } from "recharts";
 
 const StatusChart = ({ status }) => {
   const COLORS = {
-    Active: "#15803D", 
-    Inactive: "#A16207", 
+    Active: "#15803D",
+    Inactive: "#A16207",
   };
 
   const textLabel = status ? "Active" : "Inactive";

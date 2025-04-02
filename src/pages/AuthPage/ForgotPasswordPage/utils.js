@@ -1,5 +1,3 @@
-// utils.js
-
 export const isValidEmail = (email) => /\S+@\S+\.\S+/.test(email);
 
 export const formatEmail = (email) => {

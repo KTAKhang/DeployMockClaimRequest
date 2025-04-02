@@ -1,20 +1,39 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-
-import { API_URLS, BACKGROUND_IMAGE_URL } from "./const";
-import { MESSAGES } from "./string";
+import { forgotPasswordRequest } from "../../../redux/actions/forgotPasswordActions";
 import { isValidEmail, formatEmail } from "./utils";
+import { MESSAGES } from "./string";
+import { BACKGROUND_IMAGE_URL } from "./const";
 
 function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [isVerificationSent, setIsVerificationSent] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // Thêm trạng thái loading
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleForgotPasswordSubmit = async (e) => {
+  const {
+    isVerificationSent,
+    errorMessage: stateErrorMessage,
+    isLoading,
+  } = useSelector((state) => state.forgotPassword);
+
+  useEffect(() => {
+    setEmail("");
+
+    if (isVerificationSent) {
+      dispatch({ type: "RESET_FORGOT_PASSWORD_STATE" });
+    }
+  }, [dispatch, isVerificationSent]);
+
+  useEffect(() => {
+    if (isVerificationSent) {
+      navigate(`/verify-code?email=${email}`);
+    }
+  }, [isVerificationSent, email, navigate]);
+
+  const handleForgotPasswordSubmit = (e) => {
     e.preventDefault();
     setErrorMessage("");
 
@@ -23,26 +42,7 @@ function ForgotPasswordPage() {
       return;
     }
 
-    // Hiển thị Toastify khi bắt đầu gửi mã
-    setIsLoading(true);
-
-    try {
-      const result = await axios.post(API_URLS.FORGOT_PASSWORD, { email });
-      console.log("API Response:", result.data);
-
-      if (result.data && result.data.status === "OK") {
-        setIsVerificationSent(true);
-        toast.success(MESSAGES.SUCCESS_SENDING_CODE);
-        navigate(`/verify-code?email=${email}`);
-      } else {
-        setErrorMessage(result.data.message || MESSAGES.ERROR_SENDING_CODE);
-      }
-    } catch (error) {
-      console.error("Error sending verification code:", error);
-      setErrorMessage(MESSAGES.ERROR_SENDING_CODE);
-    } finally {
-      setIsLoading(false);
-    }
+    dispatch(forgotPasswordRequest(email));
   };
 
   const handleGoToLogin = () => {
@@ -74,6 +74,7 @@ function ForgotPasswordPage() {
                 id="email"
                 type="email"
                 value={email}
+                data-testid="enter-email-input"
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md"
                 placeholder="Enter your email"

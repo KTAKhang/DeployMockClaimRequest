@@ -1,219 +1,217 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import axios from "axios";
-import { toast } from "react-toastify";
+import { Provider } from "react-redux";
+import configureStore from "redux-mock-store";
 import ChangePasswordPage from "./ChangePasswordPage";
+import { changePasswordRequest } from "../../../redux/actions/changePasswordActions";
+import { MESSAGES } from "./string";
+import { validatePassword } from "./utils";
 
-const mockOnClose = jest.fn();
-// Mock các dependencies
-jest.mock("axios");
-jest.mock("react-toastify", () => ({
-  toast: {
-    success: jest.fn(),
-    error: jest.fn(),
+jest.mock("../../../redux/actions/changePasswordActions", () => ({
+  changePasswordRequest: jest.fn(() => ({ type: "CHANGE_PASSWORD_REQUEST" })),
+}));
+
+jest.mock("./utils", () => ({
+  validatePassword: jest.fn(),
+}));
+
+jest.mock("./string", () => ({
+  MESSAGES: {
+    PASSWORD_VALIDATION:
+      "Password must contain at least 8 characters, including uppercase and number",
+    CANCEL: "CANCEL",
   },
 }));
 
-// Mock localStorage
-const mockLocalStorage = (() => {
-  let store = { token: "fake-token" };
-  return {
-    getItem: jest.fn((key) => store[key]),
-    setItem: jest.fn((key, value) => {
-      store[key] = value;
-    }),
-    clear: jest.fn(() => {
-      store = {};
-    }),
-  };
-})();
+const mockStore = configureStore([]);
 
-Object.defineProperty(window, "localStorage", { value: mockLocalStorage });
-
-describe("ChangePasswordPage", () => {
-  // Mock function cho onClose prop
+describe("ChangePasswordPage Component", () => {
+  let store;
   const mockOnClose = jest.fn();
 
   beforeEach(() => {
-    // Reset mocks trước mỗi test
     jest.clearAllMocks();
-  });
 
-  // Test case 1: Render component đúng
-  test("renders change password page correctly", () => {
-    render(<ChangePasswordPage onClose={mockOnClose} />);
-
-    // Kiểm tra tiêu đề
-    expect(
-      screen.getByRole("heading", { name: /change password/i })
-    ).toBeInTheDocument();
-
-    // Kiểm tra các trường nhập liệu
-    expect(screen.getByLabelText("OLD PASSWORD")).toBeInTheDocument();
-    expect(screen.getByLabelText("NEW PASSWORD")).toBeInTheDocument();
-    expect(screen.getByLabelText("CONFIRM NEW PASSWORD")).toBeInTheDocument();
-
-    // Kiểm tra nút CONTINUE
-    expect(
-      screen.getByRole("button", { name: /continue/i })
-    ).toBeInTheDocument();
-
-    // Kiểm tra nút Cancel
-    expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
-  });
-
-  // Test case 2: Hiển thị lỗi khi mật khẩu xác nhận không khớp
-
-  // Test case 3: Hiển thị lỗi khi mật khẩu mới không hợp lệ
-  test("shows error when new password is invalid", async () => {
-    render(<ChangePasswordPage onClose={mockOnClose} />);
-
-    // Nhập mật khẩu cũ
-    fireEvent.change(screen.getByLabelText("OLD PASSWORD"), {
-      target: { value: "OldPass123" },
-    });
-
-    // Nhập mật khẩu mới không hợp lệ (không có chữ hoa)
-    fireEvent.change(screen.getByLabelText("NEW PASSWORD"), {
-      target: { value: "newpass123" },
-    });
-
-    // Nhập mật khẩu xác nhận giống mật khẩu mới
-    fireEvent.change(screen.getByLabelText("CONFIRM NEW PASSWORD"), {
-      target: { value: "newpass123" },
-    });
-
-    // Submit form
-    const form = screen
-      .getByRole("button", { name: "CONTINUE" })
-      .closest("form");
-    fireEvent.submit(form);
-
-    // Kiểm tra hiển thị thông báo lỗi
-    expect(
-      screen.getByText(
-        "Password must contain at least 8 characters, including uppercase and number"
-      )
-    ).toBeInTheDocument();
-
-    // Kiểm tra không có call API
-    expect(axios.put).not.toHaveBeenCalled();
-  });
-
-  // Test case 4: Hiển thị lỗi khi mật khẩu cũ không chính xác
-  test("shows error when old password is incorrect", async () => {
-    // Mock API response cho mật khẩu cũ không đúng
-    axios.put.mockResolvedValueOnce({
-      status: 200,
-      data: {
-        status: "ERR",
-        message: "Old password is incorrect",
+    store = mockStore({
+      changePassword: {
+        isLoading: false,
+        successMessage: "",
+        errorMessage: "",
       },
     });
 
-    render(<ChangePasswordPage onClose={mockOnClose} />);
-
-    // Nhập mật khẩu cũ
-    fireEvent.change(screen.getByLabelText("OLD PASSWORD"), {
-      target: { value: "WrongOldPass1" },
-    });
-
-    // Nhập mật khẩu mới hợp lệ
-    fireEvent.change(screen.getByLabelText("NEW PASSWORD"), {
-      target: { value: "NewPass123" },
-    });
-
-    // Nhập mật khẩu xác nhận giống mật khẩu mới
-    fireEvent.change(screen.getByLabelText("CONFIRM NEW PASSWORD"), {
-      target: { value: "NewPass123" },
-    });
-
-    // Bây giờ nút CONTINUE được kích hoạt
-    expect(screen.getByRole("button", { name: "CONTINUE" })).toBeEnabled();
-
-    // Click nút CONTINUE
-    fireEvent.click(screen.getByRole("button", { name: "CONTINUE" }));
-
-    // Kiểm tra gọi API với đúng tham số
-    await waitFor(() => {
-      expect(axios.put).toHaveBeenCalledWith(
-        "https://ojtbe-production.up.railway.app/api/user/change-password",
-        {
-          old_password: "WrongOldPass1",
-          new_password: "NewPass123",
-        },
-        {
-          headers: {
-            Authorization: "Bearer fake-token",
-          },
-        }
-      );
-    });
-
-    // Kiểm tra hiển thị thông báo lỗi về mật khẩu cũ
-    await waitFor(() => {
-      expect(screen.getByText("Old password is incorrect")).toBeInTheDocument();
-    });
-
-    // Kiểm tra không đóng popup
-    expect(mockOnClose).not.toHaveBeenCalled();
+    validatePassword.mockImplementation(() => true);
   });
 
-  // Test case 5: Thay đổi mật khẩu thành công
-  test("successfully changes password", async () => {
-    // Mock API response cho thay đổi mật khẩu thành công
-    axios.put.mockResolvedValueOnce({
-      status: 200,
-      data: {
-        status: "OK",
-        message: "Change password success",
+  it("renders the change password form correctly", () => {
+    render(
+      <Provider store={store}>
+        <ChangePasswordPage onClose={mockOnClose} />
+      </Provider>
+    );
+
+    expect(screen.getByText("Change Password")).toBeInTheDocument();
+    expect(screen.getByLabelText(/OLD PASSWORD/i)).toBeInTheDocument();
+    expect(screen.getByTestId("new-password-input")).toBeInTheDocument();
+    expect(screen.getByLabelText(/CONFIRM NEW PASSWORD/i)).toBeInTheDocument();
+    expect(screen.getByText("CONTINUE")).toBeInTheDocument();
+    expect(screen.getByText("CANCEL")).toBeInTheDocument();
+  });
+
+  it("calls onClose when cancel button is clicked", () => {
+    render(
+      <Provider store={store}>
+        <ChangePasswordPage onClose={mockOnClose} />
+      </Provider>
+    );
+
+    fireEvent.click(screen.getByText("CANCEL"));
+    expect(mockOnClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("disables continue button when new password is empty", () => {
+    render(
+      <Provider store={store}>
+        <ChangePasswordPage onClose={mockOnClose} />
+      </Provider>
+    );
+
+    const continueButton = screen.getByText("CONTINUE");
+    expect(continueButton).toHaveClass("bg-gray-400");
+    expect(continueButton).toHaveClass("cursor-not-allowed");
+  });
+
+  it("enables continue button when new password is entered", () => {
+    render(
+      <Provider store={store}>
+        <ChangePasswordPage onClose={mockOnClose} />
+      </Provider>
+    );
+
+    fireEvent.change(screen.getByTestId("new-password-input"), {
+      target: { value: "NewPassword123!" },
+    });
+
+    const continueButton = screen.getByText("CONTINUE");
+    expect(continueButton).toHaveClass("bg-blue-500");
+    expect(continueButton).not.toHaveClass("cursor-not-allowed");
+  });
+
+  it("shows loading state when isLoading is true", () => {
+    store = mockStore({
+      changePassword: {
+        isLoading: true,
+        successMessage: "",
+        errorMessage: "",
       },
     });
 
-    render(<ChangePasswordPage onClose={mockOnClose} />);
+    render(
+      <Provider store={store}>
+        <ChangePasswordPage onClose={mockOnClose} />
+      </Provider>
+    );
 
-    // Nhập mật khẩu cũ
-    fireEvent.change(screen.getByLabelText("OLD PASSWORD"), {
-      target: { value: "CorrectOldPass1" },
+    expect(screen.getByText("In Progress...")).toBeInTheDocument();
+  });
+
+  it("dispatches changePasswordRequest when form is submitted with valid inputs", async () => {
+    render(
+      <Provider store={store}>
+        <ChangePasswordPage onClose={mockOnClose} />
+      </Provider>
+    );
+
+    fireEvent.change(screen.getByTestId("old-password-input"), {
+      target: { value: "OldPassword123!" },
+    });
+    fireEvent.change(screen.getByTestId("new-password-input"), {
+      target: { value: "NewPassword123!" },
+    });
+    fireEvent.change(screen.getByTestId("confirm-password-input"), {
+      target: { value: "NewPassword123!" },
     });
 
-    // Nhập mật khẩu mới hợp lệ
-    fireEvent.change(screen.getByLabelText("NEW PASSWORD"), {
-      target: { value: "NewPass123" },
+    fireEvent.submit(screen.getByTestId("change-password-form"));
+
+    expect(changePasswordRequest).toHaveBeenCalledWith(
+      "OldPassword123!",
+      "NewPassword123!"
+    );
+  });
+
+  it("shows error message when password validation fails", async () => {
+    validatePassword.mockImplementation(() => false);
+
+    render(
+      <Provider store={store}>
+        <ChangePasswordPage onClose={mockOnClose} />
+      </Provider>
+    );
+
+    fireEvent.change(screen.getByTestId("old-password-input"), {
+      target: { value: "OldPassword123!" },
+    });
+    fireEvent.change(screen.getByTestId("new-password-input"), {
+      target: { value: "weak" },
+    });
+    fireEvent.change(screen.getByTestId("confirm-password-input"), {
+      target: { value: "weak" },
     });
 
-    // Nhập mật khẩu xác nhận giống mật khẩu mới
-    fireEvent.change(screen.getByLabelText("CONFIRM NEW PASSWORD"), {
-      target: { value: "NewPass123" },
+    fireEvent.submit(screen.getByTestId("change-password-form"));
+
+    expect(screen.getByText(MESSAGES.PASSWORD_VALIDATION)).toBeInTheDocument();
+
+    expect(changePasswordRequest).not.toHaveBeenCalled();
+  });
+
+  it("shows error message when passwords do not match", async () => {
+    render(
+      <Provider store={store}>
+        <ChangePasswordPage onClose={mockOnClose} />
+      </Provider>
+    );
+
+    fireEvent.change(screen.getByTestId("old-password-input"), {
+      target: { value: "OldPassword123!" },
+    });
+    fireEvent.change(screen.getByTestId("new-password-input"), {
+      target: { value: "NewPassword123!" },
+    });
+    fireEvent.change(screen.getByTestId("confirm-password-input"), {
+      target: { value: "DifferentPassword123!" },
     });
 
-    // Click nút CONTINUE
-    fireEvent.click(screen.getByRole("button", { name: "CONTINUE" }));
+    fireEvent.submit(screen.getByTestId("change-password-form"));
 
-    // Kiểm tra gọi API với đúng tham số
-    await waitFor(() => {
-      expect(axios.put).toHaveBeenCalledWith(
-        "https://ojtbe-production.up.railway.app/api/user/change-password",
-        {
-          old_password: "CorrectOldPass1",
-          new_password: "NewPass123",
-        },
-        {
-          headers: {
-            Authorization: "Bearer fake-token",
-          },
-        }
-      );
+    expect(
+      screen.getByText("Incorrect confirm password, Please try again")
+    ).toBeInTheDocument();
+
+    expect(changePasswordRequest).not.toHaveBeenCalled();
+  });
+
+  it("shows error message when old password is empty", async () => {
+    render(
+      <Provider store={store}>
+        <ChangePasswordPage onClose={mockOnClose} />
+      </Provider>
+    );
+
+    fireEvent.change(screen.getByTestId("new-password-input"), {
+      target: { value: "NewPassword123!" },
+    });
+    fireEvent.change(screen.getByTestId("confirm-password-input"), {
+      target: { value: "NewPassword123!" },
     });
 
-    // Kiểm tra hiển thị toast thành công
-    await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith(
-        "Password has been successfully changed!"
-      );
-    });
+    fireEvent.submit(screen.getByTestId("change-password-form"));
 
-    // Kiểm tra đóng popup
-    expect(mockOnClose).toHaveBeenCalled();
+    expect(
+      screen.getByText("Please enter your old password")
+    ).toBeInTheDocument();
+
+    expect(changePasswordRequest).not.toHaveBeenCalled();
   });
 });

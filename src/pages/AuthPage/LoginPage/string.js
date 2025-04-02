@@ -1,5 +1,3 @@
-// string.js
-
 export const MESSAGES = {
   PLEASE_ENTER_ACCOUNT: "Please Enter your account",
   FORGOT_PASSWORD: "Forgot Password?",

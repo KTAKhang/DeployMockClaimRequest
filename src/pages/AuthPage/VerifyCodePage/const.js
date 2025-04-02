@@ -1,5 +1,3 @@
-// const.js
-
 export const API_URL =
   "https://ojtbe-production.up.railway.app/api/auth/reset-password";
 
