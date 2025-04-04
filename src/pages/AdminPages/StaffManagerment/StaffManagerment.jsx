@@ -196,7 +196,7 @@ export default function StaffManagement() {
                       {filter.field === "all"
                         ? "All fields"
                         : filter.field.charAt(0).toUpperCase() +
-                          filter.field.slice(1)}
+                        filter.field.slice(1)}
                       : {filter.value}
                     </>
                   )}
@@ -239,26 +239,24 @@ export default function StaffManagement() {
         <div className={`w-full ${isMobile ? "px-1" : "px-2 sm:px-3 md:px-4"}`}>
           <div
             className="w-full overflow-x-auto overflow-hidden"
-            style={{ minHeight: paginatedStaff.length > 0 ? "500px" : "auto" }}
+            style={{ minHeight: paginatedStaff.length > 0 ? "440px" : "auto" }}
           >
             {/* Added width constraint here for sm breakpoint with overflow handling */}
             <div className="w-full sm:w-full overflow-x-auto md:w-full overflow-hidden">
-              <div className="h-[500px] overflow-y-auto">
+              <div className="h-[440px] overflow-y-auto">
                 <table className="w-full border-collapse text-gray-700 text-[10px] xs:text-xs sm:text-sm min-w-[300px] sm:min-w-[500px]">
                   <thead className="bg-gray-200 text-gray-600 sticky top-0 z-20">
                     <tr className="border-b">
                       {COLUMN_CONFIGURATIONS.map((column, index) => (
                         <th
                           key={index}
-                          className={`px-1 sm:px-2 md:px-4 py-2 sm:py-3 text-left font-medium  ${
-                            column.priority === "low"
-                              ? "hidden sm:table-cell lg:table-cell"
-                              : column.priority === "medium"
+                          className={`px-1 sm:px-2 md:px-4 py-2 sm:py-3 text-left font-medium  ${column.priority === "low"
+                            ? "hidden sm:table-cell lg:table-cell"
+                            : column.priority === "medium"
                               ? "hidden sm:hidden md:table-cell"
                               : ""
-                          } ${column.width} ${
-                            column.sortable ? "cursor-pointer" : ""
-                          }`}
+                            } ${column.width} ${column.sortable ? "cursor-pointer" : ""
+                            }`}
                           onClick={() =>
                             column.sortable && handleSort(column.key)
                           }
@@ -273,20 +271,18 @@ export default function StaffManagement() {
                             {column.sortable && (
                               <span className="ml-1 relative flex flex-col items-center">
                                 <FaSortUp
-                                  className={`translate-y-[6px] transition-all ${
-                                    sortConfig.key === column.key &&
+                                  className={`translate-y-[6px] transition-all ${sortConfig.key === column.key &&
                                     sortConfig.direction === "asc"
-                                      ? "text-blue-500"
-                                      : "text-gray-400"
-                                  }`}
+                                    ? "text-blue-500"
+                                    : "text-gray-400"
+                                    }`}
                                 />
                                 <FaSortDown
-                                  className={`translate-y-[-6px] transition-all ${
-                                    sortConfig.key === column.key &&
+                                  className={`translate-y-[-6px] transition-all ${sortConfig.key === column.key &&
                                     sortConfig.direction === "desc"
-                                      ? "text-blue-500"
-                                      : "text-gray-400"
-                                  }`}
+                                    ? "text-blue-500"
+                                    : "text-gray-400"
+                                    }`}
                                 />
                               </span>
                             )}
@@ -322,13 +318,12 @@ export default function StaffManagement() {
                           {COLUMN_CONFIGURATIONS.map((column) => (
                             <td
                               key={column.key}
-                              className={`px-1 sm:px-2 md:px-4 py-2 sm:py-3 md:py-4 ${
-                                column.priority === "low"
-                                  ? "hidden sm:table-cell lg:table-cell"
-                                  : column.priority === "medium"
+                              className={`px-1 sm:px-2 md:px-4 py-2 sm:py-3 md:py-4 ${column.priority === "low"
+                                ? "hidden sm:table-cell lg:table-cell"
+                                : column.priority === "medium"
                                   ? "hidden sm:hidden md:table-cell"
                                   : ""
-                              } ${column.width || ""}`}
+                                } ${column.width || ""}`}
                             >
                               {column.key === "_id" ? (
                                 <span
@@ -391,11 +386,10 @@ export default function StaffManagement() {
                 <button
                   onClick={() => setCurrentPage(1)}
                   disabled={currentPage === 1}
-                  className={`px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg text-xs sm:text-sm font-medium transition ${
-                    currentPage === 1
-                      ? "text-gray-400 cursor-not-allowed"
-                      : "text-blue-600 hover:bg-blue-100"
-                  }`}
+                  className={`px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg text-xs sm:text-sm font-medium transition ${currentPage === 1
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-blue-600 hover:bg-blue-100"
+                    }`}
                 >
                   <span className="hidden sm:inline">
                     {STRINGS.PAGINATION.FIRST}
@@ -407,11 +401,10 @@ export default function StaffManagement() {
                     setCurrentPage((prev) => Math.max(prev - 1, 1))
                   }
                   disabled={currentPage === 1}
-                  className={`px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg text-xs sm:text-sm font-medium transition ${
-                    currentPage === 1
-                      ? "text-gray-400 cursor-not-allowed"
-                      : "text-blue-600 hover:bg-blue-100"
-                  }`}
+                  className={`px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg text-xs sm:text-sm font-medium transition ${currentPage === 1
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-blue-600 hover:bg-blue-100"
+                    }`}
                 >
                   <span className="hidden sm:inline">
                     {STRINGS.PAGINATION.PREVIOUS}
@@ -466,11 +459,10 @@ export default function StaffManagement() {
                     setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                   }
                   disabled={currentPage === totalPages}
-                  className={`px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg text-xs sm:text-sm font-medium transition ${
-                    currentPage === totalPages
-                      ? "text-gray-400 cursor-not-allowed"
-                      : "text-blue-600 hover:bg-blue-100"
-                  }`}
+                  className={`px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg text-xs sm:text-sm font-medium transition ${currentPage === totalPages
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-blue-600 hover:bg-blue-100"
+                    }`}
                 >
                   <span className="hidden sm:inline">
                     {STRINGS.PAGINATION.NEXT}
@@ -480,11 +472,10 @@ export default function StaffManagement() {
                 <button
                   onClick={() => setCurrentPage(totalPages)}
                   disabled={currentPage === totalPages}
-                  className={`px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg text-xs sm:text-sm font-medium transition ${
-                    currentPage === totalPages
-                      ? "text-gray-400 cursor-not-allowed"
-                      : "text-blue-600 hover:bg-blue-100"
-                  }`}
+                  className={`px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg text-xs sm:text-sm font-medium transition ${currentPage === totalPages
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-blue-600 hover:bg-blue-100"
+                    }`}
                 >
                   <span className="hidden sm:inline">
                     {STRINGS.PAGINATION.LAST}

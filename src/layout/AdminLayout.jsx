@@ -30,7 +30,7 @@ const AdminLayout = () => {
   }, []);
 
   return (
-    <div>
+    <div >
       <Navbar
         toggleSidebar={toggleSidebar}
         isSidebarOpen={isOpen}
@@ -49,7 +49,7 @@ const AdminLayout = () => {
             setIsMobileView={setIsMobileView}
           />
         </div>
-        <div className="flex-1 p-4 transition-all duration-300 ease-in-out">
+        <div className="flex-1 p-4 transition-all duration-300 ease-in-out ">
           <Outlet />
         </div>
       </div>

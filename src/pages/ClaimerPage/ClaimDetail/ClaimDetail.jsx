@@ -177,7 +177,7 @@ const ClaimDetail = () => {
     }
   }, [updateClaimSuccess, dispatch, id, localClaimDetail]);
 
- 
+
   useEffect(() => {
     return () => {
       dispatch(resetUpdateState());
@@ -189,7 +189,7 @@ const ClaimDetail = () => {
     if (!loadingComment) {
       if (emptyCommentsLoading) {
         setFetchingComments(true);
-        dispatch(getCommentsRequest(id)); 
+        dispatch(getCommentsRequest(id));
       }
 
       if (Array.isArray(comments)) {
@@ -237,8 +237,8 @@ const ClaimDetail = () => {
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault(); 
-      handleSend(); 
+      e.preventDefault();
+      handleSend();
     }
   };
 
@@ -360,7 +360,7 @@ const ClaimDetail = () => {
           setIsCopied(false);
         }, 2000);
       })
-      .catch(() => {});
+      .catch(() => { });
   };
 
   const handleBulkAction = (action, claimIds) => {
@@ -589,25 +589,24 @@ const ClaimDetail = () => {
 
                 <div className="flex flex-col sm:flex-row items-center sm:items-start w-full sm:w-auto">
                   <div
-                    className={`flex items-center justify-center w-8 h-8 ${
-                      currentStatus === STATUS.CANCELLED
+                    className={`flex items-center justify-center w-8 h-8 ${currentStatus === STATUS.CANCELLED
                         ? "bg-pink-100"
                         : statusColor
-                            .replace("bg-", "bg-")
-                            .replace("500", "100")
-                    } rounded-full`}
+                          .replace("bg-", "bg-")
+                          .replace("500", "100")
+                      } rounded-full`}
                   >
                     <FaClipboard
                       className={
                         currentStatus === STATUS.DRAFT
                           ? "text-gray-600"
                           : currentStatus === STATUS.PENDING
-                          ? "text-yellow-600"
-                          : currentStatus === STATUS.CANCELLED
-                          ? "text-pink-600"
-                          : statusColor
-                              .replace("bg-", "text-")
-                              .replace("500", "600")
+                            ? "text-yellow-600"
+                            : currentStatus === STATUS.CANCELLED
+                              ? "text-pink-600"
+                              : statusColor
+                                .replace("bg-", "text-")
+                                .replace("500", "600")
                       }
                     />
                   </div>
@@ -766,14 +765,13 @@ const ClaimDetail = () => {
                               (localStorage.getItem("role") === "Claimer" &&
                                 replyTo === "")
                             }
-                            className={`px-4 py-2 rounded-md font-medium text-sm text-white flex items-center ${
-                              loadingComment ||
-                              !commentData.trim() ||
-                              (localStorage.getItem("role") === "Claimer" &&
-                                replyTo === "")
+                            className={`px-4 py-2 rounded-md font-medium text-sm text-white flex items-center ${loadingComment ||
+                                !commentData.trim() ||
+                                (localStorage.getItem("role") === "Claimer" &&
+                                  replyTo === "")
                                 ? "bg-gray-300 cursor-not-allowed"
                                 : "bg-blue-500 hover:bg-blue-600"
-                            } transition-colors`}
+                              } transition-colors`}
                           >
                             {loadingComment ? (
                               <>
@@ -945,11 +943,10 @@ const ClaimDetail = () => {
                   <button
                     onClick={handlePrevPage}
                     disabled={currentPage === 1}
-                    className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${
-                      currentPage === 1
+                    className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${currentPage === 1
                         ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
+                      }`}
                   >
                     <span className="mr-1">◀</span> Previous
                   </button>
@@ -961,11 +958,10 @@ const ClaimDetail = () => {
                         <button
                           key={pageNumber}
                           onClick={() => handlePageChange(pageNumber)}
-                          className={`w-8 h-8 rounded text-xs transition-colors ${
-                            currentPage === pageNumber
+                          className={`w-8 h-8 rounded text-xs transition-colors ${currentPage === pageNumber
                               ? "bg-blue-500 text-white"
                               : "bg-gray-100 text-blue-600 hover:bg-blue-200"
-                          }`}
+                            }`}
                         >
                           {pageNumber}
                         </button>
@@ -976,11 +972,10 @@ const ClaimDetail = () => {
                   <button
                     onClick={handleNextPage}
                     disabled={currentPage === totalPages}
-                    className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${
-                      currentPage === totalPages
+                    className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${currentPage === totalPages
                         ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
+                      }`}
                   >
                     Next <span className="ml-1">▶</span>
                   </button>
