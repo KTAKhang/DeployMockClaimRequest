@@ -5,7 +5,6 @@
 // Page titles
 export const PAGE_STRINGS = {
   TITLE: "Create Claim",
-  BREADCRUMB: "Pages > Create Claim"
 };
 
 // Field labels
@@ -17,14 +16,14 @@ export const FIELD_LABELS = {
   DATE_FROM: "Date from",
   DATE_TO: "Date to",
   TOTAL_WORKING_HOURS: "Total Working Hours",
-  REASON: "Reason"
+  REASON: "Reason",
 };
 
 // Button labels
 export const BUTTON_STRINGS = {
   SAVE: "Save",
   SUBMIT: "Submit",
-  REMOVE: "Remove"
+  REMOVE: "Remove",
 };
 
 // Error messages
@@ -36,20 +35,20 @@ export const ERROR_MESSAGES = {
   FROM_DATE_BEFORE_TO: "Start date must be before end date",
   HOURS_REQUIRED: "Total working hours is required",
   HOURS_POSITIVE: "Total working hours must be a positive number",
-  REASON_REQUIRED: "Reason is required"
+  REASON_REQUIRED: "Reason is required",
 };
 
 // Success messages
 export const SUCCESS_MESSAGES = {
-  CLAIM_CREATED: "Claim created successfully!"
+  CLAIM_CREATED: "Claim created successfully!",
 };
 
 // Select options
 export const SELECT_OPTIONS = {
-  DEFAULT_PROJECT: "Select a project"
+  DEFAULT_PROJECT: "Select a project",
 };
 
 // Total section
 export const TOTALS_STRINGS = {
-  TOTAL_WORKING_HOURS: "Total Working Hours:"
+  TOTAL_WORKING_HOURS: "Total Working Hours:",
 };

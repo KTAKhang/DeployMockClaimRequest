@@ -29,20 +29,20 @@ import {
 } from "react-icons/fa";
 
 // Import từ các file đã tách
-import { 
-  ACTION_TYPES, 
+import {
+  ACTION_TYPES,
   TEAM_MEMBER_TYPES,
   UI_CONSTANTS,
-  ROUTES 
+  ROUTES,
 } from "./constants";
-import { 
-  PAGE_STRINGS, 
-  SECTION_HEADERS, 
+import {
+  PAGE_STRINGS,
+  SECTION_HEADERS,
   PROJECT_INFO_LABELS,
   TEAM_MEMBER_LABELS,
   STATUS_STRINGS,
   BUTTON_STRINGS,
-  MESSAGE_STRINGS
+  MESSAGE_STRINGS,
 } from "./strings";
 import {
   getStatusButtonClass,
@@ -52,7 +52,7 @@ import {
   isNonEmptyArray,
   formatStatusText,
   sanitizeProjectData,
-  truncateId
+  truncateId,
 } from "./utils";
 
 const ProjectDetail = () => {
@@ -165,7 +165,7 @@ const ProjectDetail = () => {
   }
 
   return (
-    <div className=" min-h-screen p-3 sm:p-6">
+    <div className="min-h-screen p-3 sm:p-6">
       {/* Breadcrumb Navigation */}
       <nav className="flex mb-6 text-sm">
         <ol className="inline-flex items-center space-x-1 md:space-x-3 flex-wrap">
@@ -174,7 +174,8 @@ const ProjectDetail = () => {
               onClick={() => navigate(-1)}
               className="text-gray-500 hover:text-blue-600 transition-colors inline-flex items-center"
             >
-              <FaArrowLeft className="mr-1 sm:mr-2" /> {PAGE_STRINGS.BREADCRUMB_BACK}
+              <FaArrowLeft className="mr-1 sm:mr-2" />{" "}
+              {PAGE_STRINGS.BREADCRUMB_BACK}
             </button>
           </li>
           <li>
@@ -244,17 +245,20 @@ const ProjectDetail = () => {
         </div>
 
         <div className="p-4 sm:p-6">
-          {/* Project Information & Status Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {/* Project Basic Info */}
-            <div className="bg-gray-50 p-4 sm:p-6 rounded-xl border border-gray-100 h-full">
+          {/* Project Information & Status Section - Now in a 3-column grid on large screens */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            {/* Project Basic Info - Takes 2 columns on large screens */}
+            <div className="bg-gray-50 p-4 sm:p-6 rounded-xl border border-gray-100 h-full lg:col-span-2">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                <FaBriefcase className="mr-2 text-blue-600" /> {SECTION_HEADERS.PROJECT_INFORMATION}
+                <FaBriefcase className="mr-2 text-blue-600" />{" "}
+                {SECTION_HEADERS.PROJECT_INFORMATION}
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                 <div className="col-span-2">
-                  <div className="text-sm text-gray-500">{PROJECT_INFO_LABELS.PROJECT_NAME}</div>
+                  <div className="text-sm text-gray-500">
+                    {PROJECT_INFO_LABELS.PROJECT_NAME}
+                  </div>
                   <div className="font-medium text-gray-900 text-lg">
                     {projectDetail.project_name || "N/A"}
                   </div>
@@ -262,7 +266,8 @@ const ProjectDetail = () => {
 
                 <div>
                   <div className="text-sm text-gray-500 flex items-center">
-                    <FaCalendarAlt className="text-blue-600 mr-2" /> {PROJECT_INFO_LABELS.START_DATE}
+                    <FaCalendarAlt className="text-blue-600 mr-2" />{" "}
+                    {PROJECT_INFO_LABELS.START_DATE}
                   </div>
                   <div className="font-medium text-gray-900">
                     {formatDate(projectDetail.duration?.from)}
@@ -271,7 +276,8 @@ const ProjectDetail = () => {
 
                 <div>
                   <div className="text-sm text-gray-500 flex items-center">
-                    <FaCalendarAlt className="text-blue-600 mr-2" /> {PROJECT_INFO_LABELS.END_DATE}
+                    <FaCalendarAlt className="text-blue-600 mr-2" />{" "}
+                    {PROJECT_INFO_LABELS.END_DATE}
                   </div>
                   <div className="font-medium text-gray-900">
                     {formatDate(projectDetail.duration?.to)}
@@ -282,7 +288,8 @@ const ProjectDetail = () => {
               {/* Technical Lead Section */}
               <div className="mt-6">
                 <div className="text-sm text-gray-500 flex items-center mb-2">
-                  <FaUserTie className="text-blue-600 mr-2" /> {PROJECT_INFO_LABELS.TECHNICAL_LEAD}
+                  <FaUserTie className="text-blue-600 mr-2" />{" "}
+                  {PROJECT_INFO_LABELS.TECHNICAL_LEAD}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {Array.isArray(projectDetail.technical_lead) ? (
@@ -307,33 +314,52 @@ const ProjectDetail = () => {
               </div>
             </div>
 
-            {/* Project Status */}
+            {/* Project Status - Takes 1 column */}
             <div className="bg-gray-50 p-4 sm:p-6 rounded-xl border border-gray-100 h-full flex flex-col">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                <FaClipboard className="mr-2 text-blue-600" /> {SECTION_HEADERS.STATUS_INFORMATION}
+                <FaClipboard className="mr-2 text-blue-600" />{" "}
+                {SECTION_HEADERS.STATUS_INFORMATION}
               </h3>
 
               <div className="flex-1 flex flex-col items-center justify-center py-4">
-                <div className="w-36 h-36 md:w-48 md:h-48 my-4">
+                <div className="w-32 h-32 sm:w-40 sm:h-40">
                   <StatusChart status={projectDetail.status} />
                 </div>
 
-                <p className="text-center text-gray-600 mt-6 max-w-md">
-                  {STATUS_STRINGS.CURRENT_STATUS_TEXT.replace('{status}', formatStatusText(projectDetail.status))}
+                <p className="text-center text-gray-600 mt-4 max-w-md">
+                  {STATUS_STRINGS.CURRENT_STATUS_TEXT.replace(
+                    "{status}",
+                    formatStatusText(projectDetail.status)
+                  )}
                 </p>
+
+                {/* Status action button moved here for better UX */}
+                <button
+                  onClick={handleToggleStatus}
+                  className={`mt-4 px-4 py-2 text-white rounded-lg transition-colors flex items-center justify-center ${getStatusButtonClass(
+                    projectDetail.status
+                  )}`}
+                >
+                  {projectDetail.status ? (
+                    <FaTimesCircle className="mr-2" />
+                  ) : (
+                    <FaCheckCircle className="mr-2" />
+                  )}
+                  {getStatusButtonText(projectDetail.status)}
+                </button>
               </div>
             </div>
           </div>
 
-          {/* Team Members & Description Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {/* Team Members */}
-            <div className="bg-gray-50 p-4 sm:p-6 rounded-xl border border-gray-100 h-full">
+          {/* Team Members Section - Now full width */}
+          <div className="mb-8">
+            <div className="bg-gray-50 p-4 sm:p-6 rounded-xl border border-gray-100">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                <FaUsers className="mr-2 text-blue-600" /> {SECTION_HEADERS.TEAM_MEMBERS}
+                <FaUsers className="mr-2 text-blue-600" />{" "}
+                {SECTION_HEADERS.TEAM_MEMBERS}
               </h3>
 
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[
                   {
                     icon: <FaUserTie className="text-purple-600" />,
@@ -366,24 +392,27 @@ const ProjectDetail = () => {
                     value: projectDetail.testers,
                   },
                 ].map((item, index) => (
-                  <div key={index} className="flex items-start">
-                    <div className="mt-1 mr-2">{item.icon}</div>
+                  <div
+                    key={index}
+                    className="flex items-start bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div className="mt-1 mr-3 text-lg">{item.icon}</div>
                     <div className="flex-1">
                       <div className="text-sm text-gray-500 font-medium">
                         {item.title}
                       </div>
-                      <div className="text-gray-900 mt-1">
+                      <div className="text-gray-900 mt-2">
                         {Array.isArray(item.value) ? (
                           item.value.map((person, i) => (
                             <span
                               key={i}
-                              className="inline-block bg-gray-100 hover:bg-gray-200 transition-colors rounded-full px-3 py-1.5 text-sm font-medium text-gray-700 mr-2 mb-2"
+                              className="inline-block bg-gray-100 hover:bg-gray-200 transition-colors rounded-full px-3 py-1 text-sm font-medium text-gray-700 mr-2 mb-2"
                             >
                               {person.user_name}
                             </span>
                           ))
                         ) : item.value?.user_name ? (
-                          <span className="inline-block bg-gray-100 hover:bg-gray-200 transition-colors rounded-full px-3 py-1.5 text-sm font-medium text-gray-700">
+                          <span className="inline-block bg-gray-100 hover:bg-gray-200 transition-colors rounded-full px-3 py-1 text-sm font-medium text-gray-700">
                             {item.value.user_name}
                           </span>
                         ) : (
@@ -397,52 +426,13 @@ const ProjectDetail = () => {
                 ))}
               </div>
             </div>
-
-            {/* Description */}
-            <div className="bg-gray-50 p-4 sm:p-6 rounded-xl border border-gray-100 h-full flex flex-col">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                <FaClipboard className="mr-2 text-blue-600" /> {SECTION_HEADERS.PROJECT_DESCRIPTION}
-              </h3>
-
-              <div className="flex-1 overflow-auto p-2 min-h-[200px]">
-                {projectDetail.description ? (
-                  <p className="text-gray-700 whitespace-pre-line">
-                    {projectDetail.description}
-                  </p>
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-500 italic">
-                    <p className="text-center">
-                      {MESSAGE_STRINGS.NO_DESCRIPTION}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row justify-end items-center gap-3 mt-6">
-            <button
-              onClick={() => navigate(-1)}
-              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium transition-colors flex items-center justify-center"
-            >
-              <FaArrowLeft className="mr-2" /> {BUTTON_STRINGS.BACK}
-            </button>
-            <button
-              onClick={handleToggleStatus}
-              className={`w-full sm:w-auto px-4 py-2 text-white rounded-lg transition-colors flex items-center justify-center ${getStatusButtonClass(projectDetail.status)}`}
-            >
-              {projectDetail.status ? (
-                <FaTimesCircle className="mr-2" />
-              ) : (
-                <FaCheckCircle className="mr-2" />
-              )}
-              {getStatusButtonText(projectDetail.status)}
-            </button>
-
+          <div className="flex justify-end items-center mt-6">
             <button
               onClick={() => setIsPopupOpen(true)}
-              className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-center"
+              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-center shadow-sm hover:shadow-md"
             >
               <FaEdit className="mr-2" /> {BUTTON_STRINGS.UPDATE_PROJECT}
             </button>

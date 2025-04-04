@@ -212,7 +212,7 @@ const FinanceDetailPage = () => {
           setIsCopied(false);
         }, 2000);
       })
-      .catch(() => { });
+      .catch(() => {});
   };
 
   const handleConfirm = () => {
@@ -231,12 +231,11 @@ const FinanceDetailPage = () => {
     });
 
     setIsModalOpen(false);
+    navigate("/finance/approved");
+
     setTimeout(() => {
       dispatch(fetchClaimsRequest({}));
     }, 1500);
-    navigate("/finance/paid");
-
-
   };
 
   const handleNavigate = (status) => {
@@ -421,8 +420,9 @@ const FinanceDetailPage = () => {
       label: LABELS.PROJECT_DURATION,
       value:
         displayData.project?.duration?.from && displayData.project?.duration?.to
-          ? `From ${displayData.project.duration.from.split("T")[0]} To ${displayData.project.duration.to.split("T")[0]
-          }`
+          ? `From ${displayData.project.duration.from.split("T")[0]} To ${
+              displayData.project.duration.to.split("T")[0]
+            }`
           : "N/A",
     },
     {
@@ -647,9 +647,7 @@ const FinanceDetailPage = () => {
       <div className="flex flex-col">
         <div className="p-4 bg-gray-50 border-b border-gray-200">
           {/* Comment input */}
-          {["paid", "cancelled", "rejected"].includes(
-            currentStatus?.toLowerCase()
-          ) ? (
+          {currentStatus?.toLowerCase() === "paid" ? (
             <div className="flex items-center justify-center p-3 border bg-white rounded-lg">
               <FaLock className="text-gray-400 mr-2" />
               <span className="text-gray-500 text-sm">
@@ -690,10 +688,11 @@ const FinanceDetailPage = () => {
                     <button
                       onClick={handleSend}
                       disabled={loadingComment || !commentData.trim()}
-                      className={`px-2 sm:px-4 py-1 sm:py-2 rounded-lg font-medium text-xs sm:text-sm text-white flex items-center ${loadingComment || !commentData.trim()
-                        ? "bg-gray-300 cursor-not-allowed"
-                        : "bg-blue-500 hover:bg-blue-600"
-                        } transition-colors shadow-sm`}
+                      className={`px-2 sm:px-4 py-1 sm:py-2 rounded-lg font-medium text-xs sm:text-sm text-white flex items-center ${
+                        loadingComment || !commentData.trim()
+                          ? "bg-gray-300 cursor-not-allowed"
+                          : "bg-blue-500 hover:bg-blue-600"
+                      } transition-colors shadow-sm`}
                     >
                       {loadingComment ? (
                         <>
@@ -768,19 +767,20 @@ const FinanceDetailPage = () => {
                         <p className="text-gray-700">{comment.content}</p>
                       </div>
                       <div className="mt-2 ml-2 flex items-center gap-3">
-                        {comment.user_id._id !== currentUserId && (
-                          <button
-                            className="text-xs text-gray-500 hover:text-blue-600 transition-all flex items-center"
-                            onClick={() =>
-                              handleReply(
-                                formatName(comment.user_id.user_name),
-                                comment._id
-                              )
-                            }
-                          >
-                            <FaReply className="mr-1" /> {BUTTON.REPLY}
-                          </button>
-                        )}
+                        {comment.user_id._id !== currentUserId &&
+                          currentStatus?.toLowerCase() !== "paid" && (
+                            <button
+                              className="text-xs text-gray-500 hover:text-blue-600 transition-all flex items-center"
+                              onClick={() =>
+                                handleReply(
+                                  formatName(comment.user_id.user_name),
+                                  comment._id
+                                )
+                              }
+                            >
+                              <FaReply className="mr-1" /> {BUTTON.REPLY}
+                            </button>
+                          )}
                       </div>
                     </div>
                   </div>
@@ -853,10 +853,11 @@ const FinanceDetailPage = () => {
             <button
               onClick={handlePrevPage}
               disabled={currentPage === 1}
-              className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${currentPage === 1
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
+              className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${
+                currentPage === 1
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
             >
               <span className="mr-1">◀</span> Previous
             </button>
@@ -868,10 +869,11 @@ const FinanceDetailPage = () => {
                   <button
                     key={pageNumber}
                     onClick={() => handlePageChange(pageNumber)}
-                    className={`w-8 h-8 rounded text-xs transition-colors ${currentPage === pageNumber
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 text-blue-600 hover:bg-blue-200"
-                      }`}
+                    className={`w-8 h-8 rounded text-xs transition-colors ${
+                      currentPage === pageNumber
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 text-blue-600 hover:bg-blue-200"
+                    }`}
                   >
                     {pageNumber}
                   </button>
@@ -882,10 +884,11 @@ const FinanceDetailPage = () => {
             <button
               onClick={handleNextPage}
               disabled={currentPage === totalPages}
-              className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${currentPage === totalPages
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
+              className={`px-3 py-1.5 rounded text-xs font-medium transition-colors flex items-center ${
+                currentPage === totalPages
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
             >
               Next <span className="ml-1">▶</span>
             </button>

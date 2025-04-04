@@ -59,17 +59,17 @@ export default function staffReducer(state = initialState, action) {
 
     case UPDATE_STAFF_SUCCESS:
       // Đảm bảo payload có cả role và role_name để tương thích
-      const updatedPayload = {...action.payload};
-      
+      const updatedPayload = { ...action.payload };
+
       // Đồng bộ hóa các trường
       if (updatedPayload.role && !updatedPayload.role_name) {
         updatedPayload.role_name = updatedPayload.role;
       }
-      
+
       if (updatedPayload.role_name && !updatedPayload.role) {
         updatedPayload.role = updatedPayload.role_name;
       }
-      
+
       return {
         ...state,
         loading: false,
@@ -79,9 +79,10 @@ export default function staffReducer(state = initialState, action) {
             staff._id === updatedPayload._id ? updatedPayload : staff
           ),
         },
-        staffById: state.staffById?._id === updatedPayload._id 
-          ? updatedPayload 
-          : state.staffById,
+        staffById:
+          state.staffById?._id === updatedPayload._id
+            ? updatedPayload
+            : state.staffById,
       };
 
     case GET_STAFF_ALL_FAILURE:

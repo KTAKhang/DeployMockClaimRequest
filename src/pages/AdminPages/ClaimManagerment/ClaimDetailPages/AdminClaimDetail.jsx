@@ -653,6 +653,7 @@ export default function AdminClaimDetail() {
                           <p className="text-gray-700">{comment.content}</p>
                         </div>
                         <div className="mt-2 ml-2 flex items-center gap-3">
+                          {/* Comment out the reply button to disable this functionality
                           {comment.user_id._id !== currentUserId && (
                             <button
                               className="text-xs text-gray-500 hover:text-blue-600 transition-all flex items-center"
@@ -663,10 +664,10 @@ export default function AdminClaimDetail() {
                                 )
                               }
                             >
-                              <FaReply className="mr-1" />{" "}
-                              {BUTTON_STRINGS.REPLY}
+                              <FaReply className="mr-1" /> {BUTTON_STRINGS.REPLY}
                             </button>
                           )}
+                          */}
                         </div>
                       </div>
                     </div>

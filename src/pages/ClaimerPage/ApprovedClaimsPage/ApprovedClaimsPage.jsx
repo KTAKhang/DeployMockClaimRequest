@@ -7,7 +7,11 @@ import { STRINGS } from "./strings";
 
 const ApprovedClaims = () => {
   const dispatch = useDispatch();
-  const { claims = [], loading, error } = useSelector((state) => state.claimer || {});
+  const {
+    claims = [],
+    loading,
+    error,
+  } = useSelector((state) => state.claimer || {});
 
   useEffect(() => {
     dispatch(fetchClaimsRequestClaimer({}));
@@ -17,9 +21,17 @@ const ApprovedClaims = () => {
 
   return (
     <div className="p-0 bg-white">
-      <div className="mb-4 text-gray-600">{STRINGS.PAGE_BREADCRUMB}</div>
-      {error && <p className="text-red-500">{STRINGS.ERROR_PREFIX} {error}</p>}
-      <ClaimsTable title={STRINGS.TABLE_TITLE} claimsData={approvedClaims} filterCondition="Approved" />
+      {error && (
+        <p className="text-red-500">
+          {STRINGS.ERROR_PREFIX} {error}
+        </p>
+      )}
+      <ClaimsTable
+        title={STRINGS.TABLE_TITLE}
+        claimsData={approvedClaims}
+        filterCondition="Approved"
+        hideCheckboxes={true}
+      />
     </div>
   );
 };

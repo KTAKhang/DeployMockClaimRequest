@@ -60,6 +60,7 @@ export const NAVIGATION_PATHS = {
   FinanceApproved: (id) => `/finance/approved/${id}`,
   FinancePaid: (id) => `/finance/paid/${id}`,
   ClaimManagerment: (id) => `/admin/claim-management/${id}`, // Fixed typo from "ClaimManagerment"
+  ClaimerDashboard: (id) => `/claimer/draft/${id}`, // Fixed typo from "ClaimManagerment"
 };
 
 // Navigation states based on filter condition

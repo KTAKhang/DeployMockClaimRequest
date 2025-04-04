@@ -135,6 +135,11 @@ const Sidebar = ({
     : isClaimer
     ? [
         {
+          name: "Dashboard",
+          path: "/claimer",
+          icon: <FaHome />,
+        },
+        {
           name: "Create Claim",
           path: "/claimer/create-claim",
           icon: <HiOutlinePencilSquare />,

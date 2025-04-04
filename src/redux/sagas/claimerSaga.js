@@ -163,7 +163,11 @@ function* updateClaimSaga(action) {
     });
 
     yield put(updateClaimSuccess(response));
-
+    
+    // Thêm đoạn này để fetch lại chi tiết claim sau khi cập nhật
+    yield delay(500);
+    yield put(fetchClaimDetailRequest(id));
+    
   } catch (error) {
     yield put(updateClaimFailure(error.message));
     toast.error(error.message, {

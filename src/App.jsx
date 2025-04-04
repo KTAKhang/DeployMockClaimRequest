@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { restoreUser } from "./redux/actions/authActions";
 import { setNavigator } from "./redux/store";
 import Chatbot from "./components/ChatBot/Chatbot.jsx";
+import ScrollToTop from "./components/ScrollToTop/ScrollToTop.jsx";
 
 export default function App() {
   const dispatch = useDispatch();
@@ -25,6 +26,7 @@ export default function App() {
 
   return (
     <>
+      <ScrollToTop />
       <AllRoutes />
       <ToastContainer />
       <div>

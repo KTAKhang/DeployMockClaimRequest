@@ -19,16 +19,17 @@ import {
 const initialState = {
   projectsAll: {
     data: [],
-    totalProject: 0
+    totalProject: 0,
   },
   projectById: null,
   loading: false,
   error: null,
-  statusChangeSuccess: false
+  statusChangeSuccess: false,
+  updateSuccess: false,
 };
 
 const updateProjectInList = (projects, updatedProject) => {
-  return projects.map(project => 
+  return projects.map((project) =>
     project._id === updatedProject._id ? updatedProject : project
   );
 };
@@ -37,7 +38,13 @@ export default function projectReducer(state = initialState, action) {
   switch (action.type) {
     // Loading states
     case GET_PROJECTS_ALL:
-    case GET_PROJECT_BY_ID:
+    case "GET_PROJECT_BY_ID":
+      return {
+        ...state,
+        loading: true,
+        error: null,
+        updateSuccess: false,
+      };
     case CREATE_PROJECT:
     case UPDATE_PROJECT:
     case TOGGLE_PROJECT_STATUS:
@@ -45,7 +52,7 @@ export default function projectReducer(state = initialState, action) {
         ...state,
         loading: true,
         error: null,
-        statusChangeSuccess: false
+        statusChangeSuccess: false,
       };
 
     // Success states
@@ -55,15 +62,15 @@ export default function projectReducer(state = initialState, action) {
         loading: false,
         projectsAll: {
           data: action.payload.projects || [],
-          totalProject: action.payload.totalProject || 0
-        }
+          totalProject: action.payload.totalProject || 0,
+        },
       };
 
     case GET_PROJECT_BY_ID_SUCCESS:
       return {
         ...state,
         loading: false,
-        projectById: action.payload
+        projectById: action.payload,
       };
 
     case CREATE_PROJECT_SUCCESS:
@@ -72,8 +79,8 @@ export default function projectReducer(state = initialState, action) {
         loading: false,
         projectsAll: {
           data: [action.payload, ...state.projectsAll.data],
-          totalProject: state.projectsAll.totalProject + 1
-        }
+          totalProject: state.projectsAll.totalProject + 1,
+        },
       };
 
     case UPDATE_PROJECT_SUCCESS:
@@ -83,8 +90,8 @@ export default function projectReducer(state = initialState, action) {
         projectById: action.payload,
         projectsAll: {
           ...state.projectsAll,
-          data: updateProjectInList(state.projectsAll.data, action.payload)
-        }
+          data: updateProjectInList(state.projectsAll.data, action.payload),
+        },
       };
 
     case TOGGLE_PROJECT_STATUS_SUCCESS:
@@ -95,8 +102,8 @@ export default function projectReducer(state = initialState, action) {
         projectById: action.payload,
         projectsAll: {
           ...state.projectsAll,
-          data: updateProjectInList(state.projectsAll.data, action.payload)
-        }
+          data: updateProjectInList(state.projectsAll.data, action.payload),
+        },
       };
 
     // Failure states
@@ -109,7 +116,7 @@ export default function projectReducer(state = initialState, action) {
         ...state,
         loading: false,
         error: action.payload,
-        statusChangeSuccess: false
+        statusChangeSuccess: false,
       };
 
     default:

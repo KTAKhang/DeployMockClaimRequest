@@ -1,5 +1,4 @@
-export const API_URL =
-  "https://ojtbe-production.up.railway.app/api/auth/reset-password";
+export const API_URL = "https://ojt-be.onrender.com/api/auth/reset-password";
 
 export const OTP_REGEX = /^[0-9]{6}$/;
 

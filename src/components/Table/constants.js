@@ -36,6 +36,7 @@ export const FILTER_CONDITIONS = {
   FINANCE_APPROVED: "FinanceApproved",
   FINANCE_PAID: "FinancePaid",
   CLAIM_MANAGEMENT: "ClaimManagement", // Fixed typo from "ClaimManagerment"
+  CLAIMER_DASHBOARD: "ClaimerDashboard",
 };
 
 // Modes
@@ -44,6 +45,7 @@ export const MODES = {
   HISTORY: "history",
   ADMIN: "admin",
   DRAFT: "draft",
+  CLAIMER_DASHBOARD: "claimerDashboard",
 };
 
 // Pagination settings

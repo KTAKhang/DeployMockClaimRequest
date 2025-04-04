@@ -5,5 +5,5 @@ export const ROLE_REDIRECTS = {
   Administrator: "/admin",
   Approver: "/approver",
   Finance: "/finance",
-  Claimer: "/claimer/create-claim",
+  Claimer: "/claimer",
 };

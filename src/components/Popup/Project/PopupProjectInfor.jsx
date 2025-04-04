@@ -3,6 +3,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { getStaffAll } from "../../../redux/actions/staffActions";
 import { createProject } from "../../../redux/actions/projectActions";
 import { toast } from "react-toastify";
+import {
+  FaTimes,
+  FaSave,
+  FaCalendarAlt,
+  FaUsers,
+  FaUserTie,
+  FaExclamationCircle,
+} from "react-icons/fa";
 
 export default function PopupProjectInfo({
   initialData,
@@ -22,16 +30,19 @@ export default function PopupProjectInfo({
   const [isLoading, setIsLoading] = useState(true);
   const [staffList, setStaffList] = useState([]);
 
-  // Fetch staff list khi component mount
+  // Fetch staff list when component mounts
   useEffect(() => {
     const fetchStaff = async () => {
       setIsLoading(true);
       try {
-        // Thêm log để debug
         console.log("Fetching staff data...");
         await dispatch(getStaffAll());
       } catch (err) {
         console.error("Error fetching staff:", err);
+        toast.error("Failed to load staff data", {
+          position: "top-right",
+          autoClose: 3000,
+        });
       } finally {
         setIsLoading(false);
       }
@@ -39,12 +50,9 @@ export default function PopupProjectInfo({
     fetchStaff();
   }, [dispatch]);
 
-  // Cập nhật staffList khi Redux state thay đổi
+  // Update staffList when Redux state changes
   useEffect(() => {
-    console.log("staffAll changed:", staffAll); // Debug log
-
     if (staffAll?.data) {
-      console.log("Setting staff list:", staffAll.data);
       setStaffList(staffAll.data);
     }
   }, [staffAll]);
@@ -70,8 +78,6 @@ export default function PopupProjectInfo({
   // Add useEffect to properly format initialData when it changes
   useEffect(() => {
     if (initialData) {
-      console.log("Initializing form with data:", initialData);
-
       // Create a formatted version of initialData
       const formattedData = {
         _id: initialData._id || "",
@@ -96,7 +102,6 @@ export default function PopupProjectInfo({
         ),
       };
 
-      console.log("Formatted form data:", formattedData);
       setForm(formattedData);
     }
   }, [initialData]);
@@ -112,9 +117,9 @@ export default function PopupProjectInfo({
     return staffArray.map((staff) => staff._id || staff);
   };
 
-  // Thêm hàm để kiểm tra xem một staff đã được chọn vào vị trí nào chưa
+  // Function to check if a staff is already selected in another role
   const isStaffSelectedElsewhere = (staffId, currentFieldName) => {
-    // Danh sách các trường cần kiểm tra
+    // List of fields to check
     const fieldsToCheck = [
       "pm",
       "qa",
@@ -125,16 +130,16 @@ export default function PopupProjectInfo({
       "technical_consultancy",
     ];
 
-    // Kiểm tra từng trường
+    // Check each field
     for (const field of fieldsToCheck) {
-      // Bỏ qua trường hiện tại
+      // Skip current field
       if (field === currentFieldName) continue;
 
-      // Kiểm tra nếu là trường đơn (pm, qa)
+      // Check single fields (pm, qa)
       if (field === "pm" || field === "qa") {
         if (form[field] === staffId) return true;
       }
-      // Kiểm tra nếu là trường mảng (technical_lead, ba, developers, ...)
+      // Check array fields (technical_lead, ba, developers, ...)
       else if (Array.isArray(form[field]) && form[field].includes(staffId)) {
         return true;
       }
@@ -143,7 +148,7 @@ export default function PopupProjectInfo({
     return false;
   };
 
-  // Cập nhật hàm handleCheckboxSelect để kiểm tra trước khi chọn
+  // Update handleCheckboxSelect to validate before selecting
   const handleCheckboxSelect = (fieldName, staffId) => {
     setForm((prev) => {
       const currentSelected = Array.isArray(prev[fieldName])
@@ -151,17 +156,17 @@ export default function PopupProjectInfo({
         : [];
       const isSelected = currentSelected.includes(staffId);
 
-      // Nếu đang bỏ chọn, luôn cho phép
+      // If deselecting, always allow
       if (isSelected) {
         const newValue = currentSelected.filter((id) => id !== staffId);
-        // Nếu mảng rỗng, không xóa lỗi
+        // If array is empty, don't remove error
         if (newValue.length === 0) {
           setErrors((prev) => ({
             ...prev,
             [fieldName]: "At least one staff member is required",
           }));
         } else {
-          // Xóa lỗi nếu vẫn còn staff được chọn
+          // Remove error if staff is still selected
           setErrors((prev) => ({
             ...prev,
             [fieldName]: "",
@@ -173,7 +178,7 @@ export default function PopupProjectInfo({
         };
       }
 
-      // Nếu đang chọn, kiểm tra xem staff đã được chọn ở vị trí khác chưa
+      // If selecting, check if staff is already selected elsewhere
       if (isStaffSelectedElsewhere(staffId, fieldName)) {
         toast.warning(
           "This staff is already assigned to another role. Please remove them from that role first.",
@@ -185,7 +190,7 @@ export default function PopupProjectInfo({
         return prev;
       }
 
-      // Xóa lỗi khi thêm staff
+      // Clear error when adding staff
       setErrors((prev) => ({
         ...prev,
         [fieldName]: "",
@@ -198,7 +203,7 @@ export default function PopupProjectInfo({
     });
   };
 
-  // Thêm state errors
+  // Add errors state
   const [errors, setErrors] = useState({
     project_name: "",
     duration: {
@@ -214,11 +219,11 @@ export default function PopupProjectInfo({
     technical_consultancy: "",
   });
 
-  // Cập nhật hàm handleChange để xóa lỗi khi user nhập
+  // Update handleChange to clear errors when user types
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Xử lý đặc biệt cho ngày tháng
+    // Special handling for dates
     if (name === "from" || name === "to") {
       if (name === "to" && form.duration?.from && value) {
         if (value < form.duration.from) {
@@ -265,7 +270,7 @@ export default function PopupProjectInfo({
       return;
     }
 
-    // Xử lý các trường khác
+    // Handle other fields
     setForm((prev) => ({
       ...prev,
       [name]: value,
@@ -278,19 +283,7 @@ export default function PopupProjectInfo({
     }));
   };
 
-  const handleMultiSelect = (e, fieldName) => {
-    const selectedValues = Array.from(
-      e.target.selectedOptions,
-      (option) => option.value
-    );
-
-    setForm((prev) => ({
-      ...prev,
-      [fieldName]: selectedValues,
-    }));
-  };
-
-  // Thêm hàm validate form
+  // Validate form
   const validateForm = () => {
     const newErrors = {
       project_name: "",
@@ -372,22 +365,26 @@ export default function PopupProjectInfo({
     return isValid;
   };
 
-  // Cập nhật các hàm xử lý submit
+  // Update submit functions
   const handleAdd = () => {
     if (!validateForm()) {
       return;
     }
     try {
-      // Format data và loại bỏ _id
+      // Format data and remove _id
       const formattedData = formatFormData(form);
       delete formattedData._id;
 
-      console.log("Submitting project data:", formattedData);
-
-      // Dispatch action và để saga xử lý
+      // Dispatch action and let saga handle it
       dispatch(createProject(formattedData));
 
-      // Đóng popup ngay sau khi gửi request
+      // Show success toast
+      toast.success("Creating project...", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+
+      // Close popup after sending request
       onClose();
     } catch (error) {
       console.error("Error creating project:", error);
@@ -405,37 +402,44 @@ export default function PopupProjectInfo({
     try {
       const formattedData = formatFormData(form);
 
-      // Đảm bảo _id được giữ nguyên
+      // Make sure _id is preserved
       if (!formattedData._id && form._id) {
         formattedData._id = form._id;
       }
 
-      console.log("Sending update data to BE:", formattedData);
-      console.log("Project ID:", formattedData._id);
-
       if (!formattedData._id) {
-        toast.error("Cannot update: Missing project ID");
+        toast.error("Cannot update: Missing project ID", {
+          position: "top-right",
+          autoClose: 5000,
+        });
         return;
       }
+
+      // Show success toast
+      toast.success("Updating project...", {
+        position: "top-right",
+        autoClose: 3000,
+      });
 
       onUpdate?.(formattedData);
       onClose();
     } catch (error) {
       console.error("Error updating project:", error);
-      toast.error("Failed to update project. Please try again.");
+      toast.error("Failed to update project. Please try again.", {
+        position: "top-right",
+        autoClose: 5000,
+      });
     }
   };
 
-  // Thêm hàm clear selection
+  // Function to clear selection
   const handleClearSelection = (fieldName) => {
-    // Check if it's a single-select field (pm, qa) or multi-select field
     if (fieldName === "pm" || fieldName === "qa") {
       setForm((prev) => ({
         ...prev,
         [fieldName]: "",
       }));
     } else {
-      // For multi-select fields (arrays)
       setForm((prev) => ({
         ...prev,
         [fieldName]: [],
@@ -443,25 +447,21 @@ export default function PopupProjectInfo({
     }
   };
 
-  // Cập nhật renderStaffCheckboxes để hiển thị lỗi
+  // Update renderStaffCheckboxes to display errors
   const renderStaffCheckboxes = (fieldName) => {
     if (isLoading) {
-      return <div className="text-gray-500">Loading staff...</div>;
+      return <div className="text-gray-500 p-3">Loading staff...</div>;
     }
 
     if (!staffList.length) {
-      return <div className="text-gray-500">No staff available</div>;
+      return <div className="text-gray-500 p-3">No staff available</div>;
     }
 
     const selectedCount = form[fieldName]?.length || 0;
 
     return (
-      <div
-        className={`bg-white rounded-lg border ${
-          errors[fieldName] ? "border-red-500" : "border-gray-300"
-        }`}
-      >
-        {/* Header với số lượng và nút clear */}
+      <div className="max-h-48 overflow-y-auto">
+        {/* Header with count and clear button */}
         <div className="flex items-center justify-between p-2 border-b bg-gray-50">
           <span className="text-sm text-gray-600">
             Selected: {selectedCount} staff
@@ -471,26 +471,14 @@ export default function PopupProjectInfo({
               onClick={() => handleClearSelection(fieldName)}
               className="text-sm text-red-600 hover:text-red-700 flex items-center"
             >
-              <svg
-                className="w-4 h-4 mr-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                />
-              </svg>
+              <FaTimes className="w-3 h-3 mr-1" />
               Clear
             </button>
           )}
         </div>
 
-        {/* Danh sách staff */}
-        <div className="max-h-48 overflow-y-auto p-2">
+        {/* Staff list */}
+        <div className="p-2">
           {staffList.map((staff) => {
             const isSelected = form[fieldName]?.includes(staff._id);
             const isDisabled =
@@ -515,7 +503,7 @@ export default function PopupProjectInfo({
                 />
                 <label
                   htmlFor={`${fieldName}-${staff._id}`}
-                  className={`flex-1 cursor-pointer text-sm ${
+                  className={`flex-1 cursor-pointer text-sm truncate ${
                     isDisabled
                       ? "text-gray-400 cursor-not-allowed"
                       : "text-gray-700 hover:text-gray-900"
@@ -529,7 +517,7 @@ export default function PopupProjectInfo({
                   {staff.user_name}
                   {isDisabled && (
                     <span className="ml-2 text-xs text-gray-400">
-                      (already in another role)
+                      (assigned)
                     </span>
                   )}
                 </label>
@@ -537,57 +525,11 @@ export default function PopupProjectInfo({
             );
           })}
         </div>
-        {errors[fieldName] && (
-          <div className="px-2 pb-2">
-            <span className="text-red-500 text-xs">{errors[fieldName]}</span>
-          </div>
-        )}
       </div>
     );
   };
 
-  // Thêm useEffect để debug state changes
-  useEffect(() => {
-    console.log("Current state:", {
-      isLoading,
-      staffListLength: staffList.length,
-      formData: form,
-    });
-  }, [isLoading, staffList, form]);
-
-  // Thêm useEffect để debug staffList
-  useEffect(() => {
-    console.log("Current staffList:", staffList);
-  }, [staffList]);
-
-  // Cập nhật renderStaffOptions để hiển thị trạng thái disabled
-  const renderStaffOptions = () => {
-    if (isLoading) {
-      return <option value="">Loading staff...</option>;
-    }
-
-    if (!staffList || staffList.length === 0) {
-      return <option value="">No staff available</option>;
-    }
-
-    return staffList.map((user) => {
-      const isDisabled = isStaffSelectedElsewhere(user._id, "");
-
-      return (
-        <option
-          key={user._id}
-          value={user._id}
-          disabled={isDisabled}
-          className={isDisabled ? "text-gray-400" : ""}
-        >
-          {user.user_name || "Unnamed Staff"}
-          {isDisabled ? " (assigned elsewhere)" : ""}
-        </option>
-      );
-    });
-  };
-
-  // Cập nhật renderSingleSelect để hiển thị lỗi
+  // Update renderSingleSelect to display errors and fix overlap
   const renderSingleSelect = (fieldName, label) => (
     <div className="space-y-2">
       <label className="block text-sm font-medium text-gray-700">
@@ -599,9 +541,11 @@ export default function PopupProjectInfo({
           value={form[fieldName] || ""}
           onChange={handleChange}
           disabled={readOnlyFields.includes(fieldName) || isLoading}
-          className={`w-full rounded-lg border ${
-            errors[fieldName] ? "border-red-500" : "border-gray-300"
-          } shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 pr-8`}
+          className={`w-full rounded-lg border shadow-sm py-3 pl-3 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 appearance-none ${
+            errors[fieldName]
+              ? "border-red-500 focus:ring-red-300"
+              : "border-gray-200"
+          }`}
         >
           <option value="">Select {label}</option>
           {staffList.map((user) => {
@@ -617,46 +561,37 @@ export default function PopupProjectInfo({
                 className={isDisabled ? "text-gray-400" : ""}
               >
                 {user.user_name || "Unnamed Staff"}
-                {isDisabled ? " (assigned elsewhere)" : ""}
+                {isDisabled ? " (assigned)" : ""}
               </option>
             );
           })}
         </select>
         {form[fieldName] && (
           <button
+            type="button"
             onClick={() => handleClearSelection(fieldName)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600"
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600 p-1"
           >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <FaTimes className="w-4 h-4" />
           </button>
         )}
       </div>
       {errors[fieldName] && (
-        <span className="text-red-500 text-xs">{errors[fieldName]}</span>
+        <p className="text-red-500 text-xs flex items-center">
+          <FaExclamationCircle className="mr-1" />
+          {errors[fieldName]}
+        </p>
       )}
     </div>
   );
 
-  // Thêm hàm format data
+  // Format data function
   const formatFormData = (data) => {
-    // Validate input data
     if (!data) throw new Error("No data provided");
 
     // Format data
     const formatted = {
-      _id: data._id, // Đảm bảo _id được giữ nguyên
+      _id: data._id, // Keep _id unchanged
       project_name: data.project_name?.trim() || "",
       duration: {
         from: data.duration?.from || "",
@@ -675,13 +610,10 @@ export default function PopupProjectInfo({
         : [],
     };
 
-    // Log formatted data
-    console.log("Formatted project data:", formatted);
-
     return formatted;
   };
 
-  // Thêm useEffect để theo dõi trạng thái tạo project
+  // Monitor project creation status
   useEffect(() => {
     if (projectError) {
       toast.error(`Failed to create project: ${projectError}`, {
@@ -692,55 +624,44 @@ export default function PopupProjectInfo({
   }, [projectError]);
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-2xl p-8 w-[900px] max-h-[90vh] overflow-y-auto relative">
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
+      {/* Container */}
+      <div className="bg-white rounded-xl shadow-lg w-full max-w-4xl flex flex-col animate-slideIn max-h-[90vh]">
         {/* Header */}
-        <div className="border-b pb-4 mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">
-            Project Information
-          </h2>
-          <p className="text-gray-500 text-sm mt-1">
-            Fill in the project details and assign team members
-          </p>
-        </div>
-
-        {/* Loading State */}
-        {isLoading && (
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-            <span className="ml-3 text-gray-600">Loading staff data...</span>
-          </div>
-        )}
-
-        {/* Error State */}
-        {/* {!isLoading && staffList.length === 0 && (
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-r">
-            <div className="flex items-center">
-              <svg className="h-6 w-6 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              <p className="ml-3 text-yellow-700">No staff data available. Please check your API connection.</p>
-            </div>
-            <button 
-              onClick={() => {
-                setIsLoading(true);
-                dispatch(getStaffAll(1, 100));
-              }}
-              className="mt-3 bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg hover:bg-yellow-200 transition-colors"
+        <div className="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-4 text-white rounded-t-xl sticky top-0 z-10">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-bold">
+              {initialData?._id ? "Update Project" : "Create Project"}
+            </h2>
+            <button
+              onClick={onClose}
+              className="text-white hover:text-gray-200 transition-colors"
             >
-              Retry Loading
+              <FaTimes />
             </button>
           </div>
-        )} */}
+        </div>
 
-        {/* Form Content */}
-        <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-          {/* Project Basic Info Section */}
-          <div className="col-span-2 bg-gray-50 p-4 rounded-lg mb-4">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">
+        {/* Content area with adjusted max height and better scrolling */}
+        <div
+          className="overflow-y-auto p-4 md:p-6"
+          style={{ maxHeight: "calc(90vh - 140px)" }}
+        >
+          {/* Loading State */}
+          {isLoading && (
+            <div className="flex items-center justify-center py-8">
+              <div className="w-12 h-12 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin mb-4"></div>
+              <span className="ml-3 text-gray-600">Loading staff data...</span>
+            </div>
+          )}
+
+          {/* Basic Information */}
+          <div className="mb-6 p-4 rounded-xl border border-gray-200 bg-white shadow-sm">
+            <h3 className="text-base font-semibold text-gray-800 mb-4 flex items-center">
+              <FaCalendarAlt className="mr-2 text-blue-600" />
               Basic Information
             </h3>
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               {/* Project Name */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
@@ -753,90 +674,109 @@ export default function PopupProjectInfo({
                   onChange={handleChange}
                   disabled={readOnlyFields.includes("project_name")}
                   placeholder="Enter Project Name"
-                  className={`w-full rounded-lg border ${
-                    errors.project_name ? "border-red-500" : "border-gray-300"
-                  } shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
+                  className={`w-full rounded-lg border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 ${
+                    errors.project_name
+                      ? "border-red-500 focus:ring-red-300"
+                      : "border-gray-200"
+                  }`}
                 />
                 {errors.project_name && (
-                  <span className="text-red-500 text-xs">
+                  <p className="text-red-500 text-xs flex items-center">
+                    <FaExclamationCircle className="mr-1" />
                     {errors.project_name}
-                  </span>
+                  </p>
                 )}
               </div>
 
-              {/* Dates */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Start Date <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    name="from"
-                    value={form.duration?.from || ""}
-                    onChange={handleChange}
-                    max={form.duration?.to || ""}
-                    className={`w-full rounded-lg border ${
-                      errors.duration?.from
-                        ? "border-red-500"
-                        : "border-gray-300"
-                    } shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
-                  />
-                  {errors.duration?.from && (
-                    <span className="text-red-500 text-xs">
-                      {errors.duration.from}
-                    </span>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    End Date <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    name="to"
-                    value={form.duration?.to || ""}
-                    onChange={handleChange}
-                    min={form.duration?.from || ""}
-                    className={`w-full rounded-lg border ${
-                      errors.duration?.to ? "border-red-500" : "border-gray-300"
-                    } shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
-                  />
-                  {errors.duration?.to && (
-                    <span className="text-red-500 text-xs">
-                      {errors.duration.to}
-                    </span>
-                  )}
-                </div>
+              {/* Empty div for alignment - removed to avoid wasted space */}
+
+              {/* Dates - more responsive grid for mobile */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Start Date <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  name="from"
+                  value={form.duration?.from || ""}
+                  onChange={handleChange}
+                  max={form.duration?.to || ""}
+                  className={`w-full rounded-lg border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 ${
+                    errors.duration?.from
+                      ? "border-red-500 focus:ring-red-300"
+                      : "border-gray-200"
+                  }`}
+                />
+                {errors.duration?.from && (
+                  <p className="text-red-500 text-xs flex items-center">
+                    <FaExclamationCircle className="mr-1" />
+                    {errors.duration.from}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  End Date <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  name="to"
+                  value={form.duration?.to || ""}
+                  onChange={handleChange}
+                  min={form.duration?.from || ""}
+                  className={`w-full rounded-lg border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 ${
+                    errors.duration?.to
+                      ? "border-red-500 focus:ring-red-300"
+                      : "border-gray-200"
+                  }`}
+                />
+                {errors.duration?.to && (
+                  <p className="text-red-500 text-xs flex items-center">
+                    <FaExclamationCircle className="mr-1" />
+                    {errors.duration.to}
+                  </p>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Project Leaders Section */}
-          <div className="col-span-2 bg-gray-50 p-4 rounded-lg mb-4">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">
+          {/* Project Leaders */}
+          <div className="mb-6 p-4 rounded-xl border border-gray-200 bg-white shadow-sm">
+            <h3 className="text-base font-semibold text-gray-800 mb-4 flex items-center">
+              <FaUserTie className="mr-2 text-blue-600" />
               Project Leaders
             </h3>
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               {renderSingleSelect("pm", "Project Manager")}
               {renderSingleSelect("qa", "QA Lead")}
             </div>
           </div>
 
-          {/* Team Members Section */}
-          <div className="col-span-2 bg-gray-50 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold text-gray-700 mb-4">
+          {/* Team Members - better responsive grid for mobile */}
+          <div className="p-4 rounded-xl border border-gray-200 bg-white shadow-sm">
+            <h3 className="text-base font-semibold text-gray-800 mb-4 flex items-center">
+              <FaUsers className="mr-2 text-blue-600" />
               Team Members
             </h3>
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Technical Lead */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
                   Technical Lead <span className="text-red-500">*</span>
                 </label>
-                <div className="bg-white rounded-lg border border-gray-300">
+                <div
+                  className={`rounded-lg border overflow-hidden ${
+                    errors.technical_lead ? "border-red-500" : "border-gray-200"
+                  }`}
+                >
                   {renderStaffCheckboxes("technical_lead")}
                 </div>
+                {errors.technical_lead && (
+                  <p className="text-red-500 text-xs flex items-center">
+                    <FaExclamationCircle className="mr-1" />
+                    {errors.technical_lead}
+                  </p>
+                )}
               </div>
 
               {/* Business Analyst */}
@@ -844,9 +784,19 @@ export default function PopupProjectInfo({
                 <label className="block text-sm font-medium text-gray-700">
                   Business Analyst <span className="text-red-500">*</span>
                 </label>
-                <div className="bg-white rounded-lg border border-gray-300">
+                <div
+                  className={`rounded-lg border overflow-hidden ${
+                    errors.ba ? "border-red-500" : "border-gray-200"
+                  }`}
+                >
                   {renderStaffCheckboxes("ba")}
                 </div>
+                {errors.ba && (
+                  <p className="text-red-500 text-xs flex items-center">
+                    <FaExclamationCircle className="mr-1" />
+                    {errors.ba}
+                  </p>
+                )}
               </div>
 
               {/* Developers */}
@@ -854,9 +804,19 @@ export default function PopupProjectInfo({
                 <label className="block text-sm font-medium text-gray-700">
                   Developers <span className="text-red-500">*</span>
                 </label>
-                <div className="bg-white rounded-lg border border-gray-300">
+                <div
+                  className={`rounded-lg border overflow-hidden ${
+                    errors.developers ? "border-red-500" : "border-gray-200"
+                  }`}
+                >
                   {renderStaffCheckboxes("developers")}
                 </div>
+                {errors.developers && (
+                  <p className="text-red-500 text-xs flex items-center">
+                    <FaExclamationCircle className="mr-1" />
+                    {errors.developers}
+                  </p>
+                )}
               </div>
 
               {/* Testers */}
@@ -864,47 +824,77 @@ export default function PopupProjectInfo({
                 <label className="block text-sm font-medium text-gray-700">
                   Testers <span className="text-red-500">*</span>
                 </label>
-                <div className="bg-white rounded-lg border border-gray-300">
+                <div
+                  className={`rounded-lg border overflow-hidden ${
+                    errors.testers ? "border-red-500" : "border-gray-200"
+                  }`}
+                >
                   {renderStaffCheckboxes("testers")}
                 </div>
+                {errors.testers && (
+                  <p className="text-red-500 text-xs flex items-center">
+                    <FaExclamationCircle className="mr-1" />
+                    {errors.testers}
+                  </p>
+                )}
               </div>
 
-              {/* Technical Consultancy */}
-              <div className="space-y-2 col-span-2">
+              {/* Technical Consultancy - changed from col-span-2 to more responsive layout */}
+              <div className="space-y-2 md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700">
                   Technical Consultancy <span className="text-red-500">*</span>
                 </label>
-                <div className="bg-white rounded-lg border border-gray-300">
+                <div
+                  className={`rounded-lg border overflow-hidden ${
+                    errors.technical_consultancy
+                      ? "border-red-500"
+                      : "border-gray-200"
+                  }`}
+                >
                   {renderStaffCheckboxes("technical_consultancy")}
                 </div>
+                {errors.technical_consultancy && (
+                  <p className="text-red-500 text-xs flex items-center">
+                    <FaExclamationCircle className="mr-1" />
+                    {errors.technical_consultancy}
+                  </p>
+                )}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Footer Actions */}
-        <div className="mt-8 pt-6 border-t flex justify-end gap-4">
+        {/* Action Buttons - sticky to ensure visibility */}
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3 mt-auto sticky bottom-0 rounded-b-xl">
           <button
             onClick={onClose}
-            className="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
-            disabled={projectLoading}
+            className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium transition-colors flex items-center"
           >
-            Cancel
+            <FaTimes className="mr-2" /> Cancel
           </button>
           {onUpdate && (
             <button
               onClick={handleUpdate}
               disabled={isLoading || projectLoading}
-              className="px-6 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-colors flex items-center disabled:opacity-50"
             >
-              {projectLoading ? "Updating..." : "Update Project"}
+              {projectLoading ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Updating...
+                </div>
+              ) : (
+                <>
+                  <FaSave className="mr-2" /> Update Project
+                </>
+              )}
             </button>
           )}
           {onAdd && (
             <button
               onClick={handleAdd}
               disabled={isLoading || projectLoading}
-              className="px-6 py-2.5 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50"
+              className="px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-colors flex items-center disabled:opacity-50"
             >
               {projectLoading ? (
                 <div className="flex items-center">

@@ -2,7 +2,7 @@ export const ITEMS_PER_PAGE = 10;
 
 export const COLUMN_CONFIGURATIONS = [
   {
-    label: "User ID",
+    label: "ID",
     shortLabel: "ID",
     key: "_id",
     width: "w-[12%]",
@@ -11,7 +11,7 @@ export const COLUMN_CONFIGURATIONS = [
   },
   {
     label: "Staff Name",
-    shortLabel: "Name",
+    shortLabel: "Staff",
     key: "user_name",
     width: "w-[18%]",
     sortable: true,
@@ -47,7 +47,7 @@ export const COLUMN_CONFIGURATIONS = [
     key: "salary",
     width: "w-[10%]",
     sortable: true,
-    priority: "medium",
+    priority: "low",
   },
   {
     label: "Status",

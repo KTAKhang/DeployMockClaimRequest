@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://ojtbe-production.up.railway.app/api";
+const API_BASE_URL = "https://ojt-be.onrender.com/api";
 
 // ✅ Create a custom Axios instance
 const apiClient = axios.create({

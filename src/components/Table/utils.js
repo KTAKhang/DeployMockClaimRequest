@@ -295,7 +295,9 @@ export const getNavigationDetails = (filterCondition, id) => {
     return {
       path: `/approver/history/${id || ""}`,
       state: { mode: "history" },
+      
     };
+    
   }
 
   const defaultPath = `/approver/history/${id}`;

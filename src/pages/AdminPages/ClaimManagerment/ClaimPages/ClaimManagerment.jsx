@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchClaimsRequest } from "../../../../redux/actions/approverClaimActions";
 import ClaimsTable from "../../../../components/Table/ClaimsTable";
 import { useNavigate } from "react-router-dom";
+import { FILTER_CONDITIONS } from "../../../../components/Table/constants";
 
 export default function ClaimManagerment() {
   const dispatch = useDispatch();
@@ -36,12 +37,12 @@ export default function ClaimManagerment() {
     <ClaimsTable
       title="Claim Management"
       claimsData={filteredClaims}
-      filterCondition="ClaimManagerment"
+      filterCondition={FILTER_CONDITIONS.CLAIM_MANAGEMENT}
       loading={loading}
       hideUpdatedAt={true}
       onViewDetail={handleViewClaimDetail}
       hideActionButtons={true}
+      hideCheckboxes={true}
     />
   );
 }
-

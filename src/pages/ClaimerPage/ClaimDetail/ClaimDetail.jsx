@@ -110,6 +110,7 @@ const ClaimDetail = () => {
 
   // Determine if this is a draft claim
   const isDraft = claim?.status?.toLowerCase() === STATUS.DRAFT;
+  const isCancelled = claim?.status?.toLowerCase() === STATUS.CANCELLED;
 
   // Fetch claim detail when component mounts
   useEffect(() => {
@@ -129,21 +130,19 @@ const ClaimDetail = () => {
     if (!loadingComment) {
       setFetchingComments(false);
 
-      // Introduce slight delay before setting emptyCommentsLoading to false
       setTimeout(() => {
         setEmptyCommentsLoading(false);
-      }, 2000); // Adjust timing if needed
+      }, 2000);
     }
   }, [loadingComment]);
 
-  // Fetch comments only if not in draft state
+
   useEffect(() => {
-    if (!isDraft) {
+    if (!isDraft && !isCancelled) {
       dispatch(getCommentsRequest(id));
     }
-  }, [dispatch, id, isDraft]);
+  }, [dispatch, id, isDraft, isCancelled]);
 
-  // Update localClaimDetail when claimDetail changes
   useEffect(() => {
     if (claim) {
       setLocalClaimDetail(claim);
@@ -156,12 +155,12 @@ const ClaimDetail = () => {
 
     const timer = setTimeout(() => {
       setInitialCommentsLoading(false);
-    }, 5000); // Adjust the delay as needed
+    }, 5000);
 
-    return () => clearTimeout(timer); // Cleanup function
+    return () => clearTimeout(timer);
   }, [dispatch, id]);
 
-  // Handle successful update
+
   useEffect(() => {
     if (updateClaimSuccess) {
       setShowUpdatePopup(false);
@@ -173,24 +172,24 @@ const ClaimDetail = () => {
 
         setTimeout(() => {
           setIsRefreshing(false);
-        }, 300); // Reduced from 500ms
+        }, 300);
       }
     }
   }, [updateClaimSuccess, dispatch, id, localClaimDetail]);
 
-  // Reset state when component unmounts
+ 
   useEffect(() => {
     return () => {
       dispatch(resetUpdateState());
     };
   }, [dispatch]);
 
-  // Effect to handle scrolling based on action type
+
   useEffect(() => {
     if (!loadingComment) {
       if (emptyCommentsLoading) {
         setFetchingComments(true);
-        dispatch(getCommentsRequest(id)); // Fetch comments
+        dispatch(getCommentsRequest(id)); 
       }
 
       if (Array.isArray(comments)) {
@@ -236,18 +235,14 @@ const ClaimDetail = () => {
     id,
   ]);
 
-  // Handle key down events in the comment input
   const handleKeyDown = (e) => {
-    // Check if Enter key is pressed without Shift key
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault(); // Prevent default behavior (new line)
-      handleSend(); // Call the send function
+      e.preventDefault(); 
+      handleSend(); 
     }
   };
 
-  // Handle update form submission for draft claims
   const handleUpdateSubmit = (formData) => {
-    // Update UI immediately (optimistic update)
     setLocalClaimDetail((prev) => {
       if (!prev) return null;
       return {
@@ -259,16 +254,13 @@ const ClaimDetail = () => {
       };
     });
 
-    // Dispatch update action
     dispatch(updateClaimRequest(id, formData));
   };
 
-  // Handle reply action in comments
   const handleReply = (username, id) => {
     setReplyTo(`@${username} `);
     setCommentId(id);
 
-    // Scroll to the comment being replied to
     if (commentRefs.current[id]) {
       commentRefs.current[id].scrollIntoView({
         behavior: "smooth",
@@ -700,7 +692,7 @@ const ClaimDetail = () => {
 
       {/* Content Section - Modified for GitHub-like design */}
       <div className="grid grid-cols-1">
-        {isDraft ? (
+        {isDraft || isCancelled ? (
           /* Draft Specific Content - Left empty as requested */
           <div className="flex flex-col h-full">
             {/* Left empty for draft claims as requested */}
@@ -864,20 +856,23 @@ const ClaimDetail = () => {
                               <p className="text-gray-700">{comment.content}</p>
                             </div>
                             <div className="mt-2 ml-2 flex items-center gap-3">
-                              {comment.user_id._id !== currentUserId && (
-                                <button
-                                  className="text-xs text-gray-500 hover:text-blue-600 transition-all flex items-center"
-                                  onClick={() =>
-                                    handleReply(
-                                      formatName(comment.user_id?.user_name),
-                                      comment._id
-                                    )
-                                  }
-                                >
-                                  <FaReply className="mr-1" />
-                                  {BUTTON_STRINGS.REPLY}
-                                </button>
-                              )}
+                              {comment.user_id._id !== currentUserId &&
+                                !LOCKED_COMMENT_STATUSES.includes(
+                                  claim.status?.toLowerCase()
+                                ) && (
+                                  <button
+                                    className="text-xs text-gray-500 hover:text-blue-600 transition-all flex items-center"
+                                    onClick={() =>
+                                      handleReply(
+                                        formatName(comment.user_id?.user_name),
+                                        comment._id
+                                      )
+                                    }
+                                  >
+                                    <FaReply className="mr-1" />
+                                    {BUTTON_STRINGS.REPLY}
+                                  </button>
+                                )}
                             </div>
                           </div>
                         </div>

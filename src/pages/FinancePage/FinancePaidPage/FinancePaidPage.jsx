@@ -7,25 +7,25 @@ import { FINANCE_CONSTANTS } from "./constants";
 import { STRINGS } from "./strings";
 
 const FinancePaidPage = () => {
-    const dispatch = useDispatch();
-    const { claims = [], error } = useSelector((state) => state.finance || {});
+  const dispatch = useDispatch();
+  const { claims = [], error } = useSelector((state) => state.finance || {});
 
-    useEffect(() => {
-        dispatch(fetchClaimsRequest({}));
-    }, [dispatch]);
+  useEffect(() => {
+    dispatch(fetchClaimsRequest({}));
+  }, [dispatch]);
 
-    const paidClaims = filterPaidClaims(claims);
+  const paidClaims = filterPaidClaims(claims);
 
-    return (
-        <div className="p-0 bg-white">
-
-            <ClaimsTable
-                title={STRINGS.PAID_CLAIMS_TITLE}
-                claimsData={paidClaims}
-                filterCondition={FINANCE_CONSTANTS.FILTER_CONDITION}
-            />
-        </div>
-    );
+  return (
+    <div className="p-0 bg-white">
+      <ClaimsTable
+        title={STRINGS.PAID_CLAIMS_TITLE}
+        claimsData={paidClaims}
+        filterCondition={FINANCE_CONSTANTS.FILTER_CONDITION}
+        hideCheckboxes={true}
+      />
+    </div>
+  );
 };
 
 export default FinancePaidPage;

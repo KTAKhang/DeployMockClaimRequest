@@ -1,7 +1,10 @@
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getStaffById } from "../../../redux/actions/staffActions";
+import {
+  getStaffById,
+  GET_STAFF_ALL,
+} from "../../../redux/actions/staffActions";
 import {
   FaFileAlt,
   FaUser,
@@ -11,7 +14,6 @@ import {
   FaDollarSign,
   FaEdit,
   FaArrowLeft,
-  FaComments,
   FaCopy,
   FaCheck,
 } from "react-icons/fa";
@@ -29,7 +31,6 @@ import {
   FIELD_LABELS,
   QUICK_STATS_LABELS,
   BUTTON_STRINGS,
-  PLACEHOLDER_STRINGS,
   DEFAULT_VALUES,
   TOAST_MESSAGES,
   LOADING_STRINGS,
@@ -63,7 +64,6 @@ const StaffDetail = () => {
 
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [remarks, setRemarks] = useState("");
   const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
@@ -73,6 +73,10 @@ const StaffDetail = () => {
       setTimeout(() => setIsLoading(false), UI_CONSTANTS.LOADING_DELAY);
     }
   }, [dispatch, id, staffFromRedux, staffFromState]);
+
+  useEffect(() => {
+    dispatch({ type: GET_STAFF_ALL }); // Fetch latest data
+  }, [dispatch]);
 
   useEffect(() => {
     if (staffById && staffById._id === id) {
@@ -242,7 +246,7 @@ const StaffDetail = () => {
 
         {/* Profile section with card layout */}
         <div className="p-4 sm:p-6">
-          <div className="flex flex-col md:flex-row gap-6 mb-8">
+          <div className="flex flex-col md:flex-row gap-6 mb-6">
             {/* Left column - Profile image and basic stats */}
             <div className="md:w-1/3 flex flex-col items-center">
               <div className="relative group">
@@ -305,7 +309,7 @@ const StaffDetail = () => {
 
             {/* Right column - Detailed information */}
             <div className="md:w-2/3">
-              <div className="bg-gray-50 p-4 sm:p-6 rounded-xl border border-gray-100">
+              <div className="bg-gray-50 h-full p-4 sm:p-6 rounded-xl border border-gray-100">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                   <FaFileAlt className="mr-2 text-blue-600" />{" "}
                   {SECTION_HEADERS.DETAILED_INFORMATION}
@@ -371,33 +375,12 @@ const StaffDetail = () => {
                     </div>
                   ))}
                 </div>
-
-                {/* Remarks textarea with styled container */}
-                <div className="mt-6">
-                  <div className="flex items-center mb-2 text-gray-700">
-                    <FaComments className="mr-2 text-blue-600" />
-                    <h4 className="font-medium">{SECTION_HEADERS.REMARKS}</h4>
-                  </div>
-                  <textarea
-                    className="w-full border border-gray-200 p-3 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 focus:outline-none transition-all resize-none shadow-sm"
-                    rows="4"
-                    placeholder={PLACEHOLDER_STRINGS.REMARKS}
-                    value={remarks}
-                    onChange={(e) => setRemarks(e.target.value)}
-                  />
-                </div>
               </div>
             </div>
           </div>
 
           {/* Action buttons with hover effects */}
           <div className="flex flex-wrap justify-end gap-3 mt-6">
-            <button
-              onClick={() => navigate(-1)}
-              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium transition-colors flex items-center justify-center"
-            >
-              <FaArrowLeft className="mr-2" /> {BUTTON_STRINGS.BACK}
-            </button>
             <button
               onClick={handleUpdateClick}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center shadow-sm hover:shadow"

@@ -828,19 +828,20 @@ export default function Detail() {
                         <p className="text-gray-700">{comment.content}</p>
                       </div>
                       <div className="mt-2 ml-2 flex items-center gap-3">
-                        {comment.user_id._id !== currentUserId && (
-                          <button
-                            className="text-xs text-gray-500 hover:text-blue-600 transition-all flex items-center"
-                            onClick={() =>
-                              handleReply(
-                                formatName(comment.user_id?.user_name),
-                                comment._id
-                              )
-                            }
-                          >
-                            <FaReply className="mr-1" /> {BUTTONS.REPLY}
-                          </button>
-                        )}
+                        {comment.user_id._id !== currentUserId &&
+                          claim.status?.name !== "Paid" && (
+                            <button
+                              className="text-xs text-gray-500 hover:text-blue-600 transition-all flex items-center"
+                              onClick={() =>
+                                handleReply(
+                                  formatName(comment.user_id?.user_name),
+                                  comment._id
+                                )
+                              }
+                            >
+                              <FaReply className="mr-1" /> {BUTTONS.REPLY}
+                            </button>
+                          )}
                       </div>
                     </div>
                   </div>

@@ -135,7 +135,7 @@ export const validateClaimForm = (form, claimRows) => {
     } else if (row.from_date && new Date(row.from_date) > new Date(row.to_date)) {
       newErrors.claimRows[index].to_date = "End date must be after start date";
       isValid = false;
-    }
+    } 
 
     if (!row.totalNoOfHours) {
       newErrors.claimRows[index].totalNoOfHours = "Total working hours is required";

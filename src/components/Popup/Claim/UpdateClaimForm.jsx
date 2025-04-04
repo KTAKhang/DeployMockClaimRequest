@@ -21,7 +21,7 @@ const UpdateClaimForm = ({ initialData, onClose, onSubmit, claimId }) => {
   const [actionType, setActionType] = useState("");
   const [notification, setNotification] = useState({ message: "", type: "" });
 
-  // Manage validation errors
+
   const [errors, setErrors] = useState({
     from_date: "",
     to_date: "",
@@ -29,7 +29,7 @@ const UpdateClaimForm = ({ initialData, onClose, onSubmit, claimId }) => {
     reason_claimer: "",
   });
 
-  // Reset state when component unmounts
+
   useEffect(() => {
     return () => {
       dispatch(resetUpdateState());
@@ -123,6 +123,37 @@ const UpdateClaimForm = ({ initialData, onClose, onSubmit, claimId }) => {
   }, [updateClaimError]);
 
   const handleChange = (field, value) => {
+    // Xử lý đặc biệt cho date fields
+    if (field === "from_date" || field === "to_date") {
+      const today = getCurrentDate().date;
+      
+      // Kiểm tra nếu ngày được chọn lớn hơn ngày hiện tại
+      if (value > today) {
+        setNotification({
+          message: "Future date is not allowed",
+          type: "error",
+        });
+        return;
+      }
+      
+      // Kiểm tra thêm với from_date và to_date
+      if (field === "from_date" && formData.to_date && value > formData.to_date) {
+        setNotification({
+          message: "From date must be before to date",
+          type: "error",
+        });
+        return;
+      }
+      
+      if (field === "to_date" && formData.from_date && value < formData.from_date) {
+        setNotification({
+          message: "To date must be after from date",
+          type: "error",
+        });
+        return;
+      }
+    }
+
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -158,16 +189,23 @@ const UpdateClaimForm = ({ initialData, onClose, onSubmit, claimId }) => {
     };
 
     let isValid = true;
+    const today = getCurrentDate().date;
 
     // Check from_date
     if (!formData.from_date) {
       newErrors.from_date = "Start date is required";
+      isValid = false;
+    } else if (formData.from_date > today) {
+      newErrors.from_date = "Future date is not allowed";
       isValid = false;
     }
 
     // Check to_date
     if (!formData.to_date) {
       newErrors.to_date = "End date is required";
+      isValid = false;
+    } else if (formData.to_date > today) {
+      newErrors.to_date = "Future date is not allowed";
       isValid = false;
     } else if (
       formData.from_date &&
@@ -221,8 +259,9 @@ const UpdateClaimForm = ({ initialData, onClose, onSubmit, claimId }) => {
       {/* Notification */}
       {notification.message && (
         <div
-          className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg ${notification.type === "success" ? "bg-green-500" : "bg-red-500"
-            } text-white z-50 flex items-center gap-2 animate-fadeIn`}
+          className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg ${
+            notification.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white z-50 flex items-center gap-2 animate-fadeIn`}
         >
           {notification.type === "success" ? (
             <FaSave className="text-white" />
@@ -337,6 +376,7 @@ const UpdateClaimForm = ({ initialData, onClose, onSubmit, claimId }) => {
                   type="date"
                   value={formData.from_date}
                   onChange={(e) => handleChange("from_date", e.target.value)}
+                  max={getCurrentDate().date}
                   className={`border rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm ${errors.from_date
                     ? "border-red-500 focus:ring-red-300"
                     : "border-gray-200"
@@ -358,6 +398,7 @@ const UpdateClaimForm = ({ initialData, onClose, onSubmit, claimId }) => {
                   type="date"
                   value={formData.to_date}
                   onChange={(e) => handleChange("to_date", e.target.value)}
+                  max={getCurrentDate().date}
                   className={`border rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm ${errors.to_date
                     ? "border-red-500 focus:ring-red-300"
                     : "border-gray-200"
@@ -381,10 +422,11 @@ const UpdateClaimForm = ({ initialData, onClose, onSubmit, claimId }) => {
                   onChange={(e) =>
                     handleChange("totalNoOfHours", e.target.value)
                   }
-                  className={`border rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm ${errors.totalNoOfHours
-                    ? "border-red-500 focus:ring-red-300"
-                    : "border-gray-200"
-                    }`}
+                  className={`border rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm ${
+                    errors.totalNoOfHours
+                      ? "border-red-500 focus:ring-red-300"
+                      : "border-gray-200"
+                  }`}
                   min="0"
                   step="0.01"
                   required
@@ -405,10 +447,11 @@ const UpdateClaimForm = ({ initialData, onClose, onSubmit, claimId }) => {
               <textarea
                 value={formData.reason_claimer}
                 onChange={(e) => handleChange("reason_claimer", e.target.value)}
-                className={`border rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm min-h-[100px] resize-none ${errors.reason_claimer
-                  ? "border-red-500 focus:ring-red-300"
-                  : "border-gray-200"
-                  }`}
+                className={`border rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm min-h-[100px] resize-none ${
+                  errors.reason_claimer
+                    ? "border-red-500 focus:ring-red-300"
+                    : "border-gray-200"
+                }`}
                 required
                 placeholder="Enter your reason here..."
               />

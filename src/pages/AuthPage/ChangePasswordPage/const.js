@@ -1,4 +1,3 @@
 export const API_URLS = {
-  CHANGE_PASSWORD:
-    "https://ojtbe-production.up.railway.app/api/user/change-password",
+  CHANGE_PASSWORD: "https://ojt-be.onrender.com/api/user/change-password",
 };

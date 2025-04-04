@@ -83,75 +83,81 @@ function* addStaffSaga(action) {
 function* updateStaffSaga(action) {
   try {
     console.log("📤 Updating staff with data:", action.payload);
-    
+
     // Lấy thông tin người dùng hiện tại
-    const currentUser = yield select(state => state.auth.user);
+    const currentUser = yield select((state) => state.auth.user);
     console.log("Current user in saga:", currentUser);
-    
+
     // Kiểm tra quyền admin - chú ý kiểm tra cả role và role_name
-    const isAdmin = 
-      currentUser?.role_name === 'Administrator' || 
-      currentUser?.role === 'Administrator';
-    
+    const isAdmin =
+      currentUser?.role_name === "Administrator" ||
+      currentUser?.role === "Administrator";
+
     console.log("Is admin in saga:", isAdmin);
-    
+
     // Chuẩn bị dữ liệu cập nhật
-    const updateData = {...action.payload};
-    
+    const updateData = { ...action.payload };
+
     // Quan trọng: Chuyển đổi role_name thành role để gửi đúng format API yêu cầu
     if (updateData.role_name) {
       updateData.role = updateData.role_name;
       delete updateData.role_name;
     }
-    
+
     // Nếu không phải admin, loại bỏ role để không thay đổi role
     if (!isAdmin && updateData.role) {
       console.warn("⚠️ User is not admin, removing role from update request");
       delete updateData.role;
     }
-    
+
     // Tạo FormData để gửi dữ liệu dạng multipart/form-data
     const formData = new FormData();
-    
+
     // Thêm các trường vào FormData
-    Object.keys(updateData).forEach(key => {
-      if (key !== '_id') {
+    Object.keys(updateData).forEach((key) => {
+      if (key !== "_id") {
         // Xử lý đặc biệt cho trường status - chuyển từ boolean sang string
-        if (key === 'status') {
+        if (key === "status") {
           formData.append(key, updateData[key].toString());
-        } 
+        }
         // Xử lý các trường còn lại
         else if (updateData[key] !== undefined && updateData[key] !== null) {
           formData.append(key, updateData[key]);
         }
       }
     });
-    
+
     // Gửi request API với FormData và headers thích hợp
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     const response = yield call(
-      axios.put, 
-      `https://ojtbe-production.up.railway.app/api/user/update-user/${updateData._id}`, 
+      axios.put,
+      `https://ojt-be.onrender.com/api/user/update-user/${updateData._id}`,
       formData,
       {
         headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': token ? `Bearer ${token}` : ''
-        }
+          "Content-Type": "multipart/form-data",
+          Authorization: token ? `Bearer ${token}` : "",
+        },
       }
     );
-    
+
     console.log("✅ Update API response:", response.data);
-    
+
     // Chuyển đổi role thành role_name trong response
     const responseData = response.data?.data || {};
     if (responseData.role && !responseData.role_name) {
       responseData.role_name = responseData.role;
     }
-    
+
     yield put({ type: UPDATE_STAFF_SUCCESS, payload: responseData });
-    
+
+    // In updateStaffSaga
     yield put({ type: GET_STAFF_ALL });
+
+    // ✅ **Ensure single staff is refetched if on details page**
+    if (updateData._id) {
+      yield put({ type: GET_STAFF_BY_ID, payload: updateData._id });
+    }
   } catch (error) {
     console.error("❌ Update error:", error);
     yield put(updateStaffFailure(error.message || "Failed to update staff"));

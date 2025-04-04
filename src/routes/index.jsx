@@ -44,6 +44,7 @@ import LoginPage from "../pages/AuthPage/LoginPage/LoginPage";
 import ForgotPasswordPage from "../pages/AuthPage/ForgotPasswordPage/ForgotPasswordPage";
 import VerifyCodePage from "../pages/AuthPage/VerifyCodePage/VerifyCodePage";
 import ChangePasswordPage from "../pages/AuthPage/ChangePasswordPage/ChangePasswordPage";
+import ClaimerDashboard from "../pages/ClaimerPage/Dashboard/ClaimerDashboard";
 
 export const routes = [
   {
@@ -74,6 +75,8 @@ export const routes = [
       </PrivateRoute>
     ),
     children: [
+      { path: "", element: <ClaimerDashboard /> },
+      { path: "dashboard", element: <ClaimerDashboard /> }, 
       { path: "create-claim", element: <CreateClaim /> },
       { path: "pending", element: <PendingPage /> },
       { path: "pending/:id", element: <ClaimDetail /> }, // Using common ClaimDetail

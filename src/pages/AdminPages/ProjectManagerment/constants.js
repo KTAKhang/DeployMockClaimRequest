@@ -5,7 +5,7 @@
 // Table columns configuration
 export const COLUMNS = [
   {
-    label: "Project ID",
+    label: "ID",
     shortLabel: "ID", // Shorter version for small screens
     key: "_id",
     width: "w-[12%]",
@@ -14,7 +14,7 @@ export const COLUMNS = [
   },
   {
     label: "Project Name",
-    shortLabel: "Name",
+    shortLabel: "Project",
     key: "project_name",
     width: "w-[18%]",
     sortable: true,
@@ -50,7 +50,7 @@ export const COLUMNS = [
     key: "createdAt",
     width: "w-[10%]",
     sortable: true,
-    priority: "medium",
+    priority: "low",
   },
 ];
 

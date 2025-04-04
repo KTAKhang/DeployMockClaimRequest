@@ -71,7 +71,7 @@ function* downloadClaimsSaga(action) {
     if (!token) throw new Error("No authentication token found");
     const response = yield call(() =>
       axios.get(
-        `https://ojtbe-production.up.railway.app/api/claim/download?month=${month}&year=${year}`,
+        `https://ojt-be.onrender.com/api/claim/download?month=${month}&year=${year}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -111,7 +111,6 @@ function* updateClaimStatusSaga({ payload }) {
     yield call(updateMorePaidClaimStatusAPI, ids, status);
 
     yield put(financeUpdateClaimStatusSuccess({ ids, status }));
-
   } catch (error) {
     yield put(
       financeUpdateClaimStatusFailure(

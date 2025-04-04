@@ -33,6 +33,7 @@ export default function ClaimsHistory() {
       filterCondition={FILTER_CONDITIONS.CLAIMS_HISTORY}
       loading={loading}
       hideUpdatedAt={true}
+      hideCheckboxes={true}
     />
   );
 }
