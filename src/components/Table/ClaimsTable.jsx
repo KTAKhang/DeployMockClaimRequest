@@ -85,6 +85,8 @@ export default function ClaimsTable({
   const claimerLoading = useSelector((state) => state.claimer.loading);
   const isPaidSuccess = useSelector((state) => state.finance.isPaidSuccess);
 
+  const hasUpdatedAtColumn = !hideUpdatedAt;
+
   // Determine mode based on filter condition
   let mode;
   switch (filterCondition) {
@@ -463,10 +465,11 @@ export default function ClaimsTable({
                     onClick={() => handleOpenModal(ACTION_TYPES.PAY_ALL)}
                     disabled={selectedClaims.length === 0}
                     className={`flex items-center justify-center gap-1 px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-all shadow-sm
-              ${selectedClaims.length > 0
-                        ? "bg-green-600 text-white hover:bg-green-700"
-                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      }
+              ${
+                selectedClaims.length > 0
+                  ? "bg-green-600 text-white hover:bg-green-700"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }
             `}
                   >
                     <FaCheckCircle className="text-base" />
@@ -488,10 +491,11 @@ export default function ClaimsTable({
                       onClick={() => handleOpenModal(ACTION_TYPES.APPROVE_ALL)}
                       disabled={selectedClaims.length === 0}
                       className={`flex items-center justify-center gap-1 px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-all shadow-sm
-                ${selectedClaims.length > 0
-                          ? "bg-green-600 text-white hover:bg-green-700"
-                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        }
+                ${
+                  selectedClaims.length > 0
+                    ? "bg-green-600 text-white hover:bg-green-700"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }
               `}
                     >
                       <FaCheckCircle className="text-base" />
@@ -502,10 +506,11 @@ export default function ClaimsTable({
                       onClick={() => handleOpenModal(ACTION_TYPES.REJECT_ALL)}
                       disabled={selectedClaims.length === 0}
                       className={`flex items-center justify-center gap-1 px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-all shadow-sm
-                ${selectedClaims.length > 0
-                          ? "bg-red-500 text-white hover:bg-red-600"
-                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        }
+                ${
+                  selectedClaims.length > 0
+                    ? "bg-red-500 text-white hover:bg-red-600"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }
               `}
                     >
                       <FaTimesCircle className="text-base" />
@@ -518,36 +523,38 @@ export default function ClaimsTable({
                   filteredClaims.some(
                     (claim) => claim.status === STATUS_OPTIONS.DRAFT
                   )) && (
-                    <>
-                      <button
-                        onClick={() => handleOpenModal(ACTION_TYPES.SUBMIT_ALL)}
-                        disabled={selectedClaims.length === 0}
-                        className={`flex items-center justify-center gap-1 px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-all shadow-sm
-                ${selectedClaims.length > 0
-                            ? "bg-green-600 text-white hover:bg-green-700"
-                            : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          }
+                  <>
+                    <button
+                      onClick={() => handleOpenModal(ACTION_TYPES.SUBMIT_ALL)}
+                      disabled={selectedClaims.length === 0}
+                      className={`flex items-center justify-center gap-1 px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-all shadow-sm
+                ${
+                  selectedClaims.length > 0
+                    ? "bg-green-600 text-white hover:bg-green-700"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }
               `}
-                      >
-                        <FaCheckCircle className="text-base" />
-                        <span>{LABELS.BUTTONS.SUBMIT_ALL}</span>
-                      </button>
+                    >
+                      <FaCheckCircle className="text-base" />
+                      <span>{LABELS.BUTTONS.SUBMIT_ALL}</span>
+                    </button>
 
-                      <button
-                        onClick={() => handleOpenModal(ACTION_TYPES.CANCEL_ALL)}
-                        disabled={selectedClaims.length === 0}
-                        className={`flex items-center justify-center gap-1 px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-all shadow-sm
-                ${selectedClaims.length > 0
-                            ? "bg-red-500 text-white hover:bg-red-600"
-                            : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          }
+                    <button
+                      onClick={() => handleOpenModal(ACTION_TYPES.CANCEL_ALL)}
+                      disabled={selectedClaims.length === 0}
+                      className={`flex items-center justify-center gap-1 px-3 py-2 rounded-md text-xs sm:text-sm font-medium transition-all shadow-sm
+                ${
+                  selectedClaims.length > 0
+                    ? "bg-red-500 text-white hover:bg-red-600"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }
               `}
-                      >
-                        <FaTimesCircle className="text-base" />
-                        <span>{LABELS.BUTTONS.CANCEL_ALL}</span>
-                      </button>
-                    </>
-                  )}
+                    >
+                      <FaTimesCircle className="text-base" />
+                      <span>{LABELS.BUTTONS.CANCEL_ALL}</span>
+                    </button>
+                  </>
+                )}
               </div>
             )}
 
@@ -585,27 +592,27 @@ export default function ClaimsTable({
                 )}
                 {(filterCondition === FILTER_CONDITIONS.CLAIMER_DASHBOARD ||
                   filterCondition === FILTER_CONDITIONS.CLAIM_MANAGEMENT) && (
-                    <>
-                      <option value={STATUS_OPTIONS.DRAFT}>
-                        {STATUS_OPTIONS.DRAFT}
-                      </option>
-                      <option value={STATUS_OPTIONS.PENDING}>
-                        {STATUS_OPTIONS.PENDING}
-                      </option>
-                      <option value={STATUS_OPTIONS.APPROVED}>
-                        {STATUS_OPTIONS.APPROVED}
-                      </option>
-                      <option value={STATUS_OPTIONS.PAID}>
-                        {STATUS_OPTIONS.PAID}
-                      </option>
-                      <option value={STATUS_OPTIONS.REJECTED}>
-                        {STATUS_OPTIONS.REJECTED}
-                      </option>
-                      <option value={STATUS_OPTIONS.CANCELLED}>
-                        {STATUS_OPTIONS.CANCELLED}
-                      </option>
-                    </>
-                  )}
+                  <>
+                    <option value={STATUS_OPTIONS.DRAFT}>
+                      {STATUS_OPTIONS.DRAFT}
+                    </option>
+                    <option value={STATUS_OPTIONS.PENDING}>
+                      {STATUS_OPTIONS.PENDING}
+                    </option>
+                    <option value={STATUS_OPTIONS.APPROVED}>
+                      {STATUS_OPTIONS.APPROVED}
+                    </option>
+                    <option value={STATUS_OPTIONS.PAID}>
+                      {STATUS_OPTIONS.PAID}
+                    </option>
+                    <option value={STATUS_OPTIONS.REJECTED}>
+                      {STATUS_OPTIONS.REJECTED}
+                    </option>
+                    <option value={STATUS_OPTIONS.CANCELLED}>
+                      {STATUS_OPTIONS.CANCELLED}
+                    </option>
+                  </>
+                )}
               </select>
 
               <span className="px-3 py-2 text-xs sm:text-sm font-medium rounded-md border border-gray-300 bg-gray-100 flex items-center gap-1">
@@ -734,12 +741,13 @@ export default function ClaimsTable({
                         .map(({ label, key, priority }, index) => (
                           <th
                             key={index}
-                            className={`px-1 sm:px-2 md:px-4 py-2 sm:py-3 text-left font-medium whitespace-nowrap ${priority === "low"
-                              ? "hidden sm:table-cell lg:table-cell"
-                              : priority === "medium"
+                            className={`px-1 sm:px-2 md:px-4 py-2 sm:py-3 text-left font-medium whitespace-nowrap ${
+                              priority === "low"
+                                ? "hidden sm:table-cell lg:table-cell"
+                                : priority === "medium"
                                 ? "hidden sm:hidden md:table-cell"
                                 : ""
-                              }`}
+                            }`}
                           >
                             <div className="flex items-center cursor-pointer">
                               {label}
@@ -749,18 +757,20 @@ export default function ClaimsTable({
                                   onClick={() => handleSort(key)}
                                 >
                                   <FaSortUp
-                                    className={`translate-y-[6px] transition-all ${sortConfig.key === key &&
+                                    className={`translate-y-[6px] transition-all ${
+                                      sortConfig.key === key &&
                                       sortConfig.direction === "asc"
-                                      ? "text-blue-500"
-                                      : "text-gray-400"
-                                      }`}
+                                        ? "text-blue-500"
+                                        : "text-gray-400"
+                                    }`}
                                   />
                                   <FaSortDown
-                                    className={`translate-y-[-6px] transition-all ${sortConfig.key === key &&
+                                    className={`translate-y-[-6px] transition-all ${
+                                      sortConfig.key === key &&
                                       sortConfig.direction === "desc"
-                                      ? "text-blue-500"
-                                      : "text-gray-400"
-                                      }`}
+                                        ? "text-blue-500"
+                                        : "text-gray-400"
+                                    }`}
                                   />
                                 </span>
                               )}
@@ -774,7 +784,15 @@ export default function ClaimsTable({
                     {financeLoading || claimerLoading || approverLoading ? (
                       <tr>
                         <td
-                          colSpan={hideCheckboxes ? "7" : "8"}
+                          colSpan={
+                            hideCheckboxes
+                              ? hasUpdatedAtColumn
+                                ? "8"
+                                : "7"
+                              : hasUpdatedAtColumn
+                              ? "9"
+                              : "8"
+                          }
                           className="text-center py-10 sm:py-16 md:py-20"
                         >
                           <Loading message={LABELS.LOADING_CLAIMS} />
@@ -834,27 +852,29 @@ export default function ClaimsTable({
                           <td className="px-1 sm:px-2 md:px-4 py-2 sm:py-3 sm:text-xs md:py-4 min-w-[60px] sm:min-w-[70px] md:min-w-[90px]">
                             <span
                               className={`px-2 py-1 font-semibold rounded-full 
-                  ${claim.status === "Approved"
-                                  ? "bg-green-200 text-green-700"
-                                  : claim.status === "Paid"
-                                    ? "bg-blue-200 text-blue-700"
-                                    : claim.status === "Pending"
-                                      ? "bg-yellow-200 text-yellow-700"
-                                      : claim.status === "Rejected"
-                                        ? "bg-red-200 text-red-700"
-                                        : claim.status === "Cancelled"
-                                          ? "bg-pink-200 text-pink-700"
-                                          : "bg-gray-200 text-gray-700"
-                                }`}
+                  ${
+                    claim.status === "Approved"
+                      ? "bg-green-200 text-green-700"
+                      : claim.status === "Paid"
+                      ? "bg-blue-200 text-blue-700"
+                      : claim.status === "Pending"
+                      ? "bg-yellow-200 text-yellow-700"
+                      : claim.status === "Rejected"
+                      ? "bg-red-200 text-red-700"
+                      : claim.status === "Cancelled"
+                      ? "bg-pink-200 text-pink-700"
+                      : "bg-gray-200 text-gray-700"
+                  }`}
                             >
                               {claim.status}
                             </span>
                           </td>
                           <td
-                            className={`px-1 sm:px-2 md:px-4 py-2 sm:py-3 md:py-4 ${isModalOpen
-                              ? "pointer-events-none opacity-50"
-                              : ""
-                              }`}
+                            className={`px-1 sm:px-2 md:px-4 py-2 sm:py-3 md:py-4 ${
+                              isModalOpen
+                                ? "pointer-events-none opacity-50"
+                                : ""
+                            }`}
                           >
                             <div className="flex gap-1 sm:gap-2 md:gap-3">
                               <FaEye
@@ -863,7 +883,7 @@ export default function ClaimsTable({
                               />
                               {!hideActionButtons &&
                                 filterCondition !==
-                                FILTER_CONDITIONS.CLAIM_MANAGEMENT && (
+                                  FILTER_CONDITIONS.CLAIM_MANAGEMENT && (
                                   <>
                                     {financeStatus === "FinanceApproved" && (
                                       <FaMoneyCheckAlt
@@ -892,7 +912,7 @@ export default function ClaimsTable({
                                     )}
                                     {claim.status &&
                                       claim.status.toLowerCase() ===
-                                      "draft" && (
+                                        "draft" && (
                                         <>
                                           <FaCheckCircle
                                             className="h-4 w-4 sm:h-4 sm:w-4 md:h-5 md:w-5 text-green-500 cursor-pointer hover:text-green-700 transition"
@@ -923,8 +943,16 @@ export default function ClaimsTable({
                     ) : (
                       <tr>
                         <td
-                          colSpan={hideCheckboxes ? "7" : "8"}
-                          className="text-center py-4 sm:py-5 md:py-6 text-gray-500"
+                          colSpan={
+                            hideCheckboxes
+                              ? hasUpdatedAtColumn
+                                ? "8"
+                                : "7"
+                              : hasUpdatedAtColumn
+                              ? "9"
+                              : "8"
+                          }
+                          className="text-center py-10 sm:py-16 md:py-20"
                         >
                           {LABELS.NO_CLAIMS}
                         </td>
@@ -944,10 +972,11 @@ export default function ClaimsTable({
                 <button
                   onClick={() => setCurrentPage(1)}
                   disabled={currentPage === 1}
-                  className={`px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg text-xs sm:text-sm font-medium transition ${currentPage === 1
-                    ? "text-gray-400 cursor-not-allowed"
-                    : "text-blue-600 hover:bg-blue-100"
-                    }`}
+                  className={`px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg text-xs sm:text-sm font-medium transition ${
+                    currentPage === 1
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-blue-600 hover:bg-blue-100"
+                  }`}
                 >
                   <span className="hidden sm:inline">
                     {LABELS.BUTTONS.FIRST}
@@ -959,10 +988,11 @@ export default function ClaimsTable({
                     setCurrentPage((prev) => Math.max(prev - 1, 1))
                   }
                   disabled={currentPage === 1}
-                  className={`px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg text-xs sm:text-sm font-medium transition ${currentPage === 1
-                    ? "text-gray-400 cursor-not-allowed"
-                    : "text-blue-600 hover:bg-blue-100"
-                    }`}
+                  className={`px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg text-xs sm:text-sm font-medium transition ${
+                    currentPage === 1
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-blue-600 hover:bg-blue-100"
+                  }`}
                 >
                   <span className="hidden sm:inline">
                     {LABELS.BUTTONS.PREVIOUS}
@@ -1017,10 +1047,11 @@ export default function ClaimsTable({
                     setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                   }
                   disabled={currentPage === totalPages}
-                  className={`px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg text-xs sm:text-sm font-medium transition ${currentPage === totalPages
-                    ? "text-gray-400 cursor-not-allowed"
-                    : "text-blue-600 hover:bg-blue-100"
-                    }`}
+                  className={`px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg text-xs sm:text-sm font-medium transition ${
+                    currentPage === totalPages
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-blue-600 hover:bg-blue-100"
+                  }`}
                 >
                   <span className="hidden sm:inline">
                     {LABELS.BUTTONS.NEXT}
@@ -1030,10 +1061,11 @@ export default function ClaimsTable({
                 <button
                   onClick={() => setCurrentPage(totalPages)}
                   disabled={currentPage === totalPages}
-                  className={`px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg text-xs sm:text-sm font-medium transition ${currentPage === totalPages
-                    ? "text-gray-400 cursor-not-allowed"
-                    : "text-blue-600 hover:bg-blue-100"
-                    }`}
+                  className={`px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 rounded-lg text-xs sm:text-sm font-medium transition ${
+                    currentPage === totalPages
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-blue-600 hover:bg-blue-100"
+                  }`}
                 >
                   <span className="hidden sm:inline">
                     {LABELS.BUTTONS.LAST}
